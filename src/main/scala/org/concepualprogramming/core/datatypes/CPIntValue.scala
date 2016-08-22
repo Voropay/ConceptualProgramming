@@ -1,0 +1,153 @@
+package org.concepualprogramming.core.datatypes
+
+import java.time.LocalDate
+
+/**
+ * Created by oleksii.voropai on 8/6/2016.
+ */
+class CPIntValue(value: Int) extends CPValue {
+
+  override def getTypeName: String = CPDataTypes.int.toString
+
+  override def getStringValue: Option[String] = Some(value.toString())
+
+  override def getIntValue: Option[Int] = Some(value)
+
+  //I don't know a common way to treat integer value as date
+  override def getDateValue: Option[LocalDate] = None
+
+  override def getDoubleValue: Option[Double] = Some(value.toDouble)
+
+  def getValue: Int = value
+
+  override def equals(other: Any): Boolean = other match {
+    case other: CPIntValue => other.getIntValue.get == value
+    case _ => false
+  }
+
+  override def similar(other: Any): Boolean = other match {
+    case other: CPValue => other.getIntValue.isDefined && other.getIntValue.get == value
+    case other: String => other == getStringValue.get
+    case other: Int => value == other
+    case other: Double => getDoubleValue.isDefined && getDoubleValue.get == other
+    case other: LocalDate => getDateValue.isDefined && getDateValue.get == other
+  }
+
+  override def hashCode:Int = {
+    val prime = 31
+    var result = 1
+    result = prime * result + value
+    result = prime * result + getTypeName.hashCode
+    return result
+  }
+
+  override def +(other: CPValue): Option[CPValue] = {
+    other match {
+      case other: CPDoubleValue =>
+        val otherVal = other.getDoubleValue
+        if(otherVal.isEmpty) {
+          None
+        } else {
+          Some(CPDoubleValue(value + otherVal.get))
+        }
+      case _ =>
+        val otherVal = other.getIntValue
+        if(otherVal.isEmpty) {
+          None
+        } else {
+          Some(CPIntValue(value + otherVal.get))
+        }
+    }
+  }
+
+  override def -(other: CPValue): Option[CPValue] = {
+    other match {
+      case other: CPDoubleValue =>
+        val otherVal = other.getDoubleValue
+        if(otherVal.isEmpty) {
+          None
+        } else {
+          Some(CPDoubleValue(value - otherVal.get))
+        }
+      case _ =>
+        val otherVal = other.getIntValue
+        if(otherVal.isEmpty) {
+          None
+        } else {
+          Some(CPIntValue(value - otherVal.get))
+        }
+    }
+  }
+
+  override def *(other: CPValue): Option[CPValue] = {
+    other match {
+      case other: CPDoubleValue =>
+        val otherVal = other.getDoubleValue
+        if(otherVal.isEmpty) {
+          None
+        } else {
+          Some(CPDoubleValue(value * otherVal.get))
+        }
+      case _ =>
+        val otherVal = other.getIntValue
+        if(otherVal.isEmpty) {
+          None
+        } else {
+          Some(CPIntValue(value * otherVal.get))
+        }
+    }
+  }
+
+  override def /(other: CPValue): Option[CPValue] = {
+    val doubleVal = other.getDoubleValue
+    if(doubleVal.isEmpty || doubleVal.get == 0) {
+      None
+    } else {
+      Some(CPDoubleValue(value / doubleVal.get))
+    }
+  }
+
+  override def >(other: CPValue): Option[Boolean] = {
+    val doubleVal = other.getDoubleValue
+    if(doubleVal.isEmpty) {
+      None
+    } else {
+      Some(value > doubleVal.get)
+    }
+  }
+
+  override def !?=(other: CPValue): Boolean = !similar(other)
+
+  override def ?=(other: CPValue): Boolean = similar(other)
+
+  override def <=(other: CPValue): Option[Boolean] = {
+    val doubleVal = other.getDoubleValue
+    if(doubleVal.isEmpty) {
+      None
+    } else {
+      Some(value <= doubleVal.get)
+    }
+  }
+
+  override def <(other: CPValue): Option[Boolean] = {
+    val doubleVal = other.getDoubleValue
+    if(doubleVal.isEmpty) {
+      None
+    } else {
+      Some(value < doubleVal.get)
+    }
+  }
+
+  override def >=(other: CPValue): Option[Boolean] = {
+    val doubleVal = other.getDoubleValue
+    if(doubleVal.isEmpty) {
+      None
+    } else {
+      Some(value >= doubleVal.get)
+    }
+  }
+}
+
+object CPIntValue {
+  def apply(value: Int) = new CPIntValue(value)
+}
