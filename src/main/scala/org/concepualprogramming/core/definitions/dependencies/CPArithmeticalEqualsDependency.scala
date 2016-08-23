@@ -45,4 +45,7 @@ case class CPArithmeticalEqualsDependency(leftExpression: CPExpression, rightExp
       case _ => false
     }
   }
+
+  override def isDefined(attributesValues: Map[CPAttributeName, CPValue]): Boolean = leftExpression.isDefined(attributesValues) && rightExpression.isDefined(attributesValues)
+
 }

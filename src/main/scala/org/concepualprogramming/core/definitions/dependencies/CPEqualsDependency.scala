@@ -65,4 +65,7 @@ class CPEqualsDependency(_attrubutesNames: List[CPAttributeName]) extends CPAttr
   }
 
   override def toString: String = "CPEqualsDependency {" + attributesNames.mkString("=") + "}"
+
+  override def isDefined(attributesValues: Map[CPAttributeName, CPValue]): Boolean = attributesNames.find(attributesValues.contains(_)).isDefined
+
 }

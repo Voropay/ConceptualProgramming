@@ -30,6 +30,8 @@ case class CPArithmeticalDependency(leftExpression: CPExpression, rightExpressio
       case _ => false
     }
   }
+
+  override def isDefined(attributesValues: Map[CPAttributeName, CPValue]): Boolean = leftExpression.isDefined(attributesValues) && rightExpression.isDefined(attributesValues)
 }
 
 object CPArithmeticalDependency {

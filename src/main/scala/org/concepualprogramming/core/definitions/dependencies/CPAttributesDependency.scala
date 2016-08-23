@@ -8,7 +8,7 @@ import org.concepualprogramming.core.datatypes.CPValue
  */
 trait CPAttributesDependency {
   def getName: String
-  //def getAttributesNames: List[CPAttributeName]
   def infer(attributesValues: Map[CPAttributeName, CPValue]): Map[CPAttributeName, CPValue]
   def check(attributesValues: Map[CPAttributeName, CPValue]): Boolean
+  def isDefined(attributesValues: Map[CPAttributeName, CPValue]): Boolean
 }

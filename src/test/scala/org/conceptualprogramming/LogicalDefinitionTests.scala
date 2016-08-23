@@ -24,6 +24,9 @@ class LogicalDefinitionTests extends FlatSpec with Matchers {
     val i2 = d.infer(Map(b -> CPIntValue(2)))
     i2.size should equal (1)
     i2.get(a).get.getIntValue.get should equal (1)
+
+    d.isDefined(Map()) should be (false)
+    d.isDefined(Map(a -> CPIntValue(1))) should be (true)
   }
 
   "Equals dependency" should "check and infer values correctly" in {
@@ -40,6 +43,9 @@ class LogicalDefinitionTests extends FlatSpec with Matchers {
     i1.get(c).get.getIntValue.get should equal (1)
     val i2 = d.infer(Map(new CPAttributeName("d", "val") -> CPIntValue(1)))
     i2.size should equal (0)
+
+    d.isDefined(Map()) should be (false)
+    d.isDefined(Map(a -> CPIntValue(1))) should be (true)
   }
 
   "Arithmetical dependencies" should "check and infer values correctly" in {
@@ -56,9 +62,17 @@ class LogicalDefinitionTests extends FlatSpec with Matchers {
     val i2 = d.infer(Map(new CPAttributeName("c", "val") -> CPIntValue(1)))
     i2.size should equal (0)
 
+    d.isDefined(Map()) should be (false)
+    d.isDefined(Map(a -> CPIntValue(1))) should be (false)
+    d.isDefined(Map(a -> CPIntValue(1), b -> CPIntValue(1))) should be (true)
+
     val d1 = CPArithmeticalDependency(new CPConstantOperand(CPIntValue(60)), mul, ">")
     d1.check(Map(a -> CPIntValue(1), b -> CPIntValue(2))) should be (true)
     d1.check(Map(a -> CPIntValue(2), b -> CPIntValue(3))) should be (false)
+
+    d1.isDefined(Map()) should be (false)
+    d1.isDefined(Map(a -> CPIntValue(1))) should be (false)
+    d1.isDefined(Map(a -> CPIntValue(1), b -> CPIntValue(1))) should be (true)
 
     val d2 = CPArithmeticalDependency(new CPConstantOperand(CPIntValue(50)), mul, ">=")
     d2.check(Map(a -> CPIntValue(1), b -> CPIntValue(2))) should be (true)
@@ -78,6 +92,50 @@ class LogicalDefinitionTests extends FlatSpec with Matchers {
 
     val d6 = CPArithmeticalDependency(new CPAttributeOperand(CPAttributeName("p", "val")), new CPConstantOperand(CPIntValue(0)), "<")
     d6.check(Map(CPAttributeName("p", "val") -> CPDoubleValue(-2))) should be (true)
+  }
+
+  "Logical dependencies" should "check and infer values correctly" in {
+    val a = new CPAttributeName("a", "val")
+    val b = new CPAttributeName("b", "val")
+    val d1 = CPArithmeticalDependency(new CPAttributeOperand(a), new CPConstantOperand(CPIntValue(0)), "=")
+    val d2 = CPArithmeticalDependency(new CPAttributeOperand(b), new CPConstantOperand(CPIntValue(10)), "=")
+    val and = new CPLogicalAndDependency(d1 :: d2 :: Nil)
+    and.check(Map()) should be (true)
+    and.check(Map(a -> CPIntValue(0))) should be (true)
+    and.check(Map(a -> CPIntValue(0), b -> CPIntValue(10))) should be (true)
+    and.check(Map(a -> CPIntValue(0), b -> CPIntValue(11))) should be (false)
+
+    and.isDefined(Map()) should be (false)
+    and.isDefined(Map(a -> CPIntValue(1))) should be (false)
+    and.isDefined(Map(a -> CPIntValue(1), b -> CPIntValue(1))) should be (true)
+
+    val inferedAnd = and.infer(Map())
+    inferedAnd.size should equal (2)
+    inferedAnd.get(a).get.getIntValue.get should equal (0)
+    inferedAnd.get(b).get.getIntValue.get should equal (10)
+
+    val or = new CPLogicalOrDependency(d1 :: d2 :: Nil)
+    or.check(Map()) should be (true)
+    or.check(Map(a -> CPIntValue(0))) should be (true)
+    or.check(Map(a -> CPIntValue(0), b -> CPIntValue(10))) should be (true)
+    or.check(Map(a -> CPIntValue(0), b -> CPIntValue(11))) should be (true)
+    or.check(Map(a -> CPIntValue(10), b -> CPIntValue(11))) should be (false)
+
+    or.isDefined(Map()) should be (false)
+    or.isDefined(Map(a -> CPIntValue(1))) should be (false)
+    or.isDefined(Map(a -> CPIntValue(1), b -> CPIntValue(1))) should be (true)
+
+    val inferedOr = or.infer(Map(a -> CPIntValue(10)))
+    inferedOr.size should equal (1)
+    inferedOr.get(b).get.getIntValue.get should equal (10)
+
+    val not = new CPLogicalNotDependency(d1)
+    not.check(Map()) should be (true)
+    not.check(Map(a -> CPIntValue(0))) should be (false)
+    not.check(Map(a -> CPIntValue(1))) should be (true)
+
+    not.isDefined(Map()) should be (false)
+    not.isDefined(Map(a -> CPIntValue(1))) should be (true)
   }
 
   "Dependencies" should "be compared correctly" in {
@@ -118,6 +176,23 @@ class LogicalDefinitionTests extends FlatSpec with Matchers {
       ">"
     )
     (dag1 == dag2) should be (true)
+
+    val a = new CPAttributeName("a", "val")
+    val b = new CPAttributeName("b", "val")
+    val d1 = CPArithmeticalDependency(new CPAttributeOperand(a), new CPConstantOperand(CPIntValue(0)), "=")
+    val d2 = CPArithmeticalDependency(new CPAttributeOperand(b), new CPConstantOperand(CPIntValue(10)), "=")
+
+    val and1 = new CPLogicalAndDependency(d1 :: d2 :: Nil)
+    val and2 = new CPLogicalAndDependency(d2 :: d1 :: Nil)
+    (and1 == and2) should be (true)
+
+    val or1 = new CPLogicalOrDependency(d1 :: d2 :: Nil)
+    val or2 = new CPLogicalOrDependency(d2 :: d1 :: Nil)
+    (or1 == or2) should be (true)
+
+    val not1 = new CPLogicalNotDependency(d1)
+    val not2 = new CPLogicalNotDependency(d1)
+    (not1 == not2) should be (true)
   }
 
   "Logical Definition" should "correctly prepare queries" in {

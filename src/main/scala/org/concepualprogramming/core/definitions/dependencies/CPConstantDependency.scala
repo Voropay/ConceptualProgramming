@@ -31,4 +31,6 @@ class CPConstantDependency(_attributeName: CPAttributeName, _value: CPValue) ext
   }
 
   override def toString: String = "CPConstantDependency {" + attributeName.toString + "=" + value.getStringValue + "}"
+
+  override def isDefined(attributesValues: Map[CPAttributeName, CPValue]): Boolean = attributesValues.contains(attributeName)
 }
