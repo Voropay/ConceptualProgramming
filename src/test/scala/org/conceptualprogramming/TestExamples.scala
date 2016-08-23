@@ -2,7 +2,7 @@ package org.conceptualprogramming
 
 import org.concepualprogramming.core.definitions.CPLogicalDefinition
 import org.concepualprogramming.core.definitions.dependencies.operations.{CPConstantOperand, CPSubOperation, CPAttributeOperand}
-import org.concepualprogramming.core.definitions.dependencies.{CPArithmeticalDependency, CPArithmeticalEqualsDependency, CPConstantDependency, CPEqualsDependency}
+import org.concepualprogramming.core.definitions.dependencies._
 import org.concepualprogramming.core.{CPAttributeName, CPConcept, CPObject}
 import org.concepualprogramming.core.datatypes.{CPDoubleValue, CPStringValue, CPIntValue}
 import org.concepualprogramming.core.knowledgebase.KnowledgeBase
@@ -12,6 +12,87 @@ import org.scalatest.{Matchers, FlatSpec}
  * Created by oleksii.voropai on 8/21/2016.
  */
 class TestExamples extends FlatSpec with Matchers {
+
+  "Criminal West example" should "be performed correctly" in {
+
+    val kb = KnowledgeBase.newInstance
+    val criminal = new CPConcept(
+    "Criminal",
+    "name" :: Nil,
+    "name",
+      new CPLogicalDefinition(
+        ("American", "american") :: ("Weapon", "weapon") :: ("Sells", "sells") :: ("Hostile", "hostile") :: Nil,
+        new CPEqualsDependency(CPAttributeName("", "name") :: CPAttributeName("american", "name") :: CPAttributeName("sells", "seller") :: Nil) ::
+          new CPEqualsDependency(CPAttributeName("weapon", "name") :: CPAttributeName("sells", "product") :: Nil) ::
+          new CPEqualsDependency(CPAttributeName("sells", "buyer") :: CPAttributeName("hostile", "name") :: Nil) ::
+          Nil,
+        kb
+      )
+    )
+    kb.add(criminal)
+
+    val nonoOwnsM1 = new CPObject("Owns", Map("owner" -> CPStringValue("Nono"), "object" -> CPStringValue("M1")), "object")
+    kb.add(nonoOwnsM1)
+
+    val m1IsMissle = new CPObject("Missle", Map("name" -> CPStringValue("M1")), "name")
+    kb.add(m1IsMissle)
+
+    val sells = new CPConcept(
+      "Sells",
+      "seller" :: "product" :: "buyer" :: Nil,
+      "product",
+      new CPLogicalDefinition(
+        ("Missle", "missle") :: ("Owns", "owns") :: Nil,
+        new CPConstantDependency(CPAttributeName("", "seller"), CPStringValue("West")) ::
+          new CPConstantDependency(CPAttributeName("", "buyer"), CPStringValue("Nono")) ::
+          new CPEqualsDependency(CPAttributeName("", "product") :: CPAttributeName("missle", "name") :: CPAttributeName("owns", "object") :: Nil) ::
+          new CPEqualsDependency(CPAttributeName("", "buyer") :: CPAttributeName("owns", "owner") :: Nil) ::
+          Nil,
+        kb
+      )
+    )
+    kb.add(sells)
+
+    val weapon = new CPConcept(
+      "Weapon",
+      "name" :: Nil,
+      "name",
+      new CPLogicalDefinition(
+        ("Missle", "missle") :: Nil,
+        new CPEqualsDependency(CPAttributeName("", "name") :: CPAttributeName("missle", "name") :: Nil) :: Nil,
+        kb
+      )
+    )
+    kb.add(weapon)
+
+    val hostile = new CPConcept(
+      "Hostile",
+      "name" :: Nil,
+      "name",
+      new CPLogicalDefinition(
+        ("Enemy", "enemy") :: Nil,
+        new CPEqualsDependency(CPAttributeName("", "name") :: CPAttributeName("enemy", "name") :: Nil) ::
+          new CPConstantDependency(CPAttributeName("enemy", "target"), CPStringValue("America")) ::
+          Nil,
+        kb
+      )
+    )
+    kb.add(hostile)
+
+    val westIsAmerican = new CPObject("American", Map("name" -> CPStringValue("West")), "name")
+    kb.add(westIsAmerican)
+
+    val nonoIsEnemyOfAmerica = new CPObject("Enemy", Map("name" -> CPStringValue("Nono"), "target" -> CPStringValue("America")), "name")
+    kb.add(nonoIsEnemyOfAmerica)
+
+
+
+    val westIsCriminal = criminal.resolve(Map("name" -> CPStringValue("West")))
+    westIsCriminal.size should equal (1)
+    westIsCriminal.head.get("name").get.getStringValue.get should equal ("West")
+    val eastIsCriminal = criminal.resolve(Map("name" -> CPStringValue("East")))
+    eastIsCriminal.size should equal (0)
+  }
 
   "Example with income, outcome and profit" should "be performed correctly" in {
     val kb = KnowledgeBase.newInstance
