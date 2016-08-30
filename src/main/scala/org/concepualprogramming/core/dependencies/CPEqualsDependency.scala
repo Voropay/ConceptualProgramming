@@ -1,7 +1,8 @@
-package org.concepualprogramming.core.definitions.dependencies
+package org.concepualprogramming.core.dependencies
 
 import org.concepualprogramming.core.CPAttributeName
 import org.concepualprogramming.core.datatypes.CPValue
+import org.concepualprogramming.core.utils.Utils
 
 /**
  * Created by oleksii.voropai on 8/9/2016.
@@ -46,22 +47,9 @@ class CPEqualsDependency(_attrubutesNames: List[CPAttributeName]) extends CPAttr
 
   override def equals(other: Any): Boolean = {
     other match {
-      case other: CPEqualsDependency => compareAttributes(other)
+      case other: CPEqualsDependency => Utils.compareList(attributesNames, other.attributesNames)
       case _ => false
     }
-  }
-
-  def compareAttributes(other: CPEqualsDependency): Boolean = {
-    if(attributesNames.size != other.attributesNames.size) {
-      return false
-    }
-    for(attr <- attributesNames) {
-      val found = other.attributesNames.find(_.equals(attr))
-      if(found.isEmpty) {
-        return false
-      }
-    }
-    return true
   }
 
   override def toString: String = "CPEqualsDependency {" + attributesNames.mkString("=") + "}"

@@ -2,7 +2,7 @@ package org.conceptualprogramming
 
 import org.concepualprogramming.core.CPAttributeName
 import org.concepualprogramming.core.datatypes.CPIntValue
-import org.concepualprogramming.core.definitions.dependencies.operations._
+import org.concepualprogramming.core.dependencies.operations._
 import org.scalatest._
 
 /**

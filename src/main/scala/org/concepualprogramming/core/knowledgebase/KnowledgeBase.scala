@@ -1,7 +1,7 @@
 package org.concepualprogramming.core.knowledgebase
 
 import org.concepualprogramming.core.datatypes.CPValue
-import org.concepualprogramming.core.{CPConcept, CPObject}
+import org.concepualprogramming.core.{CPConcept, CPStrictConcept, CPObject}
 
 /**
  * Created by oleksii.voropai on 8/10/2016.

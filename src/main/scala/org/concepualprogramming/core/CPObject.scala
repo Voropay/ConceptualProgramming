@@ -1,6 +1,7 @@
 package org.concepualprogramming.core
 
 import org.concepualprogramming.core.datatypes.CPValue
+import org.concepualprogramming.core.utils.Utils
 import scala.collection.immutable.SortedMap
 
 /**
@@ -22,16 +23,7 @@ class CPObject(_name: String, _attributes: Map[String, CPValue], _defaultAttribu
   override def equals(other: Any): Boolean = {
     other match {
       case other: CPObject =>
-        if (name != other.name || defaultAttribute != other.defaultAttribute || attributes.size != other.attributes.size) {
-          return false
-        }
-        for ((attrName, curAttr) <- attributes) {
-          val otherAttr = other.get (attrName)
-          if (otherAttr.isEmpty || ! otherAttr.get.equals (curAttr) ) {
-            return false
-          }
-        }
-        return true
+        name == other.name && defaultAttribute == other.defaultAttribute && Utils.compareMap(attributes, other.attributes)
       case _ => false
     }
   }

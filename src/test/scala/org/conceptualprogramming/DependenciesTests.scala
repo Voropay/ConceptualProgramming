@@ -1,17 +1,16 @@
 package org.conceptualprogramming
 
 import org.concepualprogramming.core.CPAttributeName
-import org.concepualprogramming.core.definitions.CPLogicalDefinition
-import org.concepualprogramming.core.definitions.dependencies.operations._
-import org.concepualprogramming.core.definitions.dependencies._
 import org.concepualprogramming.core.datatypes.{CPDoubleValue, CPIntValue}
+import org.concepualprogramming.core.dependencies._
+import org.concepualprogramming.core.dependencies.operations.{CPAttributeOperand, CPDivOperation, CPConstantOperand, CPMulOperation}
 import org.concepualprogramming.core.knowledgebase.KnowledgeBase
 import org.scalatest.{Matchers, FlatSpec}
 
 /**
  * Created by oleksii.voropai on 8/13/2016.
  */
-class LogicalDefinitionTests extends FlatSpec with Matchers {
+class DependenciesTests extends FlatSpec with Matchers {
   "Constant dependency" should "check and infer values correctly" in {
     val a = new CPAttributeName("a", "val")
     val b = new CPAttributeName("b", "val")
@@ -195,51 +194,4 @@ class LogicalDefinitionTests extends FlatSpec with Matchers {
     (not1 == not2) should be (true)
   }
 
-  "Logical Definition" should "correctly prepare queries" in {
-    val aval = new CPAttributeName("a", "val")
-    val arow = new CPAttributeName("a", "row")
-    val bval = new CPAttributeName("b", "val")
-    val brow = new CPAttributeName("b", "row")
-    val attributesValues = Map(aval -> CPIntValue(15), arow -> CPIntValue(1), bval -> CPIntValue(11), brow -> CPIntValue(1))
-    val query = CPLogicalDefinition.prepareQueryForConcept("a", attributesValues)
-    query.size should equal (2)
-    query.get("row").get.getIntValue.get should equal (1)
-    query.get("val").get.getIntValue.get should equal (15)
-  }
-
-  "Logical Definition" should "infer values correctly" in {
-    val aval = new CPAttributeName("a", "val")
-    val arow = new CPAttributeName("a", "row")
-    val bval = new CPAttributeName("b", "val")
-    val brow = new CPAttributeName("b", "row")
-    val cval = new CPAttributeName("c", "val")
-    val crow = new CPAttributeName("c", "row")
-    val query = Map(arow -> CPIntValue(1))
-    val d1: CPEqualsDependency = new CPEqualsDependency(arow :: brow :: Nil)
-    val d2: CPEqualsDependency = new CPEqualsDependency(crow :: brow :: Nil)
-    val d3: CPEqualsDependency = new CPEqualsDependency(aval :: cval :: Nil)
-    val d4: CPConstantDependency = new CPConstantDependency(cval, CPIntValue(10))
-    val inferedQuery = CPLogicalDefinition.inferValuesFromDependencies(query, d1 :: d2 :: d3 :: d4 :: Nil)
-    inferedQuery.get.size should equal (5)
-    inferedQuery.get.get(aval).get.getIntValue.get should equal (10)
-    inferedQuery.get.get(arow).get.getIntValue.get should equal (1)
-    inferedQuery.get.get(brow).get.getIntValue.get should equal (1)
-    inferedQuery.get.get(crow).get.getIntValue.get should equal (1)
-    inferedQuery.get.get(cval).get.getIntValue.get should equal (10)
-  }
-
-  "Logical Definitions" should "be compared correctly" in {
-    val kb = KnowledgeBase.newInstance
-    val d1 = new CPLogicalDefinition(
-      ("a", "a1") :: ("b", "b1") :: Nil,
-      new CPEqualsDependency(CPAttributeName("a", "val") :: CPAttributeName("b", "val") :: Nil) :: new CPConstantDependency(CPAttributeName("b", "row"), CPIntValue(1)) :: Nil,
-      kb
-    )
-    val d2 = new CPLogicalDefinition(
-      ("b", "b1") :: ("a", "a1") :: Nil,
-      new CPConstantDependency(CPAttributeName("b", "row"), CPIntValue(1)) :: new CPEqualsDependency(CPAttributeName("a", "val") :: CPAttributeName("b", "val") :: Nil) :: Nil,
-      kb
-    )
-    d1.equals(d2) should be (true)
-  }
 }

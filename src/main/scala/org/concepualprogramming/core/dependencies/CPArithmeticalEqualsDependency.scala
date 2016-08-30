@@ -1,8 +1,8 @@
-package org.concepualprogramming.core.definitions.dependencies
+package org.concepualprogramming.core.dependencies
 
 import org.concepualprogramming.core.CPAttributeName
 import org.concepualprogramming.core.datatypes.CPValue
-import org.concepualprogramming.core.definitions.dependencies.operations.CPExpression
+import org.concepualprogramming.core.dependencies.operations.CPExpression
 
 /**
  * Created by oleksii.voropai on 8/18/2016.

@@ -1,53 +1,38 @@
 package org.concepualprogramming.core
 
 import org.concepualprogramming.core.datatypes.CPValue
-import org.concepualprogramming.core.definitions.CPDefinition
-
-import scala.collection.immutable.SortedMap
+import org.concepualprogramming.core.dependencies.CPAttributesDependency
 
 /**
- * Created by oleksii.voropai on 8/8/2016.
+ * Created by oleksii.voropai on 8/14/2016.
  */
-class CPConcept (_name: String, _attributes: List[String], _defaultAttribute: String, _definition: CPDefinition) extends CPResolvable{
-  val name = _name
-  val attributes = _attributes
-  val defaultAttribute = _defaultAttribute
-  val definition = _definition
+trait CPConcept {
+  def resolve(query: Map[String, CPValue], context: CPExecutionContext): List[CPObject]
+  def name: String
 
-  override def resolve(query: Map[String, CPValue]): List[CPObject] = {
-    val attributesValues = definition.resolve(query)
-    if(attributesValues.isEmpty) {
-      return List()
+  def inferValuesFromDependencies(attributesValues: Map[CPAttributeName, CPValue], dependencies: List[CPAttributesDependency]): Option[Map[CPAttributeName, CPValue]] = {
+    var found = true
+    var curAttrValues = Map() ++ attributesValues
+    while(found) {
+      found = false
+      for(curDependency <- dependencies) {
+        if(!curDependency.check(curAttrValues)) {
+          return None
+        }
+        val newValues = curDependency.infer(curAttrValues)
+        if(!newValues.isEmpty) {
+          curAttrValues = curAttrValues ++ newValues
+          found = true
+        }
+      }
     }
-
-    val objectsOptions = attributesValues.map(CPConcept.prepareObjectFromAttributesValues(name, defaultAttribute, attributes, _))
-    val objects = objectsOptions.filter(_.isDefined).map(_.get)
-    return objects
+    Some(curAttrValues)
   }
 
-
-
-  override def equals(other: Any): Boolean = other match {
-    case other: CPConcept =>
-      name == other.name &&
-      defaultAttribute == other.defaultAttribute &&
-      attributes.size == other.attributes.size &&
-      attributes.diff(other.attributes).isEmpty &&
-      definition.equals(other.definition)
-    case _ => false
+  def prepareQueryForConcept(conceptAlias: String, attributesValues: Map[CPAttributeName, CPValue]): Map[String, CPValue] = {
+    val curConceptAttrs = attributesValues.filterKeys(_.conceptName == conceptAlias)
+    curConceptAttrs.map(curEntry => (curEntry._1.attributeName -> curEntry._2))
   }
 }
 
-object CPConcept {
 
-  def prepareObjectFromAttributesValues(conceptName: String, defaultAttribute: String, requiredAttributes: List[String], attributesValues: Map[CPAttributeName, CPValue]): Option[CPObject] = {
-    val attributesForCurrentConcept = attributesValues.filter(entry => entry._1.conceptName == "")
-    val conceptAttributesNames = attributesForCurrentConcept.map(entry => entry._1.attributeName -> entry._2)
-    if(requiredAttributes.find(curAttr => !conceptAttributesNames.contains(curAttr)).isDefined) {
-      return None
-    }
-    val attributesForCurrentObject = requiredAttributes.map(curAttr => curAttr -> conceptAttributesNames.get(curAttr).get)
-    Some(CPObject(conceptName, attributesForCurrentObject, defaultAttribute))
-  }
-
-}

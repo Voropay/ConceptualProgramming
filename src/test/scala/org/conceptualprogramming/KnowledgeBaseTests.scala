@@ -1,9 +1,8 @@
 package org.conceptualprogramming
 
-import org.concepualprogramming.core.{CPConcept, CPAttributeName, CPObject}
+import org.concepualprogramming.core.dependencies.{CPConstantDependency, CPEqualsDependency}
+import org.concepualprogramming.core.{CPStrictConcept, CPAttributeName, CPObject}
 import org.concepualprogramming.core.datatypes.{CPIntValue, CPStringValue}
-import org.concepualprogramming.core.definitions.CPLogicalDefinition
-import org.concepualprogramming.core.definitions.dependencies.{CPConstantDependency, CPEqualsDependency}
 import org.concepualprogramming.core.knowledgebase.{KnowledgeBase, InMemoryKnowledgeBaseImpl}
 import org.scalatest.{Matchers, FlatSpec}
 
@@ -35,24 +34,29 @@ class KnowledgeBaseTests extends FlatSpec with Matchers {
   "InMemory Knowledge Base" should "add and return concepts correctly" in {
     val kb= new InMemoryKnowledgeBaseImpl
 
-    val d1 = new CPLogicalDefinition(
+    val c1 = new CPStrictConcept(
+      "c1",
+      "val" :: "row" :: Nil,
+      "val",
       ("a", "a1") :: ("b", "b1") :: Nil,
-      new CPEqualsDependency(CPAttributeName("a1", "val") :: CPAttributeName("b1", "val") :: Nil) :: new CPConstantDependency(CPAttributeName("b1", "row"), CPIntValue(1)) :: Nil,
-      kb
+      new CPEqualsDependency(CPAttributeName("a1", "val") :: CPAttributeName("b1", "val") :: Nil) ::
+        new CPConstantDependency(CPAttributeName("b1", "row"), CPIntValue(1)) :: Nil
     )
-    val d2 = new CPLogicalDefinition(
+    val c2 = new CPStrictConcept(
+      "c1",
+      "row" :: "val" :: Nil,
+      "val",
       ("b", "b1") :: ("a", "a1") :: ("c", "c1") :: Nil,
-      new CPConstantDependency(CPAttributeName("b1", "row"), CPIntValue(1)) :: new CPEqualsDependency(CPAttributeName("a1", "val") :: CPAttributeName("b1", "val") :: CPAttributeName("c1", "val") :: Nil) :: Nil,
-      kb
+      new CPConstantDependency(CPAttributeName("b1", "row"), CPIntValue(1)) ::
+        new CPEqualsDependency(CPAttributeName("a1", "val") :: CPAttributeName("b1", "val") :: CPAttributeName("c1", "val") :: Nil) :: Nil
     )
-    val d3 = new CPLogicalDefinition(
-      ("b", "b1") :: ("a", "a1") :: Nil,
-      new CPConstantDependency(CPAttributeName("b1", "row"), CPIntValue(1)) :: new CPEqualsDependency(CPAttributeName("a1", "val") :: CPAttributeName("b1", "val") :: Nil) :: Nil,
-      kb
+    val c3 = new CPStrictConcept(
+      "c1",
+      "row" :: "val" :: Nil,
+      "val", ("b", "b1") :: ("a", "a1") :: Nil,
+      new CPConstantDependency(CPAttributeName("b1", "row"), CPIntValue(1)) ::
+        new CPEqualsDependency(CPAttributeName("a1", "val") :: CPAttributeName("b1", "val") :: Nil) :: Nil
     )
-    val c1 = new CPConcept("c1", "val" :: "row" :: Nil, "val", d1)
-    val c2 = new CPConcept("c1", "row" :: "val" :: Nil, "val", d2)
-    val c3 = new CPConcept("c1", "row" :: "val" :: Nil, "val", d3)
 
     kb.add(c1) should be (true)
     kb.add(c2) should be (true)

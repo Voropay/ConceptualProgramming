@@ -1,6 +1,6 @@
 package org.concepualprogramming.core.knowledgebase
 
-import org.concepualprogramming.core.{CPConcept, CPObject}
+import org.concepualprogramming.core.{CPConcept, CPStrictConcept, CPObject}
 import org.concepualprogramming.core.datatypes.CPValue
 
 import scala.collection.immutable.TreeMap

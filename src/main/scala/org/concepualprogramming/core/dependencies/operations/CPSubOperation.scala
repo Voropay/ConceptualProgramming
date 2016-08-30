@@ -1,4 +1,4 @@
-package org.concepualprogramming.core.definitions.dependencies.operations
+package org.concepualprogramming.core.dependencies.operations
 
 import org.concepualprogramming.core.CPAttributeName
 import org.concepualprogramming.core.datatypes.CPValue
