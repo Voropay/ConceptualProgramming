@@ -2,7 +2,7 @@ package org.conceptualprogramming
 
 import org.concepualprogramming.core.dependencies.operations._
 import org.concepualprogramming.core.dependencies._
-import org.concepualprogramming.core.{CPInheritedConcept, CPStrictConcept, CPAttributeName}
+import org.concepualprogramming.core.{CPSubstitutions, CPInheritedConcept, CPStrictConcept, CPAttributeName}
 import org.concepualprogramming.core.datatypes.{CPValue, CPIntValue}
 import org.scalatest.{Matchers, FlatSpec}
 
@@ -47,12 +47,16 @@ class ConceptTests extends FlatSpec with Matchers {
     p1 should equal (p2)
   }
 
-  "Concept" should "prepare objects correctly" in {
-    val obj1 = CPStrictConcept.prepareObjectFromAttributesValues(
+  "Strict Concept" should "prepare objects correctly" in {
+    val c1 = new CPStrictConcept(
       "SomeConcept",
-      "val",
       "row" :: "val" :: Nil,
-      Map(CPAttributeName("c1", "val") -> CPIntValue(10), CPAttributeName("c1", "row") -> CPIntValue(1), CPAttributeName("c1", "col") -> CPIntValue(2), CPAttributeName("", "val") -> CPIntValue(10), CPAttributeName("", "row") -> CPIntValue(1))
+      "val",
+      Nil,
+      Nil
+    )
+    val obj1 = c1.prepareObjectFromAttributesValues(
+      CPSubstitutions(Map(CPAttributeName("c1", "val") -> CPIntValue(10), CPAttributeName("c1", "row") -> CPIntValue(1), CPAttributeName("c1", "col") -> CPIntValue(2), CPAttributeName("", "val") -> CPIntValue(10), CPAttributeName("", "row") -> CPIntValue(1)))
     )
     obj1 should not be empty
     obj1.get.get("row").get.getIntValue.get should equal (1)
@@ -60,11 +64,15 @@ class ConceptTests extends FlatSpec with Matchers {
     obj1.get.name should equal ("SomeConcept")
     obj1.get.value.getIntValue.get should equal (10)
 
-    val obj2 = CPStrictConcept.prepareObjectFromAttributesValues(
+    val c2 = new CPStrictConcept(
       "SomeConcept",
-      "val",
       "table" :: "row" :: "val" :: Nil,
-      Map(CPAttributeName("c1", "val") -> CPIntValue(10), CPAttributeName("c1", "row") -> CPIntValue(1), CPAttributeName("c1", "col") -> CPIntValue(2), CPAttributeName("", "val") -> CPIntValue(10), CPAttributeName("", "row") -> CPIntValue(1))
+      "val",
+      Nil,
+      Nil
+    )
+    val obj2 = c2.prepareObjectFromAttributesValues(
+      CPSubstitutions(Map(CPAttributeName("c1", "val") -> CPIntValue(10), CPAttributeName("c1", "row") -> CPIntValue(1), CPAttributeName("c1", "col") -> CPIntValue(2), CPAttributeName("", "val") -> CPIntValue(10), CPAttributeName("", "row") -> CPIntValue(1)))
     )
     obj2 shouldBe empty
   }

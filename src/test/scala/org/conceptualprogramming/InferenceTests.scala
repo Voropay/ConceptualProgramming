@@ -32,7 +32,8 @@ class InferenceTests extends FlatSpec with Matchers {
         new CPConstantDependency(CPAttributeName("c1", "col"), CPIntValue(2)) :: Nil
     )
 
-    val substitutions = income.resolve(Map(), ("Cell", "c1") :: Nil, context)
+    val query: Map[CPAttributeName, CPValue] = Map()
+    val substitutions = income.resolve(query, ("Cell", "c1") :: Nil, context)
     substitutions.size should equal (2)
 
     val firstCell = substitutions.find(subst => {
@@ -56,10 +57,12 @@ class InferenceTests extends FlatSpec with Matchers {
     val firstObj = incomeObjects.find(obj => obj.hasAttribute("row") && obj.get("row").get.getIntValue.get == 1)
     firstObj should not be empty
     firstObj.get.get("val").get.getIntValue.get should equal (12)
+    firstObj.get.defaultAttribute should equal ("val")
 
     val secondObj = incomeObjects.find(obj => obj.hasAttribute("row") && obj.get("row").get.getIntValue.get == 2)
     secondObj should not be empty
     secondObj.get.get("val").get.getIntValue.get should equal (24)
+    secondObj.get.defaultAttribute should equal ("val")
   }
 
   "StrictConcept" should "infer values correctly" in {
@@ -94,19 +97,19 @@ class InferenceTests extends FlatSpec with Matchers {
       Nil
     )
     val q1: Map[CPAttributeName, CPValue] = Map()
-    val r1 = c.inferInheritedValues(q1).get
+    val r1 = c.inferValues(q1).get
     r1.size should equal(1)
     r1.get(CPAttributeName("c", "col")).get should equal (CPIntValue(1))
 
     val q2 = q1 + (CPAttributeName("", "row") -> CPIntValue(2))
-    val r2 = c.inferInheritedValues(q2).get
+    val r2 = c.inferValues(q2).get
     r2.size should equal(3)
     r2.get(CPAttributeName("c", "row")).get should equal (CPIntValue(2))
     r2.get(CPAttributeName("", "row")).get should equal (CPIntValue(2))
     r2.get(CPAttributeName("c", "col")).get should equal (CPIntValue(1))
 
     val q3 = q2 + (CPAttributeName("c", "val") -> CPIntValue(10))
-    val r3 = c.inferInheritedValues(q3).get
+    val r3 = c.inferValues(q3).get
     r3.size should equal(5)
     r3.get(CPAttributeName("c", "row")).get should equal (CPIntValue(2))
     r3.get(CPAttributeName("", "row")).get should equal (CPIntValue(2))
@@ -122,22 +125,22 @@ class InferenceTests extends FlatSpec with Matchers {
       CPArithmeticalDependency(new CPConstantOperand(CPIntValue(0)), new CPAttributeOperand(CPAttributeName("", "val")), "<") :: Nil
     )
     val q11: Map[CPAttributeName, CPValue] = Map()
-    val r11 = p.inferInheritedValues(q11).get
+    val r11 = p.inferValues(q11).get
     r11.size should equal(0)
 
     val q12 = q11 + (CPAttributeName("i", "row") -> CPIntValue(2), CPAttributeName("i", "val") -> CPIntValue(12))
-    val r12 = p.inferInheritedValues(q12).get
+    val r12 = p.inferValues(q12).get
     r12.size should equal(4)
     r12.get(CPAttributeName("", "row")).get should equal (CPIntValue(2))
     r12.get(CPAttributeName("o", "row")).get should equal (CPIntValue(2))
 
     val q13 = q12 + (CPAttributeName("o", "val") -> CPIntValue(8))
-    val r13 = p.inferInheritedValues(q13).get
+    val r13 = p.inferValues(q13).get
     r13.size should equal(6)
     r13.get(CPAttributeName("", "val")).get should equal (CPIntValue(4))
 
     val q14 = q12 + (CPAttributeName("o", "val") -> CPIntValue(18))
-    val r14 = p.inferInheritedValues(q14)
+    val r14 = p.inferValues(q14)
     r14.isEmpty should be (true)
   }
 
@@ -159,7 +162,8 @@ class InferenceTests extends FlatSpec with Matchers {
       Nil
     )
 
-    val substitutions = income.resolve(Map(), ("Cell", "c") :: Nil, context)
+    val query: Map[CPAttributeName, CPValue] = Map()
+    val substitutions = income.resolve(query, ("Cell", "c") :: Nil, context)
     substitutions.size should equal (2)
 
     val firstCell = substitutions.find(subst => {
@@ -181,10 +185,12 @@ class InferenceTests extends FlatSpec with Matchers {
     val firstObj = incomeObjects.find(obj => obj.hasAttribute("row") && obj.get("row").get.getIntValue.get == 1)
     firstObj should not be empty
     firstObj.get.get("val").get.getIntValue.get should equal (12)
+    firstObj.get.defaultAttribute should equal ("val")
 
     val secondObj = incomeObjects.find(obj => obj.hasAttribute("row") && obj.get("row").get.getIntValue.get == 2)
     secondObj should not be empty
     secondObj.get.get("val").get.getIntValue.get should equal (24)
+    secondObj.get.defaultAttribute should equal ("val")
 
   }
 }
