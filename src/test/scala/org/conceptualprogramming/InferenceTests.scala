@@ -193,4 +193,102 @@ class InferenceTests extends FlatSpec with Matchers {
     secondObj.get.defaultAttribute should equal ("val")
 
   }
+
+  "Decision Node" should "resolve attribute values correctly" in {
+    val kb = KnowledgeBase.newInstance
+    kb.add(new CPObject("Cell", Map("row" -> CPIntValue(1), "col" -> CPIntValue(1), "val" -> CPStringValue("row1")), "val"))
+    kb.add(new CPObject("Cell", Map("row" -> CPIntValue(1), "col" -> CPIntValue(2), "val" -> CPDoubleValue(12)), "val"))
+    kb.add(new CPObject("Cell", Map("row" -> CPIntValue(1), "col" -> CPIntValue(3), "val" -> CPDoubleValue(10)), "val"))
+    kb.add(new CPObject("Cell", Map("row" -> CPIntValue(2), "col" -> CPIntValue(1), "val" -> CPStringValue("row2")), "val"))
+    kb.add(new CPObject("Cell", Map("row" -> CPIntValue(2), "col" -> CPIntValue(2), "val" -> CPDoubleValue(24)), "val"))
+    kb.add(new CPObject("Cell", Map("row" -> CPIntValue(2), "col" -> CPIntValue(3), "val" -> CPDoubleValue(26)), "val"))
+    val context = new CPExecutionContext(kb)
+
+    val income = new CPStrictConcept(
+      "Income",
+      "row" :: "val" :: Nil,
+      "val",
+      ("Cell", "c1") :: Nil,
+      new CPEqualsDependency(CPAttributeName("", "row") :: CPAttributeName("c1", "row") :: Nil) ::
+        new CPEqualsDependency(CPAttributeName("", "val") :: CPAttributeName("c1", "val") :: Nil) ::
+        new CPConstantDependency(CPAttributeName("c1", "col"), CPIntValue(2)) :: Nil
+    )
+    kb.add(income)
+
+    val query: Map[String, CPValue] = Map()
+    val incomeNode = income.createDecisionNode(query, context)
+    incomeNode.init
+    incomeNode.hasNextBranch should be (false)
+    var incomeObjects = incomeNode.getAllResults
+    incomeObjects.size should equal (2)
+    val firstObj = incomeObjects.find(obj => obj.hasAttribute("row") && obj.get("row").get.getIntValue.get == 1)
+    firstObj should not be empty
+    firstObj.get.get("val").get.getIntValue.get should equal (12)
+    firstObj.get.defaultAttribute should equal ("val")
+
+    val secondObj = incomeObjects.find(obj => obj.hasAttribute("row") && obj.get("row").get.getIntValue.get == 2)
+    secondObj should not be empty
+    secondObj.get.get("val").get.getIntValue.get should equal (24)
+    secondObj.get.defaultAttribute should equal ("val")
+
+    val outcome = new CPInheritedConcept(
+      "Outcome",
+      ("Cell", "c") :: Nil,
+      Map(),
+      Map(CPAttributeName("c", "col") -> new CPConstantOperand(CPIntValue(3))),
+      Nil
+    )
+
+    val profit = new CPInheritedConcept(
+      "Profit",
+      ("Income", "i") :: ("Outcome", "o") :: Nil,
+      Map(
+        "val" -> new CPSubOperation(new CPAttributeOperand(CPAttributeName("i", "val")), new CPAttributeOperand(CPAttributeName("o", "val")))),
+      Map(),
+      Nil
+    )
+
+    kb.add(outcome)
+    kb.add(profit)
+    val profitNode = profit.createDecisionNode(query, context)
+    profitNode.init
+    profitNode.hasNextBranch should be (true)
+    val incomeNode1 = profitNode.nextBranch
+    incomeNode1.init
+    incomeNode1.hasNextBranch should be (false)
+    var incomeObjects1 = incomeNode1.getAllResults
+    incomeObjects1.size should equal (2)
+    profitNode.setCurrentNodeResolvingResult(incomeObjects1)
+    profitNode.hasNextBranch should be (true)
+    val outcomeNode1 = profitNode.nextBranch
+    outcomeNode1.init
+    outcomeNode1.hasNextBranch should be (false)
+    var outcomeObjects1 = outcomeNode1.getAllResults
+    outcomeObjects1.size should equal (1)
+    profitNode.setCurrentNodeResolvingResult(outcomeObjects1)
+    profitNode.hasNextBranch should be (true)
+    val outcomeNode2 = profitNode.nextBranch
+    outcomeNode2.init
+    outcomeNode2.hasNextBranch should be (false)
+    var outcomeObjects2 = outcomeNode2.getAllResults
+    outcomeObjects2.size should equal (1)
+    profitNode.setCurrentNodeResolvingResult(outcomeObjects2)
+    profitNode.hasNextBranch should be (false)
+    var profitObjects1 = profitNode.getAllResults
+    profitObjects1.size should equal (2)
+
+    val firstProfitObj = profitObjects1.find(obj => obj.hasAttribute("row") && obj.get("row").get.getIntValue.get == 1)
+    firstProfitObj should not be empty
+    firstProfitObj.get.get("val").get.getIntValue.get should equal (2)
+    firstProfitObj.get.defaultAttribute should equal ("val")
+
+    val secondProfitObj = profitObjects1.find(obj => obj.hasAttribute("row") && obj.get("row").get.getIntValue.get == 2)
+    secondProfitObj should not be empty
+    secondProfitObj.get.get("val").get.getIntValue.get should equal (-2)
+    secondProfitObj.get.defaultAttribute should equal ("val")
+
+
+  }
+
+
 }
