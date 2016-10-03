@@ -67,4 +67,10 @@ class InMemoryKnowledgeBaseImpl extends KnowledgeBase {
     objectsIndex = TreeMap()
     conceptsIndex = TreeMap()
   }
+
+  override def containsObjects(name: String): Boolean = objectsIndex.contains(name)
+
+  override def containsConcepts(name: String): Boolean = conceptsIndex.contains(name)
+
+  override def add(objects: List[CPObject]): Unit = objects.foreach(add(_))
 }

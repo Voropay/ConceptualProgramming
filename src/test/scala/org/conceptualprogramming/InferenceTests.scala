@@ -4,6 +4,7 @@ import org.concepualprogramming.core.dependencies.operations.{CPSubOperation, CP
 import org.concepualprogramming.core.dependencies.{CPArithmeticalDependency, CPConstantDependency, CPEqualsDependency}
 import org.concepualprogramming.core._
 import org.concepualprogramming.core.datatypes._
+import org.concepualprogramming.core.execution_steps.{ReturnStep, ConceptResolvingStep}
 import org.concepualprogramming.core.knowledgebase.KnowledgeBase
 import org.scalatest.{Matchers, FlatSpec}
 
@@ -13,14 +14,14 @@ import org.scalatest.{Matchers, FlatSpec}
 class InferenceTests extends FlatSpec with Matchers {
 
   "StrictConcept" should "resolve attribute values correctly" in {
-    val kb = KnowledgeBase.newInstance
-    kb.add(new CPObject("Cell", Map("row" -> CPIntValue(1), "col" -> CPIntValue(1), "val" -> CPStringValue("row1")), "val"))
-    kb.add(new CPObject("Cell", Map("row" -> CPIntValue(1), "col" -> CPIntValue(2), "val" -> CPDoubleValue(12)), "val"))
-    kb.add(new CPObject("Cell", Map("row" -> CPIntValue(1), "col" -> CPIntValue(3), "val" -> CPDoubleValue(10)), "val"))
-    kb.add(new CPObject("Cell", Map("row" -> CPIntValue(2), "col" -> CPIntValue(1), "val" -> CPStringValue("row2")), "val"))
-    kb.add(new CPObject("Cell", Map("row" -> CPIntValue(2), "col" -> CPIntValue(2), "val" -> CPDoubleValue(24)), "val"))
-    kb.add(new CPObject("Cell", Map("row" -> CPIntValue(2), "col" -> CPIntValue(3), "val" -> CPDoubleValue(26)), "val"))
-    val context = new CPExecutionContext(kb)
+    val context = new CPExecutionContext
+    context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(1), "col" -> CPIntValue(1), "val" -> CPStringValue("row1")), "val"))
+    context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(1), "col" -> CPIntValue(2), "val" -> CPDoubleValue(12)), "val"))
+    context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(1), "col" -> CPIntValue(3), "val" -> CPDoubleValue(10)), "val"))
+    context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(2), "col" -> CPIntValue(1), "val" -> CPStringValue("row2")), "val"))
+    context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(2), "col" -> CPIntValue(2), "val" -> CPDoubleValue(24)), "val"))
+    context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(2), "col" -> CPIntValue(3), "val" -> CPDoubleValue(26)), "val"))
+
 
     val income = new CPStrictConcept(
       "Income",
@@ -145,14 +146,14 @@ class InferenceTests extends FlatSpec with Matchers {
   }
 
   "InheritedConcept" should "resolve attribute values correctly" in {
-    val kb = KnowledgeBase.newInstance
-    kb.add(new CPObject("Cell", Map("row" -> CPIntValue(1), "col" -> CPIntValue(1), "val" -> CPStringValue("row1")), "val"))
-    kb.add(new CPObject("Cell", Map("row" -> CPIntValue(1), "col" -> CPIntValue(2), "val" -> CPDoubleValue(12)), "val"))
-    kb.add(new CPObject("Cell", Map("row" -> CPIntValue(1), "col" -> CPIntValue(3), "val" -> CPDoubleValue(10)), "val"))
-    kb.add(new CPObject("Cell", Map("row" -> CPIntValue(2), "col" -> CPIntValue(1), "val" -> CPStringValue("row2")), "val"))
-    kb.add(new CPObject("Cell", Map("row" -> CPIntValue(2), "col" -> CPIntValue(2), "val" -> CPDoubleValue(24)), "val"))
-    kb.add(new CPObject("Cell", Map("row" -> CPIntValue(2), "col" -> CPIntValue(3), "val" -> CPDoubleValue(26)), "val"))
-    val context = new CPExecutionContext(kb)
+    val context = new CPExecutionContext
+    context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(1), "col" -> CPIntValue(1), "val" -> CPStringValue("row1")), "val"))
+    context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(1), "col" -> CPIntValue(2), "val" -> CPDoubleValue(12)), "val"))
+    context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(1), "col" -> CPIntValue(3), "val" -> CPDoubleValue(10)), "val"))
+    context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(2), "col" -> CPIntValue(1), "val" -> CPStringValue("row2")), "val"))
+    context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(2), "col" -> CPIntValue(2), "val" -> CPDoubleValue(24)), "val"))
+    context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(2), "col" -> CPIntValue(3), "val" -> CPDoubleValue(26)), "val"))
+
 
     val income = new CPInheritedConcept(
       "Income",
@@ -195,14 +196,14 @@ class InferenceTests extends FlatSpec with Matchers {
   }
 
   "Decision Node" should "resolve attribute values correctly" in {
-    val kb = KnowledgeBase.newInstance
-    kb.add(new CPObject("Cell", Map("row" -> CPIntValue(1), "col" -> CPIntValue(1), "val" -> CPStringValue("row1")), "val"))
-    kb.add(new CPObject("Cell", Map("row" -> CPIntValue(1), "col" -> CPIntValue(2), "val" -> CPDoubleValue(12)), "val"))
-    kb.add(new CPObject("Cell", Map("row" -> CPIntValue(1), "col" -> CPIntValue(3), "val" -> CPDoubleValue(10)), "val"))
-    kb.add(new CPObject("Cell", Map("row" -> CPIntValue(2), "col" -> CPIntValue(1), "val" -> CPStringValue("row2")), "val"))
-    kb.add(new CPObject("Cell", Map("row" -> CPIntValue(2), "col" -> CPIntValue(2), "val" -> CPDoubleValue(24)), "val"))
-    kb.add(new CPObject("Cell", Map("row" -> CPIntValue(2), "col" -> CPIntValue(3), "val" -> CPDoubleValue(26)), "val"))
-    val context = new CPExecutionContext(kb)
+    val context = new CPExecutionContext
+    context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(1), "col" -> CPIntValue(1), "val" -> CPStringValue("row1")), "val"))
+    context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(1), "col" -> CPIntValue(2), "val" -> CPDoubleValue(12)), "val"))
+    context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(1), "col" -> CPIntValue(3), "val" -> CPDoubleValue(10)), "val"))
+    context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(2), "col" -> CPIntValue(1), "val" -> CPStringValue("row2")), "val"))
+    context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(2), "col" -> CPIntValue(2), "val" -> CPDoubleValue(24)), "val"))
+    context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(2), "col" -> CPIntValue(3), "val" -> CPDoubleValue(26)), "val"))
+
 
     val income = new CPStrictConcept(
       "Income",
@@ -213,7 +214,7 @@ class InferenceTests extends FlatSpec with Matchers {
         new CPEqualsDependency(CPAttributeName("", "val") :: CPAttributeName("c1", "val") :: Nil) ::
         new CPConstantDependency(CPAttributeName("c1", "col"), CPIntValue(2)) :: Nil
     )
-    kb.add(income)
+    context.knowledgeBase.add(income)
 
     val query: Map[String, CPValue] = Map()
     val incomeNode = income.createDecisionNode(query, context)
@@ -248,8 +249,8 @@ class InferenceTests extends FlatSpec with Matchers {
       Nil
     )
 
-    kb.add(outcome)
-    kb.add(profit)
+    context.knowledgeBase.add(outcome)
+    context.knowledgeBase.add(profit)
     val profitNode = profit.createDecisionNode(query, context)
     profitNode.init
     profitNode.hasNextBranch should be (true)
@@ -288,6 +289,32 @@ class InferenceTests extends FlatSpec with Matchers {
     secondProfitObj.get.defaultAttribute should equal ("val")
 
 
+  }
+
+  "Free concept" should "resolve objects correctly" in {
+    val context = new CPExecutionContext
+    context.knowledgeBase.add(new CPObject("Var", Map("val" -> CPIntValue(1)), "val"))
+    context.knowledgeBase.add(new CPObject("Var", Map("val" -> CPIntValue(-1)), "val"))
+    val step1 = new ConceptResolvingStep(
+      new CPStrictConcept(
+        "Res",
+        "val" :: Nil,
+        "val",
+        ("Var", "v") :: Nil,
+        new CPEqualsDependency(CPAttributeName("", "val") :: CPAttributeName("v", "val") :: Nil)  ::
+          CPArithmeticalDependency(
+            new CPAttributeOperand(CPAttributeName("v", "val")),
+            new CPConstantOperand(CPIntValue(0)),
+            ">"
+          ) :: Nil
+      )
+    )
+    val step2 = new ReturnStep("Res")
+    val concept = new CPFreeConcept("PositiveVariables", step1 :: step2 :: Nil)
+    val objects = concept.resolve(Map(), context)
+    objects.size should equal (1)
+    objects.head.name should equal ("PositiveVariables")
+    objects.head.get("val").get.getIntValue.get should equal (1)
   }
 
 

@@ -4,7 +4,6 @@ import org.concepualprogramming.core.CPAttributeName
 import org.concepualprogramming.core.datatypes.{CPDoubleValue, CPIntValue}
 import org.concepualprogramming.core.dependencies._
 import org.concepualprogramming.core.dependencies.operations.{CPAttributeOperand, CPDivOperation, CPConstantOperand, CPMulOperation}
-import org.concepualprogramming.core.knowledgebase.KnowledgeBase
 import org.scalatest.{Matchers, FlatSpec}
 
 /**

@@ -1,7 +1,6 @@
 package org.concepualprogramming.core
 
 import org.concepualprogramming.core.datatypes.CPValue
-import org.concepualprogramming.core.dependencies.CPAttributesDependency
 
 import scala.collection.mutable
 

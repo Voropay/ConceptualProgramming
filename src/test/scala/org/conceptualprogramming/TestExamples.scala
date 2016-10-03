@@ -13,8 +13,7 @@ import org.scalatest.{Matchers, FlatSpec}
 class TestExamples extends FlatSpec with Matchers {
 
   "Criminal West example" should "be performed correctly" in {
-
-    val kb = KnowledgeBase.newInstance
+    val context = new CPExecutionContext
     val criminal = new CPStrictConcept(
       "Criminal",
       "name" :: Nil,
@@ -25,13 +24,13 @@ class TestExamples extends FlatSpec with Matchers {
         new CPEqualsDependency(CPAttributeName("sells", "buyer") :: CPAttributeName("hostile", "name") :: Nil) ::
         Nil
     )
-    kb.add(criminal)
+    context.knowledgeBase.add(criminal)
 
     val nonoOwnsM1 = new CPObject("Owns", Map("owner" -> CPStringValue("Nono"), "object" -> CPStringValue("M1")), "object")
-    kb.add(nonoOwnsM1)
+    context.knowledgeBase.add(nonoOwnsM1)
 
     val m1IsMissle = new CPObject("Missle", Map("name" -> CPStringValue("M1")), "name")
-    kb.add(m1IsMissle)
+    context.knowledgeBase.add(m1IsMissle)
 
     val sells = new CPStrictConcept(
       "Sells",
@@ -44,7 +43,7 @@ class TestExamples extends FlatSpec with Matchers {
         new CPEqualsDependency(CPAttributeName("", "buyer") :: CPAttributeName("owns", "owner") :: Nil) ::
         Nil
     )
-    kb.add(sells)
+    context.knowledgeBase.add(sells)
 
     val weapon = new CPStrictConcept(
       "Weapon",
@@ -53,7 +52,7 @@ class TestExamples extends FlatSpec with Matchers {
       ("Missle", "missle") :: Nil,
       new CPEqualsDependency(CPAttributeName("", "name") :: CPAttributeName("missle", "name") :: Nil) :: Nil
     )
-    kb.add(weapon)
+    context.knowledgeBase.add(weapon)
 
     val hostile = new CPStrictConcept(
       "Hostile",
@@ -64,15 +63,15 @@ class TestExamples extends FlatSpec with Matchers {
         new CPConstantDependency(CPAttributeName("enemy", "target"), CPStringValue("America")) ::
         Nil
     )
-    kb.add(hostile)
+    context.knowledgeBase.add(hostile)
 
     val westIsAmerican = new CPObject("American", Map("name" -> CPStringValue("West")), "name")
-    kb.add(westIsAmerican)
+    context.knowledgeBase.add(westIsAmerican)
 
     val nonoIsEnemyOfAmerica = new CPObject("Enemy", Map("name" -> CPStringValue("Nono"), "target" -> CPStringValue("America")), "name")
-    kb.add(nonoIsEnemyOfAmerica)
+    context.knowledgeBase.add(nonoIsEnemyOfAmerica)
 
-    val context = new CPExecutionContext(kb)
+
     val westIsCriminal = criminal.resolve(Map("name" -> CPStringValue("West")), context)
     westIsCriminal.size should equal (1)
     westIsCriminal.head.get("name").get.getStringValue.get should equal ("West")
@@ -81,8 +80,7 @@ class TestExamples extends FlatSpec with Matchers {
   }
 
   "Criminal West example" should "be performed correctly in non-recursive implementation" in {
-
-    val kb = KnowledgeBase.newInstance
+    val context = new CPExecutionContext
     val criminal = new CPStrictConcept(
       "Criminal",
       "name" :: Nil,
@@ -93,13 +91,13 @@ class TestExamples extends FlatSpec with Matchers {
         new CPEqualsDependency(CPAttributeName("sells", "buyer") :: CPAttributeName("hostile", "name") :: Nil) ::
         Nil
     )
-    kb.add(criminal)
+    context.knowledgeBase.add(criminal)
 
     val nonoOwnsM1 = new CPObject("Owns", Map("owner" -> CPStringValue("Nono"), "object" -> CPStringValue("M1")), "object")
-    kb.add(nonoOwnsM1)
+    context.knowledgeBase.add(nonoOwnsM1)
 
     val m1IsMissle = new CPObject("Missle", Map("name" -> CPStringValue("M1")), "name")
-    kb.add(m1IsMissle)
+    context.knowledgeBase.add(m1IsMissle)
 
     val sells = new CPStrictConcept(
       "Sells",
@@ -112,7 +110,7 @@ class TestExamples extends FlatSpec with Matchers {
         new CPEqualsDependency(CPAttributeName("", "buyer") :: CPAttributeName("owns", "owner") :: Nil) ::
         Nil
     )
-    kb.add(sells)
+    context.knowledgeBase.add(sells)
 
     val weapon = new CPStrictConcept(
       "Weapon",
@@ -121,7 +119,7 @@ class TestExamples extends FlatSpec with Matchers {
       ("Missle", "missle") :: Nil,
       new CPEqualsDependency(CPAttributeName("", "name") :: CPAttributeName("missle", "name") :: Nil) :: Nil
     )
-    kb.add(weapon)
+    context.knowledgeBase.add(weapon)
 
     val hostile = new CPStrictConcept(
       "Hostile",
@@ -132,15 +130,15 @@ class TestExamples extends FlatSpec with Matchers {
         new CPConstantDependency(CPAttributeName("enemy", "target"), CPStringValue("America")) ::
         Nil
     )
-    kb.add(hostile)
+    context.knowledgeBase.add(hostile)
 
     val westIsAmerican = new CPObject("American", Map("name" -> CPStringValue("West")), "name")
-    kb.add(westIsAmerican)
+    context.knowledgeBase.add(westIsAmerican)
 
     val nonoIsEnemyOfAmerica = new CPObject("Enemy", Map("name" -> CPStringValue("Nono"), "target" -> CPStringValue("America")), "name")
-    kb.add(nonoIsEnemyOfAmerica)
+    context.knowledgeBase.add(nonoIsEnemyOfAmerica)
 
-    val context = new CPExecutionContext(kb)
+
     val westIsCriminal = CPConcept.resolveDecisionTree(criminal, Map("name" -> CPStringValue("West")), context)
     westIsCriminal.size should equal (1)
     westIsCriminal.head.get("name").get.getStringValue.get should equal ("West")
@@ -149,16 +147,16 @@ class TestExamples extends FlatSpec with Matchers {
   }
 
   "Example with income, outcome and profit" should "be performed correctly in Strict Implementation" in {
-    val kb = KnowledgeBase.newInstance
-    kb.add(new CPObject("Cell", Map("row" -> CPIntValue(1), "col" -> CPIntValue(1), "val" -> CPStringValue("row1")), "val"))
-    kb.add(new CPObject("Cell", Map("row" -> CPIntValue(1), "col" -> CPIntValue(2), "val" -> CPDoubleValue(12)), "val"))
-    kb.add(new CPObject("Cell", Map("row" -> CPIntValue(1), "col" -> CPIntValue(3), "val" -> CPDoubleValue(10)), "val"))
-    kb.add(new CPObject("Cell", Map("row" -> CPIntValue(2), "col" -> CPIntValue(1), "val" -> CPStringValue("row2")), "val"))
-    kb.add(new CPObject("Cell", Map("row" -> CPIntValue(2), "col" -> CPIntValue(2), "val" -> CPDoubleValue(24)), "val"))
-    kb.add(new CPObject("Cell", Map("row" -> CPIntValue(2), "col" -> CPIntValue(3), "val" -> CPDoubleValue(26)), "val"))
-    kb.add(new CPObject("Cell", Map("row" -> CPIntValue(3), "col" -> CPIntValue(1), "val" -> CPStringValue("row3")), "val"))
-    kb.add(new CPObject("Cell", Map("row" -> CPIntValue(3), "col" -> CPIntValue(2), "val" -> CPDoubleValue(21)), "val"))
-    kb.add(new CPObject("Cell", Map("row" -> CPIntValue(3), "col" -> CPIntValue(3), "val" -> CPDoubleValue(14)), "val"))
+    val context = new CPExecutionContext
+    context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(1), "col" -> CPIntValue(1), "val" -> CPStringValue("row1")), "val"))
+    context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(1), "col" -> CPIntValue(2), "val" -> CPDoubleValue(12)), "val"))
+    context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(1), "col" -> CPIntValue(3), "val" -> CPDoubleValue(10)), "val"))
+    context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(2), "col" -> CPIntValue(1), "val" -> CPStringValue("row2")), "val"))
+    context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(2), "col" -> CPIntValue(2), "val" -> CPDoubleValue(24)), "val"))
+    context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(2), "col" -> CPIntValue(3), "val" -> CPDoubleValue(26)), "val"))
+    context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(3), "col" -> CPIntValue(1), "val" -> CPStringValue("row3")), "val"))
+    context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(3), "col" -> CPIntValue(2), "val" -> CPDoubleValue(21)), "val"))
+    context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(3), "col" -> CPIntValue(3), "val" -> CPDoubleValue(14)), "val"))
 
     val name = new CPStrictConcept(
       "Name",
@@ -217,12 +215,12 @@ class TestExamples extends FlatSpec with Matchers {
         ) :: Nil
     )
 
-    kb.add(name)
-    kb.add(income)
-    kb.add(outcome)
-    kb.add(profit)
-    kb.add(unprofitable)
-    val context = new CPExecutionContext(kb)
+    context.knowledgeBase.add(name)
+    context.knowledgeBase.add(income)
+    context.knowledgeBase.add(outcome)
+    context.knowledgeBase.add(profit)
+    context.knowledgeBase.add(unprofitable)
+
 
     val rowNames = name.resolve(Map(), context)
     rowNames.size should equal (3)
@@ -245,16 +243,16 @@ class TestExamples extends FlatSpec with Matchers {
   }
 
   "Example with income, outcome and profit" should "be performed correctly in Inherited Implementation" in {
-    val kb = KnowledgeBase.newInstance
-    kb.add(new CPObject("Cell", Map("row" -> CPIntValue(1), "col" -> CPIntValue(1), "val" -> CPStringValue("row1")), "val"))
-    kb.add(new CPObject("Cell", Map("row" -> CPIntValue(1), "col" -> CPIntValue(2), "val" -> CPDoubleValue(12)), "val"))
-    kb.add(new CPObject("Cell", Map("row" -> CPIntValue(1), "col" -> CPIntValue(3), "val" -> CPDoubleValue(10)), "val"))
-    kb.add(new CPObject("Cell", Map("row" -> CPIntValue(2), "col" -> CPIntValue(1), "val" -> CPStringValue("row2")), "val"))
-    kb.add(new CPObject("Cell", Map("row" -> CPIntValue(2), "col" -> CPIntValue(2), "val" -> CPDoubleValue(24)), "val"))
-    kb.add(new CPObject("Cell", Map("row" -> CPIntValue(2), "col" -> CPIntValue(3), "val" -> CPDoubleValue(26)), "val"))
-    kb.add(new CPObject("Cell", Map("row" -> CPIntValue(3), "col" -> CPIntValue(1), "val" -> CPStringValue("row3")), "val"))
-    kb.add(new CPObject("Cell", Map("row" -> CPIntValue(3), "col" -> CPIntValue(2), "val" -> CPDoubleValue(21)), "val"))
-    kb.add(new CPObject("Cell", Map("row" -> CPIntValue(3), "col" -> CPIntValue(3), "val" -> CPDoubleValue(14)), "val"))
+    val context = new CPExecutionContext
+    context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(1), "col" -> CPIntValue(1), "val" -> CPStringValue("row1")), "val"))
+    context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(1), "col" -> CPIntValue(2), "val" -> CPDoubleValue(12)), "val"))
+    context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(1), "col" -> CPIntValue(3), "val" -> CPDoubleValue(10)), "val"))
+    context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(2), "col" -> CPIntValue(1), "val" -> CPStringValue("row2")), "val"))
+    context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(2), "col" -> CPIntValue(2), "val" -> CPDoubleValue(24)), "val"))
+    context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(2), "col" -> CPIntValue(3), "val" -> CPDoubleValue(26)), "val"))
+    context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(3), "col" -> CPIntValue(1), "val" -> CPStringValue("row3")), "val"))
+    context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(3), "col" -> CPIntValue(2), "val" -> CPDoubleValue(21)), "val"))
+    context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(3), "col" -> CPIntValue(3), "val" -> CPDoubleValue(14)), "val"))
 
     val name = new CPInheritedConcept(
       "Name",
@@ -305,12 +303,12 @@ class TestExamples extends FlatSpec with Matchers {
       Nil
     )
 
-    kb.add(name)
-    kb.add(income)
-    kb.add(outcome)
-    kb.add(profit)
-    kb.add(unprofitable)
-    val context = new CPExecutionContext(kb)
+    context.knowledgeBase.add(name)
+    context.knowledgeBase.add(income)
+    context.knowledgeBase.add(outcome)
+    context.knowledgeBase.add(profit)
+    context.knowledgeBase.add(unprofitable)
+
 
     val rowNames = name.resolve(Map(), context)
     rowNames.size should equal (3)
@@ -337,16 +335,16 @@ class TestExamples extends FlatSpec with Matchers {
   }
 
   "Example with income, outcome and profit" should "be performed correctly in non-recursive Implementation" in {
-    val kb = KnowledgeBase.newInstance
-    kb.add(new CPObject("Cell", Map("row" -> CPIntValue(1), "col" -> CPIntValue(1), "val" -> CPStringValue("row1")), "val"))
-    kb.add(new CPObject("Cell", Map("row" -> CPIntValue(1), "col" -> CPIntValue(2), "val" -> CPDoubleValue(12)), "val"))
-    kb.add(new CPObject("Cell", Map("row" -> CPIntValue(1), "col" -> CPIntValue(3), "val" -> CPDoubleValue(10)), "val"))
-    kb.add(new CPObject("Cell", Map("row" -> CPIntValue(2), "col" -> CPIntValue(1), "val" -> CPStringValue("row2")), "val"))
-    kb.add(new CPObject("Cell", Map("row" -> CPIntValue(2), "col" -> CPIntValue(2), "val" -> CPDoubleValue(24)), "val"))
-    kb.add(new CPObject("Cell", Map("row" -> CPIntValue(2), "col" -> CPIntValue(3), "val" -> CPDoubleValue(26)), "val"))
-    kb.add(new CPObject("Cell", Map("row" -> CPIntValue(3), "col" -> CPIntValue(1), "val" -> CPStringValue("row3")), "val"))
-    kb.add(new CPObject("Cell", Map("row" -> CPIntValue(3), "col" -> CPIntValue(2), "val" -> CPDoubleValue(21)), "val"))
-    kb.add(new CPObject("Cell", Map("row" -> CPIntValue(3), "col" -> CPIntValue(3), "val" -> CPDoubleValue(14)), "val"))
+    val context = new CPExecutionContext
+    context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(1), "col" -> CPIntValue(1), "val" -> CPStringValue("row1")), "val"))
+    context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(1), "col" -> CPIntValue(2), "val" -> CPDoubleValue(12)), "val"))
+    context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(1), "col" -> CPIntValue(3), "val" -> CPDoubleValue(10)), "val"))
+    context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(2), "col" -> CPIntValue(1), "val" -> CPStringValue("row2")), "val"))
+    context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(2), "col" -> CPIntValue(2), "val" -> CPDoubleValue(24)), "val"))
+    context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(2), "col" -> CPIntValue(3), "val" -> CPDoubleValue(26)), "val"))
+    context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(3), "col" -> CPIntValue(1), "val" -> CPStringValue("row3")), "val"))
+    context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(3), "col" -> CPIntValue(2), "val" -> CPDoubleValue(21)), "val"))
+    context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(3), "col" -> CPIntValue(3), "val" -> CPDoubleValue(14)), "val"))
 
     val name = new CPInheritedConcept(
       "Name",
@@ -397,12 +395,12 @@ class TestExamples extends FlatSpec with Matchers {
       Nil
     )
 
-    kb.add(name)
-    kb.add(income)
-    kb.add(outcome)
-    kb.add(profit)
-    kb.add(unprofitable)
-    val context = new CPExecutionContext(kb)
+    context.knowledgeBase.add(name)
+    context.knowledgeBase.add(income)
+    context.knowledgeBase.add(outcome)
+    context.knowledgeBase.add(profit)
+    context.knowledgeBase.add(unprofitable)
+
 
     val profits = CPConcept.resolveDecisionTree(profit, Map(), context)
     profits.size should equal (3)

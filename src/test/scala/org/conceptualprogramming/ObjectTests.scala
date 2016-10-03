@@ -4,6 +4,8 @@ import org.concepualprogramming.core.datatypes.{CPStringValue, CPIntValue}
 import org.concepualprogramming.core.CPObject
 import org.scalatest.{Matchers, FlatSpec}
 
+import scala.collection.mutable
+
 /**
  * Created by oleksii.voropai on 8/6/2016.
  */

@@ -8,7 +8,7 @@ import org.concepualprogramming.core.dependencies.CPAttributesDependency
  */
 abstract class CPAbstractConcept extends CPConcept{
 
-  val childConcepts: List[Tuple2[String, String]]
+  val childConcepts: List[(String, String)]
 
   def inferValuesFromDependencies(attributesValues: Map[CPAttributeName, CPValue], dependencies: List[CPAttributesDependency]): Option[Map[CPAttributeName, CPValue]] = {
     var found = true
