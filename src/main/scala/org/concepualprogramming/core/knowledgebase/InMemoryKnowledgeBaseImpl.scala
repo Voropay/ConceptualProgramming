@@ -37,11 +37,15 @@ class InMemoryKnowledgeBaseImpl extends KnowledgeBase {
   override def getObjects(name: String, query: Map[String, CPValue]): List[CPObject] = {
     val objects = objectsIndex.get(name)
     if(objects.isDefined) {
-      val filteredObjects = objects.get.filter(obj => {
-        val notMatchedAttribute = obj.attributes.find(entry => query.get(entry._1).isDefined && !query.get(entry._1).get.equals(entry._2))
-        notMatchedAttribute.isEmpty
-      })
-      filteredObjects
+      if(query.isEmpty) {
+        return objects.get
+      } else {
+        val filteredObjects = objects.get.filter(obj => {
+          val notMatchedAttribute = obj.attributes.find(entry => query.get(entry._1).isDefined && !query.get(entry._1).get.equals(entry._2))
+          notMatchedAttribute.isEmpty
+        })
+        return filteredObjects
+      }
     } else {
       return List()
     }

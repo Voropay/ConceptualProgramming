@@ -8,8 +8,8 @@ import org.concepualprogramming.core.datatypes.CPValue
  */
 //TODO: return an expression evaluation result instead of simple objects
 class ReturnStep(returnObjectsName: String) extends CPExecutionStep{
-  override def execute(context: CPExecutionContext): Unit = {
-    val objects = context.knowledgeBase.getObjects(returnObjectsName)
+  override def execute(query: Map[String, CPValue], context: CPExecutionContext): Unit = {
+    val objects = context.knowledgeBase.getObjects(returnObjectsName, query)
     context.setResults(objects)
     context.stop
   }

@@ -16,7 +16,7 @@ class CPFreeConcept(_name: String, _steps: List[CPExecutionStep]) extends CPConc
     context.addFrame
     while(!context.isStopped && context.getCurrentStep < steps.size) {
       val step = steps(context.getCurrentStep)
-      step.execute(context)
+      step.execute(query, context)
     }
     val res = context.getResults.map(prepareObject(_))
     context.deleteFrame
@@ -48,7 +48,7 @@ class CPFreeConcept(_name: String, _steps: List[CPExecutionStep]) extends CPConc
           nextBranchExists = true
           return
         } else {
-          step.execute(context)
+          step.execute(query, context)
         }
       }
       nextBranchExists = false

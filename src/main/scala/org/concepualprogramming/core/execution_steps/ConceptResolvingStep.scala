@@ -8,7 +8,7 @@ import org.concepualprogramming.core.{CPObject, CPDecisionNode, CPConcept, CPExe
  */
 class ConceptResolvingStep(definition: CPConcept) extends CPExecutionStep{
 
-  override def execute(context: CPExecutionContext): Unit = {
+  override def execute(query: Map[String, CPValue], context: CPExecutionContext): Unit = {
     val objects = definition.resolve(Map(), context)
     context.knowledgeBase.add(objects)
     context.nextStep

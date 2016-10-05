@@ -479,6 +479,20 @@ class TestExamples extends FlatSpec with Matchers {
     toNotifyRow1.get("name").get.getStringValue.get should equal ("row2")
     toNotifyRow1.get("val").get.getIntValue.get should equal (-2)
 
+    val taskWithQuery = new CPFreeConcept("ToNotify",
+      new ConceptResolvingStep(name) ::
+      new ReturnStep("Name") ::  Nil
+    )
+
+    val names1 = taskWithQuery.resolve(Map("row" -> CPIntValue(1)), context)
+    names1.size should equal (1)
+    val name1 = names1.head
+    name1.get("val").get.getStringValue.get should equal ("row1")
+
+    val names3 =  CPConcept.resolveDecisionTree(taskWithQuery, Map("val" -> CPStringValue("row3")), context)
+    names3.size should equal (1)
+    val name3 = names3.head
+    name3.get("row").get.getIntValue.get should equal (3)
   }
 
-  }
+}

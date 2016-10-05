@@ -35,7 +35,7 @@ class ExecutionContextTests extends FlatSpec with Matchers {
     val context = new CPExecutionContext
     context.knowledgeBase.add(new CPObject("Var", Map("val" -> CPIntValue(1)), "val"))
     val step = new ReturnStep("Var")
-    step.execute(context)
+    step.execute(Map(), context)
     context.getCurrentStep should equal (-1)
     val res = context.getResults
     res.size should equal (1)
@@ -62,7 +62,7 @@ class ExecutionContextTests extends FlatSpec with Matchers {
       )
     )
 
-    step.execute(context)
+    step.execute(Map(), context)
     context.getCurrentStep should equal (1)
     val res = context.knowledgeBase.getObjects("PositiveVariable")
     res.size should equal (1)
