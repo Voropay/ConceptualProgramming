@@ -4,6 +4,7 @@ import org.concepualprogramming.core.dependencies.{CPArithmeticalDependency, CPC
 import org.concepualprogramming.core.dependencies.operations.{CPSubOperation, CPAttributeOperand, CPConstantOperand}
 import org.concepualprogramming.core._
 import org.concepualprogramming.core.datatypes.{CPDoubleValue, CPStringValue, CPIntValue}
+import org.concepualprogramming.core.execution_steps.{ReturnStep, ConceptResolvingStep}
 import org.concepualprogramming.core.knowledgebase.KnowledgeBase
 import org.scalatest.{Matchers, FlatSpec}
 
@@ -146,7 +147,7 @@ class TestExamples extends FlatSpec with Matchers {
     eastIsCriminal.size should equal (0)
   }
 
-  "Example with income, outcome and profit" should "be performed correctly in Strict Implementation" in {
+  def prepareContextForProfitExample: CPExecutionContext = {
     val context = new CPExecutionContext
     context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(1), "col" -> CPIntValue(1), "val" -> CPStringValue("row1")), "val"))
     context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(1), "col" -> CPIntValue(2), "val" -> CPDoubleValue(12)), "val"))
@@ -157,6 +158,11 @@ class TestExamples extends FlatSpec with Matchers {
     context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(3), "col" -> CPIntValue(1), "val" -> CPStringValue("row3")), "val"))
     context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(3), "col" -> CPIntValue(2), "val" -> CPDoubleValue(21)), "val"))
     context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(3), "col" -> CPIntValue(3), "val" -> CPDoubleValue(14)), "val"))
+    context
+  }
+
+  "Example with income, outcome and profit" should "be performed correctly in Strict Implementation" in {
+    val context = prepareContextForProfitExample
 
     val name = new CPStrictConcept(
       "Name",
@@ -243,16 +249,7 @@ class TestExamples extends FlatSpec with Matchers {
   }
 
   "Example with income, outcome and profit" should "be performed correctly in Inherited Implementation" in {
-    val context = new CPExecutionContext
-    context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(1), "col" -> CPIntValue(1), "val" -> CPStringValue("row1")), "val"))
-    context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(1), "col" -> CPIntValue(2), "val" -> CPDoubleValue(12)), "val"))
-    context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(1), "col" -> CPIntValue(3), "val" -> CPDoubleValue(10)), "val"))
-    context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(2), "col" -> CPIntValue(1), "val" -> CPStringValue("row2")), "val"))
-    context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(2), "col" -> CPIntValue(2), "val" -> CPDoubleValue(24)), "val"))
-    context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(2), "col" -> CPIntValue(3), "val" -> CPDoubleValue(26)), "val"))
-    context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(3), "col" -> CPIntValue(1), "val" -> CPStringValue("row3")), "val"))
-    context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(3), "col" -> CPIntValue(2), "val" -> CPDoubleValue(21)), "val"))
-    context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(3), "col" -> CPIntValue(3), "val" -> CPDoubleValue(14)), "val"))
+    val context = prepareContextForProfitExample
 
     val name = new CPInheritedConcept(
       "Name",
@@ -335,16 +332,7 @@ class TestExamples extends FlatSpec with Matchers {
   }
 
   "Example with income, outcome and profit" should "be performed correctly in non-recursive Implementation" in {
-    val context = new CPExecutionContext
-    context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(1), "col" -> CPIntValue(1), "val" -> CPStringValue("row1")), "val"))
-    context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(1), "col" -> CPIntValue(2), "val" -> CPDoubleValue(12)), "val"))
-    context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(1), "col" -> CPIntValue(3), "val" -> CPDoubleValue(10)), "val"))
-    context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(2), "col" -> CPIntValue(1), "val" -> CPStringValue("row2")), "val"))
-    context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(2), "col" -> CPIntValue(2), "val" -> CPDoubleValue(24)), "val"))
-    context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(2), "col" -> CPIntValue(3), "val" -> CPDoubleValue(26)), "val"))
-    context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(3), "col" -> CPIntValue(1), "val" -> CPStringValue("row3")), "val"))
-    context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(3), "col" -> CPIntValue(2), "val" -> CPDoubleValue(21)), "val"))
-    context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(3), "col" -> CPIntValue(3), "val" -> CPDoubleValue(14)), "val"))
+    val context = prepareContextForProfitExample
 
     val name = new CPInheritedConcept(
       "Name",
@@ -416,4 +404,81 @@ class TestExamples extends FlatSpec with Matchers {
     toNotifyRow.get("name").get.getStringValue.get should equal ("row2")
     toNotifyRow.get("val").get.getIntValue.get should equal (-2)
   }
-}
+
+  "Example with income, outcome and profit" should "be performed correctly in free implementation" in {
+    val context = prepareContextForProfitExample
+
+    val name = new CPInheritedConcept(
+      "Name",
+      ("Cell", "c") :: Nil,
+      Map(),
+      Map(CPAttributeName("c", "col") -> new CPConstantOperand(CPIntValue(1))),
+      Nil
+    )
+
+    val income = new CPInheritedConcept(
+      "Income",
+      ("Cell", "c") :: Nil,
+      Map(),
+      Map(CPAttributeName("c", "col") -> new CPConstantOperand(CPIntValue(2))),
+      Nil
+    )
+
+    val outcome = new CPInheritedConcept(
+      "Outcome",
+      ("Cell", "c") :: Nil,
+      Map(),
+      Map(CPAttributeName("c", "col") -> new CPConstantOperand(CPIntValue(3))),
+      Nil
+    )
+
+    val profit = new CPInheritedConcept(
+      "Profit",
+      ("Income", "i") :: ("Outcome", "o") :: Nil,
+      Map(
+        "val" -> new CPSubOperation(new CPAttributeOperand(CPAttributeName("i", "val")), new CPAttributeOperand(CPAttributeName("o", "val")))),
+      Map(),
+      Nil
+    )
+
+    val unprofitable = new CPInheritedConcept(
+      "Unprofitable",
+      ("Profit", "p") :: Nil,
+      Map(),
+      Map(),
+      CPArithmeticalDependency(new CPAttributeOperand(CPAttributeName("p", "val")), new CPConstantOperand(CPIntValue(0)), "<") :: Nil
+    )
+
+    val toNotify = new CPInheritedConcept(
+      "ToNotify",
+      ("Unprofitable", "u") :: ("Name", "n") :: Nil,
+      Map("val" -> new CPAttributeOperand(CPAttributeName("u", "val")), "name" -> new CPAttributeOperand(CPAttributeName("n", "val"))),
+      Map(),
+      Nil
+    )
+
+    val task = new CPFreeConcept("ToNotify",
+      new ConceptResolvingStep(name) ::
+      new ConceptResolvingStep(income) ::
+      new ConceptResolvingStep(outcome) ::
+      new ConceptResolvingStep(profit) ::
+      new ConceptResolvingStep(unprofitable) ::
+      new ConceptResolvingStep(toNotify) ::
+      new ReturnStep("ToNotify") ::  Nil
+    )
+
+    val toNotifyRows = task.resolve(Map(), context)
+    toNotifyRows.size should equal (1)
+    val toNotifyRow = toNotifyRows.head
+    toNotifyRow.get("name").get.getStringValue.get should equal ("row2")
+    toNotifyRow.get("val").get.getIntValue.get should equal (-2)
+
+    val toNotifyRows1 = CPConcept.resolveDecisionTree(task, Map(), context)
+    toNotifyRows1.size should equal (1)
+    val toNotifyRow1 = toNotifyRows1.head
+    toNotifyRow1.get("name").get.getStringValue.get should equal ("row2")
+    toNotifyRow1.get("val").get.getIntValue.get should equal (-2)
+
+  }
+
+  }

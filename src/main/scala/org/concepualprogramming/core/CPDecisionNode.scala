@@ -9,7 +9,6 @@ trait CPDecisionNode {
   def init()
   def hasNextBranch: Boolean
   def nextBranch: CPDecisionNode
-  def getSubstitutionsForCurrentSubNode: Map[String, CPValue]
   def getAllResults: List[CPObject]
   def setCurrentNodeResolvingResult(res: List[CPObject])
 }

@@ -32,16 +32,40 @@ class CPFreeConcept(_name: String, _steps: List[CPExecutionStep]) extends CPConc
   }
 
   private class DecisionNode(query: Map[String, CPValue], context: CPExecutionContext) extends CPDecisionNode {
-    override def init(): Unit = {}
 
-    override def nextBranch: CPDecisionNode = null
+    var nextBranchExists = false
+    var results: List[CPObject] = List()
 
-    override def getAllResults: List[CPObject] = List()
+    override def init(): Unit = {
+      context.addFrame
+      findNextConceptStep
+    }
 
-    override def getSubstitutionsForCurrentSubNode: Map[String, CPValue] = Map()
+    def findNextConceptStep: Unit = {
+      while(!context.isStopped && context.getCurrentStep < steps.size) {
+        val step = steps(context.getCurrentStep)
+        if(step.needsResolve) {
+          nextBranchExists = true
+          return
+        } else {
+          step.execute(context)
+        }
+      }
+      nextBranchExists = false
+      results = context.getResults.map(prepareObject(_))
+      context.deleteFrame
+    }
 
-    override def hasNextBranch: Boolean = false
+    override def nextBranch: CPDecisionNode = steps(context.getCurrentStep).createDecisionNode(query, context)
 
-    override def setCurrentNodeResolvingResult(res: List[CPObject]): Unit = {}
+    override def getAllResults: List[CPObject] = results
+
+    override def hasNextBranch: Boolean = nextBranchExists
+
+    override def setCurrentNodeResolvingResult(res: List[CPObject]): Unit = {
+      val step = steps(context.getCurrentStep)
+      step.setCurrentNodeResolvingResult(res, context)
+      findNextConceptStep
+    }
   }
 }

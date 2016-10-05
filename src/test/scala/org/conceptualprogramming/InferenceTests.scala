@@ -315,6 +315,19 @@ class InferenceTests extends FlatSpec with Matchers {
     objects.size should equal (1)
     objects.head.name should equal ("PositiveVariables")
     objects.head.get("val").get.getIntValue.get should equal (1)
+
+    var currentNode: CPDecisionNode = concept.createDecisionNode(Map(), context);
+    currentNode.init()
+    currentNode.hasNextBranch should be (true)
+    val nextBranch = currentNode.nextBranch
+    nextBranch.init()
+    nextBranch.hasNextBranch should be (false)
+    currentNode.setCurrentNodeResolvingResult(nextBranch.getAllResults)
+    currentNode.hasNextBranch should be (false)
+    val objects1 = currentNode.getAllResults
+    objects1.size should equal (1)
+    objects1.head.name should equal ("PositiveVariables")
+    objects1.head.get("val").get.getIntValue.get should equal (1)
   }
 
 

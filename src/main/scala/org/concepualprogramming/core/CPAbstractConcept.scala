@@ -241,8 +241,6 @@ abstract class CPAbstractConcept extends CPConcept{
       return objects
     }
 
-    override def getSubstitutionsForCurrentSubNode: Map[String, CPValue] = currentQuery
-
     override def hasNextBranch: Boolean = hasNextStep
 
     override def setCurrentNodeResolvingResult(conceptResults: List[CPObject]): Unit = {

@@ -15,8 +15,8 @@ trait CPConcept {
 
 object CPConcept {
   def resolveDecisionTree(concept: CPConcept, query: Map[String, CPValue], context: CPExecutionContext): List[CPObject] = {
-    var currentNode: CPDecisionNode = concept.createDecisionNode(query, context);
-    currentNode.init();
+    var currentNode: CPDecisionNode = concept.createDecisionNode(query, context)
+    currentNode.init()
     val stack = mutable.Stack[CPDecisionNode]()
     while(currentNode.hasNextBranch || !stack.isEmpty) {
       if(currentNode.hasNextBranch) {
