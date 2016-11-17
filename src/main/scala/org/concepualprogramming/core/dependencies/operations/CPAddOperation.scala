@@ -6,7 +6,7 @@ import org.concepualprogramming.core.datatypes.CPValue
 /**
  * Created by oleksii.voropai on 8/18/2016.
  */
-case class CPAddOperation(operand1: CPExpression, operand2: CPExpression) extends CPExpression {
+case class CPAddOperation(operand1: CPDependencyExpression, operand2: CPDependencyExpression) extends CPDependencyExpression {
 
   override def calculate(attributesValues: Map[CPAttributeName, CPValue]): Option[CPValue] = {
     val value1 = operand1.calculate(attributesValues)
@@ -37,7 +37,7 @@ case class CPAddOperation(operand1: CPExpression, operand2: CPExpression) extend
     return Map()
   }
 
-  override def operands: List[CPExpression] = List(operand1, operand2)
+  override def operands: List[CPDependencyExpression] = List(operand1, operand2)
 
   override def name: String = "+"
 

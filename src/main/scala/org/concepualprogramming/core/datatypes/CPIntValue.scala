@@ -13,10 +13,12 @@ class CPIntValue(value: Int) extends CPValue {
 
   override def getIntValue: Option[Int] = Some(value)
 
-  //I don't know a common way to treat integer value as date
+  //TODO: treat integer as unix timestamp
   override def getDateValue: Option[LocalDate] = None
 
   override def getDoubleValue: Option[Double] = Some(value.toDouble)
+
+  override def getBooleanValue: Option[Boolean] = Some(value != 0)
 
   def getValue: Int = value
 

@@ -2,7 +2,7 @@ package org.concepualprogramming.core
 
 import org.concepualprogramming.core.datatypes.CPValue
 import org.concepualprogramming.core.execution_steps.CPExecutionStep
-
+import org.concepualprogramming.core.utils.Utils
 import scala.collection.mutable.ArrayBuffer
 
 /**
@@ -18,7 +18,7 @@ class CPFreeConcept(_name: String, _steps: List[CPExecutionStep]) extends CPConc
       val step = steps(context.getCurrentStep)
       step.execute(query, context)
     }
-    val res = context.getResults.map(prepareObject(_))
+    val res = context.getObjectResults.map(prepareObject(_))
     context.deleteFrame
     return res
   }
@@ -31,6 +31,12 @@ class CPFreeConcept(_name: String, _steps: List[CPExecutionStep]) extends CPConc
     new CPObject(_name, obj.attributes, obj.defaultAttribute)
   }
 
+  override def equals(other: Any): Boolean = other match {
+    case other: CPFreeConcept =>
+      name == other.name && steps.sameElements(other.steps)
+    case _ => false
+  }
+
   private class DecisionNode(query: Map[String, CPValue], context: CPExecutionContext) extends CPDecisionNode {
 
     var nextBranchExists = false
@@ -38,13 +44,12 @@ class CPFreeConcept(_name: String, _steps: List[CPExecutionStep]) extends CPConc
 
     override def init(): Unit = {
       context.addFrame
-      findNextConceptStep
     }
 
     def findNextConceptStep: Unit = {
       while(!context.isStopped && context.getCurrentStep < steps.size) {
         val step = steps(context.getCurrentStep)
-        if(step.needsResolve) {
+        if(step.needsResolve(context)) {
           nextBranchExists = true
           return
         } else {
@@ -52,7 +57,7 @@ class CPFreeConcept(_name: String, _steps: List[CPExecutionStep]) extends CPConc
         }
       }
       nextBranchExists = false
-      results = context.getResults.map(prepareObject(_))
+      results = context.getObjectResults.map(prepareObject(_))
       context.deleteFrame
     }
 
@@ -60,12 +65,14 @@ class CPFreeConcept(_name: String, _steps: List[CPExecutionStep]) extends CPConc
 
     override def getAllResults: List[CPObject] = results
 
-    override def hasNextBranch: Boolean = nextBranchExists
+    override def hasNextBranch: Boolean = {
+      findNextConceptStep
+      nextBranchExists
+    }
 
     override def setCurrentNodeResolvingResult(res: List[CPObject]): Unit = {
       val step = steps(context.getCurrentStep)
       step.setCurrentNodeResolvingResult(res, context)
-      findNextConceptStep
     }
   }
 }

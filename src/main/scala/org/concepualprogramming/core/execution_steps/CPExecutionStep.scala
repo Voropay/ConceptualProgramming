@@ -8,7 +8,7 @@ import org.concepualprogramming.core.datatypes.CPValue
  */
 trait CPExecutionStep {
   def execute(query: Map[String, CPValue], context: CPExecutionContext)
-  def needsResolve: Boolean
+  def needsResolve(context: CPExecutionContext): Boolean
   def createDecisionNode(query: Map[String, CPValue], context: CPExecutionContext): CPDecisionNode
   def setCurrentNodeResolvingResult(res: List[CPObject], context: CPExecutionContext): Unit
 }

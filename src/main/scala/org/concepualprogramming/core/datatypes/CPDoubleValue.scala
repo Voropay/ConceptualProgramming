@@ -17,6 +17,8 @@ class CPDoubleValue(value: Double) extends CPValue {
 
   override def getDateValue: Option[LocalDate] = None
 
+  override def getBooleanValue: Option[Boolean] = Some(value != 0)
+
   def getValue: Double = value
 
   override def +(other: CPValue): Option[CPValue] = {

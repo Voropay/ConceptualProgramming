@@ -1,11 +1,14 @@
 package org.conceptualprogramming
 
+import org.concepualprogramming.core.datatypes._
+import org.concepualprogramming.core._
+import org.concepualprogramming.core.execution_steps.expressions.operations.CPEquals
+import org.concepualprogramming.core.execution_steps.expressions.operations._
 import org.concepualprogramming.core.dependencies.operations.{CPSubOperation, CPConstantOperand, CPAttributeOperand, CPMulOperation}
 import org.concepualprogramming.core.dependencies.{CPArithmeticalDependency, CPConstantDependency, CPEqualsDependency}
-import org.concepualprogramming.core._
-import org.concepualprogramming.core.datatypes._
-import org.concepualprogramming.core.execution_steps.{ReturnStep, ConceptResolvingStep}
-import org.concepualprogramming.core.knowledgebase.KnowledgeBase
+import org.concepualprogramming.core.execution_steps._
+import org.concepualprogramming.core.execution_steps.expressions.{CPConstant, CPVariable}
+
 import org.scalatest.{Matchers, FlatSpec}
 
 /**
@@ -309,14 +312,14 @@ class InferenceTests extends FlatSpec with Matchers {
           ) :: Nil
       )
     )
-    val step2 = new ReturnStep("Res")
+    val step2 = new ReturnObjectsStep("Res")
     val concept = new CPFreeConcept("PositiveVariables", step1 :: step2 :: Nil)
     val objects = concept.resolve(Map(), context)
     objects.size should equal (1)
     objects.head.name should equal ("PositiveVariables")
     objects.head.get("val").get.getIntValue.get should equal (1)
 
-    var currentNode: CPDecisionNode = concept.createDecisionNode(Map(), context);
+    val currentNode: CPDecisionNode = concept.createDecisionNode(Map(), context);
     currentNode.init()
     currentNode.hasNextBranch should be (true)
     val nextBranch = currentNode.nextBranch
@@ -328,6 +331,63 @@ class InferenceTests extends FlatSpec with Matchers {
     objects1.size should equal (1)
     objects1.head.name should equal ("PositiveVariables")
     objects1.head.get("val").get.getIntValue.get should equal (1)
+  }
+
+  "Composite Step" should "resolve objects correctly" in {
+
+    val context = new CPExecutionContext
+    context.knowledgeBase.add(new CPObject("Var", Map("val" -> CPIntValue(1)), "val"))
+    context.knowledgeBase.add(new CPObject("Var", Map("val" -> CPIntValue(-1)), "val"))
+
+    val positiveValueStep = new ConceptResolvingStep(
+      new CPStrictConcept(
+        "PosRes",
+        "val" :: Nil,
+        "val",
+        ("Var", "v") :: Nil,
+        new CPEqualsDependency(CPAttributeName("", "val") :: CPAttributeName("v", "val") :: Nil) ::
+          CPArithmeticalDependency(
+            new CPAttributeOperand(CPAttributeName("v", "val")),
+            new CPConstantOperand(CPIntValue(0)),
+            ">"
+          ) :: Nil
+      )
+    )
+    val negativeValueStep = new ConceptResolvingStep(
+      new CPStrictConcept(
+        "NegRes",
+        "val" :: Nil,
+        "val",
+        ("Var", "v") :: Nil,
+        new CPEqualsDependency(CPAttributeName("", "val") :: CPAttributeName("v", "val") :: Nil) ::
+          CPArithmeticalDependency(
+            new CPAttributeOperand(CPAttributeName("v", "val")),
+            new CPConstantOperand(CPIntValue(0)),
+            "<"
+          ) :: Nil
+      )
+    )
+    val returnPositiveStep = new ReturnObjectsStep("PosRes")
+    val returnNegativeStep = new ReturnObjectsStep("NegRes")
+    val compositePositiveStep = new CompositeStep(positiveValueStep :: returnPositiveStep :: Nil)
+    val compositeNegativeStep = new CompositeStep(negativeValueStep :: returnNegativeStep :: Nil)
+    val condPos = new CPEquals(new CPVariable("pos"), new CPConstant(CPBooleanValue(true)))
+
+    val variableStep = new VariableStep("pos", new CPConstant(CPBooleanValue(true)))
+    val ifStep = new IfStep(condPos, compositePositiveStep, compositeNegativeStep)
+
+    val concept = new CPFreeConcept("Variables", variableStep :: ifStep :: Nil)
+
+    val objects1 = concept.resolve(Map(), context)
+    objects1.size should equal(1)
+    objects1.head.name should equal("Variables")
+    objects1.head.get("val").get.getIntValue.get should equal(1)
+    /*
+            val objects2 = CPConcept.resolveDecisionTree(concept, Map(), context)
+            objects2.size should equal (1)
+            objects2.head.name should equal ("Variables")
+            objects2.head.get("val").get.getIntValue.get should equal (1)
+            */
   }
 
 

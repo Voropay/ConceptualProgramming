@@ -2,12 +2,12 @@ package org.concepualprogramming.core.dependencies
 
 import org.concepualprogramming.core.CPAttributeName
 import org.concepualprogramming.core.datatypes.CPValue
-import org.concepualprogramming.core.dependencies.operations.CPExpression
+import org.concepualprogramming.core.dependencies.operations.CPDependencyExpression
 
 /**
  * Created by oleksii.voropai on 8/18/2016.
  */
-case class CPArithmeticalEqualsDependency(leftExpression: CPExpression, rightExpression: CPExpression) extends CPAttributesDependency {
+case class CPArithmeticalEqualsDependency(leftExpression: CPDependencyExpression, rightExpression: CPDependencyExpression) extends CPAttributesDependency {
   override def getName: String = "ArithmeticalEqualsDependency"
 
   override def infer(attributesValues: Map[CPAttributeName, CPValue]): Map[CPAttributeName, CPValue] = {

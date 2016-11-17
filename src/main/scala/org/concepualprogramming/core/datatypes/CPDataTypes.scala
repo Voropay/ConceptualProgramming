@@ -9,5 +9,6 @@ object CPDataTypes extends Enumeration {
   val double = Value("double")
   val string = Value("string")
   val date = Value("date")
+  val boolean = Value("boolean")
   val list = Value("list")
 }

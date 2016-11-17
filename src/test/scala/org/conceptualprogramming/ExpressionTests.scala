@@ -1,152 +1,170 @@
 package org.conceptualprogramming
 
-import org.concepualprogramming.core.CPAttributeName
-import org.concepualprogramming.core.datatypes.CPIntValue
+import org.concepualprogramming.core.execution_steps.expressions.operations._
+import org.concepualprogramming.core.{CPExecutionContext, CPAttributeName}
+import org.concepualprogramming.core.datatypes.{CPBooleanValue, CPIntValue}
 import org.concepualprogramming.core.dependencies.operations._
+import org.concepualprogramming.core.execution_steps.expressions.{CPVariable, CPConstant}
 import org.scalatest._
 
 /**
- * Created by oleksii.voropai on 8/19/2016.
+ * Created by oleksii.voropai on 11/1/2016.
  */
 class ExpressionTests extends FlatSpec with Matchers {
   "constants and variables" should "be evaluated correctly" in {
-    val c = new CPConstantOperand(CPIntValue(1))
-    c.calculate(Map()).get.getIntValue.get should equal (1)
-    c.infer(CPIntValue(1), Map()).isEmpty should be (true)
-    c.isDefined(Map()) should equal (true)
+    val context = new CPExecutionContext
+    val anotherContext = new CPExecutionContext
+    val c = new CPConstant(CPIntValue(1))
+    c.calculate(context).get.getIntValue.get should equal (1)
 
-    val v = new CPAttributeOperand(CPAttributeName("a", "val"))
-    v.calculate(Map(CPAttributeName("a", "val") -> CPIntValue(1))).get.getIntValue.get should equal (1)
-    v.calculate(Map()).isEmpty should be (true)
-    var vres1 = v.infer(CPIntValue(1), Map(CPAttributeName("a", "val") -> CPIntValue(2)))
-    var vres2 = v.infer(CPIntValue(1), Map())
-    vres1.isEmpty should be (true)
-    vres2.get(CPAttributeName("a", "val")).get.getIntValue.get should equal (1)
-    v.isDefined(Map()) should equal (false)
-    v.isDefined(Map(CPAttributeName("a", "val") -> CPIntValue(2))) should equal (true)
+    val v = new CPVariable("a")
+    v.calculate(context).isEmpty should be (true)
+    context.setVariable("a", CPIntValue(1))
+    v.calculate(context).get.getIntValue.get should equal (1)
+
   }
 
-  "AddExpression" should "be evaluated correctly" in {
-    val add = new CPAddOperation(new CPAttributeOperand(CPAttributeName("a", "val")), new CPAttributeOperand(CPAttributeName("b", "val")))
-    add.isDefined(Map()) should be (false)
-    add.isDefined(Map(CPAttributeName("a", "val") -> CPIntValue(1))) should be (false)
-    add.isDefined(Map(CPAttributeName("b", "val") -> CPIntValue(2))) should be (false)
-    add.isDefined(Map(CPAttributeName("a", "val") -> CPIntValue(1), CPAttributeName("b", "val") -> CPIntValue(2))) should equal (true)
+  "Add" should "be evaluated correctly" in {
+    val add = new CPAdd(new CPVariable("a"), new CPVariable("b"))
+    val context = new CPExecutionContext
 
-    add.calculate(Map()).isEmpty should be (true)
-    add.calculate(Map(CPAttributeName("a", "val") -> CPIntValue(1))).isEmpty should be (true)
-    add.calculate(Map(CPAttributeName("b", "val") -> CPIntValue(2))).isEmpty should be (true)
-    add.calculate(Map(CPAttributeName("a", "val") -> CPIntValue(1), CPAttributeName("b", "val") -> CPIntValue(2))).get.getIntValue.get should equal (3)
+    add.calculate(context).isEmpty should be (true)
+    context.setVariable("a", CPIntValue(1))
+    add.calculate(context).isEmpty should be (true)
+    context.setVariable("b", CPIntValue(2))
+    add.calculate(context).get.getIntValue.get should equal (3)
 
-    add.infer(CPIntValue(3), Map()).isEmpty should be (true)
-    add.infer(CPIntValue(3), Map(CPAttributeName("a", "val") -> CPIntValue(1))).get(CPAttributeName("b", "val")).get.getIntValue.get should equal (2)
-    add.infer(CPIntValue(3), Map(CPAttributeName("b", "val") -> CPIntValue(2))).get(CPAttributeName("a", "val")).get.getIntValue.get should equal (1)
-    add.infer(CPIntValue(3), Map(CPAttributeName("a", "val") -> CPIntValue(1), CPAttributeName("b", "val") -> CPIntValue(2))).isEmpty should be (true)
-
-    val add1 = new CPAddOperation(add, new CPConstantOperand(CPIntValue(3)))
-    add1.isDefined(Map(CPAttributeName("a", "val") -> CPIntValue(1), CPAttributeName("b", "val") -> CPIntValue(2))) should equal (true)
-    add1.calculate(Map(CPAttributeName("a", "val") -> CPIntValue(1), CPAttributeName("b", "val") -> CPIntValue(2))).get.getIntValue.get should equal (6)
-    add1.infer(CPIntValue(6), Map(CPAttributeName("b", "val") -> CPIntValue(2))).get(CPAttributeName("a", "val")).get.getIntValue.get should equal (1)
-    add1.infer(CPIntValue(6), Map(CPAttributeName("a", "val") -> CPIntValue(1))).get(CPAttributeName("b", "val")).get.getIntValue.get should equal (2)
+    val add1 = new CPAdd(add, new CPConstant(CPIntValue(3)))
+    add1.calculate(context).get.getIntValue.get should equal (6)
   }
 
-  "SubExpression" should "be evaluated correctly" in {
-    val sub = new CPSubOperation(new CPAttributeOperand(CPAttributeName("a", "val")), new CPAttributeOperand(CPAttributeName("b", "val")))
-    sub.isDefined(Map()) should be (false)
-    sub.isDefined(Map(CPAttributeName("a", "val") -> CPIntValue(3))) should be (false)
-    sub.isDefined(Map(CPAttributeName("b", "val") -> CPIntValue(2))) should be (false)
-    sub.isDefined(Map(CPAttributeName("a", "val") -> CPIntValue(3), CPAttributeName("b", "val") -> CPIntValue(2))) should equal (true)
+  "Sub" should "be evaluated correctly" in {
+    val sub = new CPSub(new CPVariable("a"), new CPVariable("b"))
+    val context = new CPExecutionContext
+    sub.calculate(context).isEmpty should be (true)
+    context.setVariable("b", CPIntValue(2))
+    sub.calculate(context).isEmpty should be (true)
+    context.setVariable("a", CPIntValue(3))
+    sub.calculate(context).get.getIntValue.get should equal (1)
 
-    sub.calculate(Map()).isEmpty should be (true)
-    sub.calculate(Map(CPAttributeName("a", "val") -> CPIntValue(3))).isEmpty should be (true)
-    sub.calculate(Map(CPAttributeName("b", "val") -> CPIntValue(2))).isEmpty should be (true)
-    sub.calculate(Map(CPAttributeName("a", "val") -> CPIntValue(3), CPAttributeName("b", "val") -> CPIntValue(2))).get.getIntValue.get should equal (1)
-
-    sub.infer(CPIntValue(1), Map()).isEmpty should be (true)
-    sub.infer(CPIntValue(1), Map(CPAttributeName("a", "val") -> CPIntValue(3))).get(CPAttributeName("b", "val")).get.getIntValue.get should equal (2)
-    sub.infer(CPIntValue(1), Map(CPAttributeName("b", "val") -> CPIntValue(2))).get(CPAttributeName("a", "val")).get.getIntValue.get should equal (3)
-    sub.infer(CPIntValue(1), Map(CPAttributeName("a", "val") -> CPIntValue(3), CPAttributeName("b", "val") -> CPIntValue(2))).isEmpty should be (true)
-
-    val add1 = new CPAddOperation(sub, new CPConstantOperand(CPIntValue(3)))
-    add1.isDefined(Map(CPAttributeName("a", "val") -> CPIntValue(3), CPAttributeName("b", "val") -> CPIntValue(2))) should equal (true)
-    add1.calculate(Map(CPAttributeName("a", "val") -> CPIntValue(3), CPAttributeName("b", "val") -> CPIntValue(2))).get.getIntValue.get should equal (4)
-    add1.infer(CPIntValue(4), Map(CPAttributeName("b", "val") -> CPIntValue(2))).get(CPAttributeName("a", "val")).get.getIntValue.get should equal (3)
-    add1.infer(CPIntValue(4), Map(CPAttributeName("a", "val") -> CPIntValue(3))).get(CPAttributeName("b", "val")).get.getIntValue.get should equal (2)
+    val add1 = new CPAdd(sub, new CPConstant(CPIntValue(3)))
+    add1.calculate(context).get.getIntValue.get should equal (4)
   }
 
-  "MulExpression" should "be evaluated correctly" in {
-    val mul = new CPMulOperation(new CPAttributeOperand(CPAttributeName("a", "val")), new CPAttributeOperand(CPAttributeName("b", "val")))
-    mul.isDefined(Map()) should be (false)
-    mul.isDefined(Map(CPAttributeName("a", "val") -> CPIntValue(3))) should be (false)
-    mul.isDefined(Map(CPAttributeName("b", "val") -> CPIntValue(2))) should be (false)
-    mul.isDefined(Map(CPAttributeName("a", "val") -> CPIntValue(3), CPAttributeName("b", "val") -> CPIntValue(2))) should equal (true)
+  "Mul" should "be evaluated correctly" in {
+    val mul = new CPMul(new CPVariable("a"), new CPVariable("b"))
+    val context = new CPExecutionContext
+    mul.calculate(context).isEmpty should be (true)
+    context.setVariable("b", CPIntValue(2))
+    mul.calculate(context).isEmpty should be (true)
+    context.setVariable("a", CPIntValue(3))
+    mul.calculate(context).get.getIntValue.get should equal (6)
 
-    mul.calculate(Map()).isEmpty should be (true)
-    mul.calculate(Map(CPAttributeName("a", "val") -> CPIntValue(3))).isEmpty should be (true)
-    mul.calculate(Map(CPAttributeName("b", "val") -> CPIntValue(2))).isEmpty should be (true)
-    mul.calculate(Map(CPAttributeName("a", "val") -> CPIntValue(3), CPAttributeName("b", "val") -> CPIntValue(2))).get.getIntValue.get should equal (6)
 
-    mul.infer(CPIntValue(6), Map()).isEmpty should be (true)
-    mul.infer(CPIntValue(6), Map(CPAttributeName("a", "val") -> CPIntValue(3))).get(CPAttributeName("b", "val")).get.getIntValue.get should equal (2)
-    mul.infer(CPIntValue(6), Map(CPAttributeName("b", "val") -> CPIntValue(2))).get(CPAttributeName("a", "val")).get.getIntValue.get should equal (3)
-    mul.infer(CPIntValue(6), Map(CPAttributeName("a", "val") -> CPIntValue(3), CPAttributeName("b", "val") -> CPIntValue(2))).isEmpty should be (true)
-
-    val mul1 = new CPAddOperation(mul, new CPConstantOperand(CPIntValue(1)))
-    mul1.isDefined(Map(CPAttributeName("a", "val") -> CPIntValue(3), CPAttributeName("b", "val") -> CPIntValue(2))) should equal (true)
-    mul1.calculate(Map(CPAttributeName("a", "val") -> CPIntValue(3), CPAttributeName("b", "val") -> CPIntValue(2))).get.getIntValue.get should equal (7)
-    mul1.infer(CPIntValue(7), Map(CPAttributeName("b", "val") -> CPIntValue(2))).get(CPAttributeName("a", "val")).get.getIntValue.get should equal (3)
-    mul1.infer(CPIntValue(7), Map(CPAttributeName("a", "val") -> CPIntValue(3))).get(CPAttributeName("b", "val")).get.getIntValue.get should equal (2)
+    val mul1 = new CPAdd(mul, new CPConstant(CPIntValue(1)))
+    mul1.calculate(context).get.getIntValue.get should equal (7)
   }
 
-  "DivExpression" should "be evaluated correctly" in {
-    val div = new CPDivOperation(new CPAttributeOperand(CPAttributeName("a", "val")), new CPAttributeOperand(CPAttributeName("b", "val")))
-    div.isDefined(Map()) should be (false)
-    div.isDefined(Map(CPAttributeName("a", "val") -> CPIntValue(6))) should be (false)
-    div.isDefined(Map(CPAttributeName("b", "val") -> CPIntValue(2))) should be (false)
-    div.isDefined(Map(CPAttributeName("a", "val") -> CPIntValue(6), CPAttributeName("b", "val") -> CPIntValue(2))) should equal (true)
+  "Div" should "be evaluated correctly" in {
+    val div = new CPDiv(new CPVariable("a"), new CPVariable("b"))
+    val context = new CPExecutionContext
 
-    div.calculate(Map()).isEmpty should be (true)
-    div.calculate(Map(CPAttributeName("a", "val") -> CPIntValue(6))).isEmpty should be (true)
-    div.calculate(Map(CPAttributeName("b", "val") -> CPIntValue(2))).isEmpty should be (true)
-    div.calculate(Map(CPAttributeName("a", "val") -> CPIntValue(6), CPAttributeName("b", "val") -> CPIntValue(2))).get.getIntValue.get should equal (3)
-    div.calculate(Map(CPAttributeName("a", "val") -> CPIntValue(6), CPAttributeName("b", "val") -> CPIntValue(0))).isEmpty should be (true)
+    div.calculate(context).isEmpty should be (true)
+    context.setVariable("a", CPIntValue(6))
+    div.calculate(context).isEmpty should be (true)
+    context.setVariable("b", CPIntValue(0))
+    div.calculate(context).isEmpty should be (true)
+    context.setVariable("b", CPIntValue(2))
+    div.calculate(context).get.getIntValue.get should equal (3)
 
-    div.infer(CPIntValue(3), Map()).isEmpty should be (true)
-    div.infer(CPIntValue(3), Map(CPAttributeName("a", "val") -> CPIntValue(6))).get(CPAttributeName("b", "val")).get.getIntValue.get should equal (2)
-    div.infer(CPIntValue(3), Map(CPAttributeName("b", "val") -> CPIntValue(2))).get(CPAttributeName("a", "val")).get.getIntValue.get should equal (6)
-    div.infer(CPIntValue(3), Map(CPAttributeName("a", "val") -> CPIntValue(6), CPAttributeName("b", "val") -> CPIntValue(2))).isEmpty should be (true)
+    val add1 = new CPAdd(div, new CPConstant(CPIntValue(10)))
+    add1.calculate(context).get.getIntValue.get should equal (13)
+  }
 
-    val add1 = new CPAddOperation(div, new CPConstantOperand(CPIntValue(10)))
-    add1.isDefined(Map(CPAttributeName("a", "val") -> CPIntValue(3), CPAttributeName("b", "val") -> CPIntValue(2))) should equal (true)
-    add1.calculate(Map(CPAttributeName("a", "val") -> CPIntValue(6), CPAttributeName("b", "val") -> CPIntValue(2))).get.getIntValue.get should equal (13)
-    add1.infer(CPIntValue(13), Map(CPAttributeName("b", "val") -> CPIntValue(2))).get(CPAttributeName("a", "val")).get.getIntValue.get should equal (6)
-    add1.infer(CPIntValue(13), Map(CPAttributeName("a", "val") -> CPIntValue(6))).get(CPAttributeName("b", "val")).get.getIntValue.get should equal (2)
+  "Logical expressions" should "be evaluated correctly" in {
+    val and = new CPAnd(new CPVariable("a"), new CPVariable("b"))
+    val context = new CPExecutionContext
+    and.calculate(context).isEmpty should be (true)
+    context.setVariable("a", CPBooleanValue(true))
+    and.calculate(context).isEmpty should be (true)
+    context.setVariable("b", CPBooleanValue(true))
+    and.calculate(context).get.getBooleanValue.get should equal (true)
+    context.setVariable("b", CPBooleanValue(false))
+    and.calculate(context).get.getBooleanValue.get should equal (false)
+
+    val or = new CPOr(new CPVariable("a"), new CPVariable("b"))
+    or.calculate(context).get.getBooleanValue.get should equal (true)
+    context.setVariable("a", CPBooleanValue(false))
+    or.calculate(context).get.getBooleanValue.get should equal (false)
+
+    val not = new CPNot(new CPVariable("a"))
+    not.calculate(context).get.getBooleanValue.get should equal (true)
+    context.setVariable("a", CPBooleanValue(true))
+    not.calculate(context).get.getBooleanValue.get should equal (false)
+  }
+
+  "Comparison operators " should "be evaluated correctly" in {
+    val eq = new CPEquals(new CPVariable("a"), new CPVariable("b"))
+    val eqgt = new CPEqualsOrGreater(new CPVariable("a"), new CPVariable("b"))
+    val eqls = new CPEqualsOrLess(new CPVariable("a"), new CPVariable("b"))
+    val neq = new CPNotEquals(new CPVariable("a"), new CPVariable("b"))
+    val gt = new CPGreater(new CPVariable("a"), new CPVariable("b"))
+    val ls = new CPLess(new CPVariable("a"), new CPVariable("b"))
+
+    val context = new CPExecutionContext
+
+    eq.calculate(context).isEmpty should be (true)
+    context.setVariable("a", CPIntValue(2))
+    eq.calculate(context).isEmpty should be (true)
+    context.setVariable("b", CPIntValue(2))
+    eq.calculate(context).get.getBooleanValue.get should equal (true)
+    eqgt.calculate(context).get.getBooleanValue.get should equal (true)
+    neq.calculate(context).get.getBooleanValue.get should equal (false)
+    eqls.calculate(context).get.getBooleanValue.get should equal (true)
+    gt.calculate(context).get.getBooleanValue.get should equal (false)
+    ls.calculate(context).get.getBooleanValue.get should equal (false)
+
+    context.setVariable("b", CPIntValue(3))
+    eq.calculate(context).get.getBooleanValue.get should equal (false)
+    eqgt.calculate(context).get.getBooleanValue.get should equal (false)
+    neq.calculate(context).get.getBooleanValue.get should equal (true)
+    eqls.calculate(context).get.getBooleanValue.get should equal (true)
+    gt.calculate(context).get.getBooleanValue.get should equal (false)
+    ls.calculate(context).get.getBooleanValue.get should equal (true)
+
+    context.setVariable("b", CPIntValue(1))
+    eq.calculate(context).get.getBooleanValue.get should equal (false)
+    eqgt.calculate(context).get.getBooleanValue.get should equal (true)
+    neq.calculate(context).get.getBooleanValue.get should equal (true)
+    eqls.calculate(context).get.getBooleanValue.get should equal (false)
+    gt.calculate(context).get.getBooleanValue.get should equal (true)
+    ls.calculate(context).get.getBooleanValue.get should equal (false)
   }
 
   "Expressions" should "be compared correctly" in {
-    val c = new CPConstantOperand(CPIntValue(1))
-    (c == new CPConstantOperand(CPIntValue(1))) should be (true)
-    val v = new CPAttributeOperand(CPAttributeName("a", "val"))
-    (v == new CPAttributeOperand(CPAttributeName("a", "val"))) should be (true)
+    val c = new CPConstant(CPIntValue(1))
+    (c == new CPConstant(CPIntValue(1))) should be (true)
+    val v = new CPVariable("a")
+    (v == new CPVariable("a")) should be (true)
 
-    val add1 = new CPAddOperation(new CPAttributeOperand(CPAttributeName("a", "val")), new CPAttributeOperand(CPAttributeName("b", "val")))
-    val add2 = new CPAddOperation(new CPAttributeOperand(CPAttributeName("b", "val")), new CPAttributeOperand(CPAttributeName("a", "val")))
+    val add1 = new CPAdd(new CPVariable("a"), new CPVariable("b"))
+    val add2 = new CPAdd(new CPVariable("b"), new CPVariable("a"))
     (add1 == add2) should be (true)
 
-    val sub1 = new CPSubOperation(new CPAttributeOperand(CPAttributeName("a", "val")), new CPAttributeOperand(CPAttributeName("b", "val")))
-    val sub2 = new CPSubOperation(new CPAttributeOperand(CPAttributeName("a", "val")), new CPAttributeOperand(CPAttributeName("b", "val")))
+    val sub1 = new CPSub(new CPVariable("a"), new CPVariable("b"))
+    val sub2 = new CPSub(new CPVariable("a"), new CPVariable("b"))
     (sub1 == sub2) should be (true)
 
-    val mul1 = new CPMulOperation(new CPAttributeOperand(CPAttributeName("a", "val")), new CPAttributeOperand(CPAttributeName("b", "val")))
-    val mul2 = new CPMulOperation(new CPAttributeOperand(CPAttributeName("b", "val")), new CPAttributeOperand(CPAttributeName("a", "val")))
+    val mul1 = new CPMul(new CPVariable("a"), new CPVariable("b"))
+    val mul2 = new CPMul(new CPVariable("b"), new CPVariable("a"))
     (mul1 == mul2) should be (true)
 
-    val div1 = new CPDivOperation(new CPAttributeOperand(CPAttributeName("a", "val")), new CPAttributeOperand(CPAttributeName("b", "val")))
-    val div2 = new CPDivOperation(new CPAttributeOperand(CPAttributeName("a", "val")), new CPAttributeOperand(CPAttributeName("b", "val")))
+    val div1 = new CPDiv(new CPVariable("a"), new CPVariable("b"))
+    val div2 = new CPDiv(new CPVariable("a"), new CPVariable("b"))
     (div1 == div2) should be (true)
 
-    val exp1 = new CPAddOperation(add1, mul1)
-    val exp2 = new CPAddOperation(add2, mul2)
+    val exp1 = new CPAdd(add1, mul1)
+    val exp2 = new CPAdd(add2, mul2)
     (exp1 == exp2) should be (true)
   }
 }

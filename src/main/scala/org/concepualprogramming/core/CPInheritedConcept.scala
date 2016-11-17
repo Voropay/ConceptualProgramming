@@ -2,7 +2,7 @@ package org.concepualprogramming.core
 
 import org.concepualprogramming.core.datatypes.CPValue
 import org.concepualprogramming.core.dependencies.{CPArithmeticalEqualsDependency, CPAttributesDependency}
-import org.concepualprogramming.core.dependencies.operations.{CPAttributeOperand, CPExpression}
+import org.concepualprogramming.core.dependencies.operations.{CPAttributeOperand, CPDependencyExpression}
 import org.concepualprogramming.core.utils.Utils
 
 /**
@@ -11,8 +11,8 @@ import org.concepualprogramming.core.utils.Utils
 case class CPInheritedConcept(
                                name: String,
                                childConcepts: List[Tuple2[String, String]],
-                               overriddenAttributes: Map[String, CPExpression],
-                               specifiedAttributes: Map[CPAttributeName, CPExpression],
+                               overriddenAttributes: Map[String, CPDependencyExpression],
+                               specifiedAttributes: Map[CPAttributeName, CPDependencyExpression],
                                filterDependencies: List[CPAttributesDependency]
                                ) extends CPAbstractConcept with CPConcept {
 
@@ -41,8 +41,8 @@ case class CPInheritedConcept(
     return inferValuesFromDependencies(newAttributes, attributesDependencies)
   }
 
-  def prepareDependencies(overriddenAttributes: Map[String, CPExpression],
-                          specifiedAttributes: Map[CPAttributeName, CPExpression],
+  def prepareDependencies(overriddenAttributes: Map[String, CPDependencyExpression],
+                          specifiedAttributes: Map[CPAttributeName, CPDependencyExpression],
                           filterDependencies: List[CPAttributesDependency]): List[CPAttributesDependency] = {
     val overridden = overriddenAttributes.map(entry => new CPArithmeticalEqualsDependency(
       new CPAttributeOperand(CPAttributeName("", entry._1)),

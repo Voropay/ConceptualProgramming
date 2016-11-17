@@ -1,6 +1,7 @@
 package org.concepualprogramming.core
 
 import org.concepualprogramming.core.datatypes.CPValue
+import org.concepualprogramming.core.execution_steps.expressions.CPFunctionDefinition
 import org.concepualprogramming.core.knowledgebase.KnowledgeBase
 
 import scala.collection.mutable
@@ -15,6 +16,11 @@ class CPExecutionContext {
   def addFrame: Unit = {
     frameStack.push(new CPExecutionFrame)
   }
+  def addTransparentFrame: Unit = {
+    val frame = new CPExecutionFrame
+    frame.transparent = true
+    frameStack.push(frame)
+  }
   def deleteFrame: Unit = {
     frameStack.pop
   }
@@ -25,26 +31,106 @@ class CPExecutionContext {
   def setCurrentStep(step: Int) = {
     frameStack.top.currentStep = step
   }
-  def nextStep = frameStack.top.currentStep += 1
-  def stop = frameStack.top.currentStep = -1
+  def nextStep = {
+    if (!isStopped) {
+      frameStack.top.currentStep += 1
+    }
+  }
+  def stop = {
+    val iterator = frameStack.iterator
+    var continue = true
+    while(iterator.hasNext && continue) {
+      val el: CPExecutionFrame = iterator.next
+      el.currentStep = -1
+      if(!el.transparent) {
+        continue = false
+      }
+    }
+  }
   def isStopped = frameStack.top.currentStep == -1
 
-  def getResults = frameStack.top.results
-  def setResults(results: List[CPObject]) = {
-    frameStack.top.results = results
+  def getObjectResults = frameStack.top.objectsResults
+  def setObjectResults(results: List[CPObject]) = {
+    val baseFrame = frameStack.find(!_.transparent)
+    if (baseFrame.isDefined) {
+      baseFrame.get.objectsResults = results
+    } else {
+      frameStack.top.objectsResults = results
+    }
+  }
+
+  def getValueResult = frameStack.top.valueResult
+  def setValueResult(result: Option[CPValue]) = {
+    val baseFrame = frameStack.find(!_.transparent)
+    if (baseFrame.isDefined) {
+      baseFrame.get.valueResult = result
+    } else {
+      frameStack.top.valueResult = result
+    }
+  }
+
+  def getVariable(name: String): Option[CPValue] = {
+    for(frame <- frameStack) {
+      val value = frame.variables.get(name)
+      if(!value.isEmpty) {
+        return value
+      }
+    }
+    return None
+  }
+  def setVariable(name: String, value: CPValue): Unit = {
+    val baseFrame = frameStack.find((frame: CPExecutionFrame) => !frame.transparent || frame.variables.contains(name))
+    if(baseFrame.isDefined && baseFrame.get.variables.contains(name)) {
+      baseFrame.get.variables.put(name, value)
+    } else {
+      frameStack.top.variables.put(name, value)
+    }
+  }
+  def createVariable(name: String, value: CPValue): Unit = {
+    frameStack.top.variables.put(name, value)
+  }
+
+  def getFunctionDefinition(name: String): Option[CPFunctionDefinition] = {
+    for(frame <- frameStack) {
+      val function = frame.functions.get(name)
+      if(!function.isEmpty) {
+        return function
+      }
+    }
+    return None
+  }
+  def addFunctionDefinition(function: CPFunctionDefinition): Unit = {
+    frameStack.top.functions.put(function.name, function)
   }
 
 
   class CPExecutionFrame {
     val knowledgeBase = KnowledgeBase.newInstance
     var currentStep = 0
-    var results = List[CPObject]()
+    var objectsResults = List[CPObject]()
+    var valueResult: Option[CPValue] = None
+    var variables = mutable.Map[String, CPValue]()
+    var functions = mutable.Map[String, CPFunctionDefinition]()
+    var transparent = false
   }
 
   class KnowledgeBaseStack extends KnowledgeBase {
-    override def add(concept: CPConcept): Boolean = frameStack.top.knowledgeBase.add(concept)
+    override def add(concept: CPConcept): Boolean = {
+      val baseFrame = frameStack.find(!_.transparent)
+      if(baseFrame.isDefined) {
+        baseFrame.get.knowledgeBase.add(concept)
+        return true
+      } else {
+        return false
+      }
+    }
 
-    override def clear: Unit = frameStack.top.knowledgeBase.clear
+    override def clear: Unit = {
+      val baseFrame = frameStack.find(!_.transparent)
+      if(baseFrame.isDefined) {
+        baseFrame.get.knowledgeBase.clear
+      }
+    }
 
     override def getConcepts(name: String): List[CPConcept] = {
       for(frame <- frameStack) {
@@ -93,7 +179,15 @@ class CPExecutionContext {
       return List()
     }
 
-    override def add(obj: CPObject): Boolean = frameStack.top.knowledgeBase.add(obj)
+    override def add(obj: CPObject): Boolean = {
+      val baseFrame = frameStack.find(!_.transparent)
+      if(baseFrame.isDefined) {
+        baseFrame.get.knowledgeBase.add(obj)
+        return true
+      } else {
+        return false
+      }
+    }
 
     override def containsObjects(name: String): Boolean = {
       for(frame <- frameStack) {
@@ -114,7 +208,10 @@ class CPExecutionContext {
     }
 
     override def add(objects: List[CPObject]): Unit = {
-      objects.foreach(frameStack.top.knowledgeBase.add(_))
+      val baseFrame = frameStack.find(!_.transparent)
+      if(baseFrame.isDefined) {
+        objects.foreach(baseFrame.get.knowledgeBase.add(_))
+      }
     }
   }
 }

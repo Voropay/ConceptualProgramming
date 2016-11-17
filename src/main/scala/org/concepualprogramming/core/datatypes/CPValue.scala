@@ -13,6 +13,7 @@ trait CPValue {
   def getDoubleValue: Option[Double]
   def getStringValue: Option[String]
   def getDateValue: Option[LocalDate]
+  def getBooleanValue: Option[Boolean]
   def similar(other: Any): Boolean
   def +(other: CPValue): Option[CPValue]
   def -(other: CPValue): Option[CPValue]

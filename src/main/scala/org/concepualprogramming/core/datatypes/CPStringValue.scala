@@ -40,6 +40,18 @@ class CPStringValue(value: String) extends CPValue{
     }
   }
 
+  override def getBooleanValue: Option[Boolean] = {
+    if(value == null) {
+      return Some(false)
+    }
+    val trimmed = value.trim
+    if(trimmed == "0" || trimmed.isEmpty || trimmed.equalsIgnoreCase("false")) {
+      return Some(false)
+    } else {
+      return Some(true)
+    }
+  }
+
   def getValue: String = value
 
   override def equals(other: Any): Boolean = other match {

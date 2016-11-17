@@ -6,10 +6,10 @@ import org.concepualprogramming.core.datatypes.CPValue
 /**
  * Created by oleksii.voropai on 8/18/2016.
  */
-trait CPExpression {
+trait CPDependencyExpression {
   def isDefined(attributesValues: Map[CPAttributeName, CPValue]): Boolean
   def calculate(attributesValues: Map[CPAttributeName, CPValue]) : Option[CPValue]
   def infer(result: CPValue, attributesValues: Map[CPAttributeName, CPValue]) : Map[CPAttributeName, CPValue]
-  def operands: List[CPExpression]
+  def operands: List[CPDependencyExpression]
   def name: String
 }

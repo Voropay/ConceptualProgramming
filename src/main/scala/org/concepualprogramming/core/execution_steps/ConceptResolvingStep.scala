@@ -14,7 +14,7 @@ class ConceptResolvingStep(definition: CPConcept) extends CPExecutionStep{
     context.nextStep
   }
 
-  override def needsResolve: Boolean = true
+  override def needsResolve(context: CPExecutionContext): Boolean = true
 
   override def createDecisionNode(query: Map[String, CPValue], context: CPExecutionContext): CPDecisionNode = {
     definition.createDecisionNode(query, context)

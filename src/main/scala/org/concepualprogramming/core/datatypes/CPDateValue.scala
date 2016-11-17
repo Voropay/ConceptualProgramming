@@ -19,6 +19,8 @@ class CPDateValue(value: LocalDate) extends CPValue {
 
   override def getDateValue: Option[LocalDate] = Some(value)
 
+  override def getBooleanValue: Option[Boolean] = Some(value != null)
+
   def getValue: LocalDate = value
 
   override def equals(other: Any): Boolean = other match {

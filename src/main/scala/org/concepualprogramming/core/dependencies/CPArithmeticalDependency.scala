@@ -2,12 +2,12 @@ package org.concepualprogramming.core.dependencies
 
 import org.concepualprogramming.core.CPAttributeName
 import org.concepualprogramming.core.datatypes._
-import org.concepualprogramming.core.dependencies.operations.CPExpression
+import org.concepualprogramming.core.dependencies.operations.CPDependencyExpression
 
 /**
  * Created by oleksii.voropai on 8/19/2016.
  */
-case class CPArithmeticalDependency(leftExpression: CPExpression, rightExpression: CPExpression, comparator: CPValueComparator) extends CPAttributesDependency {
+case class CPArithmeticalDependency(leftExpression: CPDependencyExpression, rightExpression: CPDependencyExpression, comparator: CPValueComparator) extends CPAttributesDependency {
   override def getName: String = "ArithmeticalDependency[" + comparator.getName + "]"
 
   override def infer(attributesValues: Map[CPAttributeName, CPValue]): Map[CPAttributeName, CPValue] = Map()
@@ -35,7 +35,7 @@ case class CPArithmeticalDependency(leftExpression: CPExpression, rightExpressio
 }
 
 object CPArithmeticalDependency {
- def apply(leftExpression: CPExpression, rightExpression: CPExpression, comparatorName: String) = {
+ def apply(leftExpression: CPDependencyExpression, rightExpression: CPDependencyExpression, comparatorName: String) = {
    comparatorName match {
      case "=" | "==" | "?=" => new CPArithmeticalEqualsDependency(leftExpression, rightExpression)
      case "!=" | "!?=" => new CPArithmeticalDependency(leftExpression, rightExpression, new CPNotEquals)

@@ -4,7 +4,7 @@ import org.concepualprogramming.core.dependencies.{CPArithmeticalDependency, CPC
 import org.concepualprogramming.core.dependencies.operations.{CPSubOperation, CPAttributeOperand, CPConstantOperand}
 import org.concepualprogramming.core._
 import org.concepualprogramming.core.datatypes.{CPDoubleValue, CPStringValue, CPIntValue}
-import org.concepualprogramming.core.execution_steps.{ReturnStep, ConceptResolvingStep}
+import org.concepualprogramming.core.execution_steps.{ReturnObjectsStep, ConceptResolvingStep}
 import org.concepualprogramming.core.knowledgebase.KnowledgeBase
 import org.scalatest.{Matchers, FlatSpec}
 
@@ -464,7 +464,7 @@ class TestExamples extends FlatSpec with Matchers {
       new ConceptResolvingStep(profit) ::
       new ConceptResolvingStep(unprofitable) ::
       new ConceptResolvingStep(toNotify) ::
-      new ReturnStep("ToNotify") ::  Nil
+      new ReturnObjectsStep("ToNotify") ::  Nil
     )
 
     val toNotifyRows = task.resolve(Map(), context)
@@ -481,7 +481,7 @@ class TestExamples extends FlatSpec with Matchers {
 
     val taskWithQuery = new CPFreeConcept("ToNotify",
       new ConceptResolvingStep(name) ::
-      new ReturnStep("Name") ::  Nil
+      new ReturnObjectsStep("Name") ::  Nil
     )
 
     val names1 = taskWithQuery.resolve(Map("row" -> CPIntValue(1)), context)
