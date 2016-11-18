@@ -44,6 +44,7 @@ class CPFreeConcept(_name: String, _steps: List[CPExecutionStep]) extends CPConc
 
     override def init(): Unit = {
       context.addFrame
+      findNextConceptStep
     }
 
     def findNextConceptStep: Unit = {
@@ -66,13 +67,19 @@ class CPFreeConcept(_name: String, _steps: List[CPExecutionStep]) extends CPConc
     override def getAllResults: List[CPObject] = results
 
     override def hasNextBranch: Boolean = {
-      findNextConceptStep
       nextBranchExists
     }
 
     override def setCurrentNodeResolvingResult(res: List[CPObject]): Unit = {
-      val step = steps(context.getCurrentStep)
-      step.setCurrentNodeResolvingResult(res, context)
+      if(!context.isStopped && context.getCurrentStep < steps.size) {
+        val step = steps(context.getCurrentStep)
+        step.setCurrentNodeResolvingResult(res, context)
+        findNextConceptStep
+      } else {
+        nextBranchExists = false
+        results = context.getObjectResults.map(prepareObject(_))
+        context.deleteFrame
+      }
     }
   }
 }

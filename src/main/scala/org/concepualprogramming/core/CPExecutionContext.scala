@@ -14,11 +14,14 @@ class CPExecutionContext {
   addFrame
 
   def addFrame: Unit = {
-    frameStack.push(new CPExecutionFrame)
+    val frame = new CPExecutionFrame
+    frame.depth = frameStack.size
+    frameStack.push(frame)
   }
   def addTransparentFrame: Unit = {
     val frame = new CPExecutionFrame
     frame.transparent = true
+    frame.depth = frameStack.size
     frameStack.push(frame)
   }
   def deleteFrame: Unit = {
@@ -49,7 +52,14 @@ class CPExecutionContext {
   }
   def isStopped = frameStack.top.currentStep == -1
 
-  def getObjectResults = frameStack.top.objectsResults
+  def getObjectResults = {
+    val baseFrame = frameStack.find(!_.transparent)
+    if (baseFrame.isDefined) {
+      baseFrame.get.objectsResults
+    } else {
+      frameStack.top.objectsResults
+    }
+  }
   def setObjectResults(results: List[CPObject]) = {
     val baseFrame = frameStack.find(!_.transparent)
     if (baseFrame.isDefined) {
@@ -59,7 +69,15 @@ class CPExecutionContext {
     }
   }
 
-  def getValueResult = frameStack.top.valueResult
+  def getValueResult = {
+    val baseFrame = frameStack.find(!_.transparent)
+    if (baseFrame.isDefined) {
+      baseFrame.get.valueResult
+    } else {
+      frameStack.top.valueResult
+    }
+  }
+
   def setValueResult(result: Option[CPValue]) = {
     val baseFrame = frameStack.find(!_.transparent)
     if (baseFrame.isDefined) {
@@ -105,6 +123,7 @@ class CPExecutionContext {
 
 
   class CPExecutionFrame {
+    var depth: Integer = 0
     val knowledgeBase = KnowledgeBase.newInstance
     var currentStep = 0
     var objectsResults = List[CPObject]()

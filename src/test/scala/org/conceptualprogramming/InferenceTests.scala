@@ -382,12 +382,12 @@ class InferenceTests extends FlatSpec with Matchers {
     objects1.size should equal(1)
     objects1.head.name should equal("Variables")
     objects1.head.get("val").get.getIntValue.get should equal(1)
-    /*
-            val objects2 = CPConcept.resolveDecisionTree(concept, Map(), context)
-            objects2.size should equal (1)
-            objects2.head.name should equal ("Variables")
-            objects2.head.get("val").get.getIntValue.get should equal (1)
-            */
+
+    val objects2 = CPConcept.resolveDecisionTree(concept, Map(), context)
+    objects2.size should equal (1)
+    objects2.head.name should equal ("Variables")
+    objects2.head.get("val").get.getIntValue.get should equal (1)
+
   }
 
 

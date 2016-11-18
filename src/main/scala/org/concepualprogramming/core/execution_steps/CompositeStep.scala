@@ -27,28 +27,30 @@ class CompositeStep(body: List[CPExecutionStep]) extends CPExecutionStep{
   override def needsResolve(context: CPExecutionContext): Boolean = {body.find(_.needsResolve(context)).isDefined}
 
   override def setCurrentNodeResolvingResult(objects: List[CPObject], context: CPExecutionContext): Unit = {
-    context.knowledgeBase.add(objects)
+    context.nextStep
   }
 
   private class DecisionNode(query: Map[String, CPValue], context: CPExecutionContext) extends CPDecisionNode {
 
     var nextBranchExists = false
-    var results: List[CPObject] = List()
 
     override def init(): Unit = {
-      context.addFrame
+      context.addTransparentFrame
+      findNextConceptStep
     }
 
     override def nextBranch: CPDecisionNode = steps(context.getCurrentStep).createDecisionNode(query, context)
 
-    override def getAllResults: List[CPObject] = results
+    override def getAllResults: List[CPObject] = List()
 
     override def hasNextBranch: Boolean = {
-      findNextConceptStep
       nextBranchExists
     }
 
-    override def setCurrentNodeResolvingResult(res: List[CPObject]): Unit = ???
+    override def setCurrentNodeResolvingResult(objects: List[CPObject]): Unit = {
+      steps(context.getCurrentStep).setCurrentNodeResolvingResult(objects, context)
+      findNextConceptStep
+    }
 
     def findNextConceptStep: Unit = {
       while(!context.isStopped && context.getCurrentStep < steps.size) {
@@ -61,7 +63,6 @@ class CompositeStep(body: List[CPExecutionStep]) extends CPExecutionStep{
         }
       }
       nextBranchExists = false
-      results = context.getObjectResults
       context.deleteFrame
     }
   }

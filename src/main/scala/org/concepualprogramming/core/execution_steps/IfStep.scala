@@ -80,6 +80,8 @@ class IfStep(condition: CPExpression, thenBlock: CPExecutionStep, elseBlock: CPE
         elseBlock.setCurrentNodeResolvingResult(res, context)
       }
       condState = 0 //condition should be reevaluated
+    } else {
+      context.nextStep
     }
   }
 }
