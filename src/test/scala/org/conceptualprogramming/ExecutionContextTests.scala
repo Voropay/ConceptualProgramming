@@ -1,12 +1,13 @@
 package org.conceptualprogramming
 
-import org.concepualprogramming.core.datatypes.{CPBooleanValue, CPIntValue}
+import org.concepualprogramming.core.datatypes.{CPGreater, CPStringValue, CPBooleanValue, CPIntValue}
 import org.concepualprogramming.core.dependencies.operations.{CPConstantOperand, CPAttributeOperand}
 import org.concepualprogramming.core.dependencies.{CPArithmeticalDependency, CPEqualsDependency}
-import org.concepualprogramming.core.execution_steps.expressions.{CPVariable, CPConstant, CPExpression}
+import org.concepualprogramming.core.execution_steps.expressions.operations.CPAdd
+import org.concepualprogramming.core.execution_steps.expressions.{WhileStep, CPFunctionCall, CPVariable, CPConstant}
 import org.concepualprogramming.core.execution_steps._
-import org.concepualprogramming.core.execution_steps.expressions.functions.CPCompositeFunctionDefinition
-import org.concepualprogramming.core.{CPAttributeName, CPStrictConcept, CPObject, CPExecutionContext}
+import org.concepualprogramming.core.execution_steps.expressions.functions.{ObjectsFunctions, CPCompositeFunctionDefinition}
+import org.concepualprogramming.core._
 import org.scalatest.{Matchers, FlatSpec}
 
 /**
@@ -145,8 +146,63 @@ class ExecutionContextTests extends FlatSpec with Matchers {
   }
 
 
-  "Function definition" should "execute body correctly" in {
-    //val body =
-    //val f1 = new CPCompositeFunctionDefinition("inc", "a" :: Nil, body)
+  "Function calls" should "be executed correctly" in {
+
+    val context = new CPExecutionContext
+    context.knowledgeBase.add(new CPObject("Var", Map("val" -> CPIntValue(1)), "val"))
+    context.knowledgeBase.add(new CPObject("Var", Map("val" -> CPIntValue(-1)), "val"))
+    ObjectsFunctions.register(context)
+    val empty = new CPFunctionCall("Objects.isEmpty", Map("name" -> CPConstant(CPStringValue("Var"))))
+    empty.calculate(context).get.getBooleanValue.get should be (false)
+    val size = new CPFunctionCall("Objects.size", Map("name" -> CPConstant(CPStringValue("Var"))))
+    size.calculate(context).get.getIntValue.get should be (2)
+
+    val positiveValueStep = new ConceptResolvingStep(
+      new CPStrictConcept(
+        "PosRes",
+        "val" :: Nil,
+        "val",
+        ("Var", "v") :: Nil,
+        new CPEqualsDependency(CPAttributeName("", "val") :: CPAttributeName("v", "val") :: Nil) ::
+          CPArithmeticalDependency(
+            new CPAttributeOperand(CPAttributeName("v", "val")),
+            new CPConstantOperand(CPIntValue(0)),
+            ">"
+          ) :: Nil
+      )
+    )
+    val variableStep = new VariableStep("res", new CPFunctionCall("Objects.size", Map("name" -> CPConstant(CPStringValue("PosRes")))))
+    val returnStep = new ReturnValueStep(new CPVariable(("res")))
+    val body = new CompositeStep(positiveValueStep :: variableStep :: returnStep :: Nil)
+    val positiveValuesCount= new CPCompositeFunctionDefinition("positiveValuesCount", Nil, body)
+    context.addFunctionDefinition(positiveValuesCount)
+    val positive =  new CPFunctionCall("positiveValuesCount", Map())
+    positive.calculate(context).get.getIntValue.get should be (1)
+  }
+
+  "while step" should "be executed correctly" in {
+    val iInit = new VariableStep("i", CPConstant(CPIntValue(0)))
+    val iInc = new VariableStep("i", new CPAdd(new CPVariable("i"), CPConstant(CPIntValue(1))))
+    val exitCond = new org.concepualprogramming.core.execution_steps.expressions.operations.CPLess(
+      new CPFunctionCall("Objects.size", Map("name" -> CPConstant(CPStringValue("Var")))),
+      new CPConstant(CPIntValue(5))
+    )
+    val addObject = new AddObjectStep("Var", Map("val" -> CPVariable("i")), "val")
+    val body = new CompositeStep(iInc :: addObject :: Nil)
+    val whileStep = new WhileStep(exitCond, body)
+    val returnStep = new ReturnObjectsStep("Var")
+
+    val context = new CPExecutionContext
+    ObjectsFunctions.register(context)
+    val concept = new CPFreeConcept("Values", iInit :: whileStep :: returnStep :: Nil)
+
+    val objects1 = concept.resolve(Map(), context)
+    objects1.size should equal(5)
+    objects1.head.name should equal("Values")
+
+    val objects2 = CPConcept.resolveDecisionTree(concept, Map(), context)
+    objects2.size should equal (5)
+    objects2.head.name should equal ("Values")
+
   }
 }
