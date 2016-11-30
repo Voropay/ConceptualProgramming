@@ -4,7 +4,7 @@ import org.concepualprogramming.core.datatypes.{CPGreater, CPStringValue, CPBool
 import org.concepualprogramming.core.dependencies.operations.{CPConstantOperand, CPAttributeOperand}
 import org.concepualprogramming.core.dependencies.{CPArithmeticalDependency, CPEqualsDependency}
 import org.concepualprogramming.core.execution_steps.expressions.operations.CPAdd
-import org.concepualprogramming.core.execution_steps.expressions.{WhileStep, CPFunctionCall, CPVariable, CPConstant}
+import org.concepualprogramming.core.execution_steps.expressions.{CPFunctionCall, CPVariable, CPConstant}
 import org.concepualprogramming.core.execution_steps._
 import org.concepualprogramming.core.execution_steps.expressions.functions.{ObjectsFunctions, CPCompositeFunctionDefinition}
 import org.concepualprogramming.core._
@@ -204,5 +204,29 @@ class ExecutionContextTests extends FlatSpec with Matchers {
     objects2.size should equal (5)
     objects2.head.name should equal ("Values")
 
+  }
+
+  "for step" should "be executed correctly" in {
+    val iInit = new VariableStep("i", CPConstant(CPIntValue(0)))
+    val iInc = new VariableStep("i", new CPAdd(new CPVariable("i"), CPConstant(CPIntValue(1))))
+    val exitCond = new org.concepualprogramming.core.execution_steps.expressions.operations.CPLess(
+      new CPFunctionCall("Objects.size", Map("name" -> CPConstant(CPStringValue("Var")))),
+      new CPConstant(CPIntValue(5))
+    )
+    val body = new AddObjectStep("Var", Map("val" -> CPVariable("i")), "val")
+    val forStep = new ForStep(iInit, exitCond, iInc, body)
+    val returnStep = new ReturnObjectsStep("Var")
+
+    val context = new CPExecutionContext
+    ObjectsFunctions.register(context)
+    val concept = new CPFreeConcept("Values", forStep :: returnStep :: Nil)
+
+    val objects1 = concept.resolve(Map(), context)
+    objects1.size should equal(5)
+    objects1.head.name should equal("Values")
+
+    val objects2 = CPConcept.resolveDecisionTree(concept, Map(), context)
+    objects2.size should equal (5)
+    objects2.head.name should equal ("Values")
   }
 }

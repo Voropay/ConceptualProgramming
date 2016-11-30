@@ -1,8 +1,8 @@
-package org.concepualprogramming.core.execution_steps.expressions
+package org.concepualprogramming.core.execution_steps
 
 import org.concepualprogramming.core.datatypes.CPValue
+import org.concepualprogramming.core.execution_steps.expressions.CPExpression
 import org.concepualprogramming.core.{CPDecisionNode, CPExecutionContext, CPObject}
-import org.concepualprogramming.core.execution_steps.CPExecutionStep
 
 /**
  * Created by oleksii.voropai on 11/21/2016.
