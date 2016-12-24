@@ -110,10 +110,12 @@ abstract class CPAbstractConcept extends CPConcept{
       return List()
     }
 
-    val objectsOptions = attributesValues.map(prepareObjectFromAttributesValues(_))
+    val objectsOptions = prepareObjects(attributesValues, context)
     val objects = objectsOptions.filter(_.isDefined).map(_.get)
     return objects
   }
+
+  def prepareObjects(attributesValues: List[CPSubstitutions], context: CPExecutionContext): List[Option[CPObject]] = attributesValues.map(prepareObjectFromAttributesValues(_))
 
   def prepareObjectFromAttributesValues(attributesValues: CPSubstitutions): Option[CPObject]
 

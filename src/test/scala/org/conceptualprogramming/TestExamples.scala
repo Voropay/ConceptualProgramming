@@ -4,6 +4,8 @@ import org.concepualprogramming.core.dependencies.{CPArithmeticalDependency, CPC
 import org.concepualprogramming.core.dependencies.operations.{CPSubOperation, CPAttributeOperand, CPConstantOperand}
 import org.concepualprogramming.core._
 import org.concepualprogramming.core.datatypes.{CPDoubleValue, CPStringValue, CPIntValue}
+import org.concepualprogramming.core.execution_steps.expressions.{CPAttribute, CPFunctionCall}
+import org.concepualprogramming.core.execution_steps.expressions.functions.GroupingFunctions
 import org.concepualprogramming.core.execution_steps.{ReturnObjectsStep, ConceptResolvingStep}
 import org.concepualprogramming.core.knowledgebase.KnowledgeBase
 import org.scalatest.{Matchers, FlatSpec}
@@ -493,6 +495,70 @@ class TestExamples extends FlatSpec with Matchers {
     names3.size should equal (1)
     val name3 = names3.head
     name3.get("row").get.getIntValue.get should equal (3)
+  }
+
+  "Example with income, outcome and profit" should "be performed correctly in grouping implementation" in {
+    val context = prepareContextForProfitExample
+
+    val name = new CPInheritedConcept(
+      "Name",
+      ("Cell", "c") :: Nil,
+      Map(),
+      Map(CPAttributeName("c", "col") -> new CPConstantOperand(CPIntValue(1))),
+      Nil
+    )
+
+    val income = new CPInheritedConcept(
+      "Income",
+      ("Cell", "c") :: Nil,
+      Map(),
+      Map(CPAttributeName("c", "col") -> new CPConstantOperand(CPIntValue(2))),
+      Nil
+    )
+
+    val outcome = new CPInheritedConcept(
+      "Outcome",
+      ("Cell", "c") :: Nil,
+      Map(),
+      Map(CPAttributeName("c", "col") -> new CPConstantOperand(CPIntValue(3))),
+      Nil
+    )
+
+    val profit = new CPInheritedConcept(
+      "Profit",
+      ("Income", "i") :: ("Outcome", "o") :: Nil,
+      Map(
+        "val" -> new CPSubOperation(new CPAttributeOperand(CPAttributeName("i", "val")), new CPAttributeOperand(CPAttributeName("o", "val")))),
+      Map(),
+      Nil
+    )
+
+    context.knowledgeBase.add(name)
+    context.knowledgeBase.add(income)
+    context.knowledgeBase.add(outcome)
+    context.knowledgeBase.add(profit)
+
+    GroupingFunctions.register(context)
+
+    val totals = new CPGroupingConcept(
+      "Total",
+      Nil,
+      "totalProfit",
+      ("Profit" , "p") :: ("Income" , "i") :: ("Outcome" , "o") :: Nil,
+      new CPEqualsDependency(CPAttributeName("i", "row") :: CPAttributeName("o", "row") :: CPAttributeName("p", "row") :: Nil) :: Nil,
+      Map("totalIncome" -> new CPFunctionCall("Grouping.sum", Map("operand" -> new CPAttribute(new CPAttributeName("i", "val")))),
+        "totalOutcome" -> new CPFunctionCall("Grouping.sum", Map("operand" -> new CPAttribute(new CPAttributeName("o", "val")))),
+        "totalProfit" -> new CPFunctionCall("Grouping.sum", Map("operand" -> new CPAttribute(new CPAttributeName("p", "val"))))),
+      Nil
+    )
+    val totalRows = totals.resolve(Map(), context)
+    totalRows.size should equal (1)
+    val totalRow = totalRows.head
+    totalRow.get("totalIncome").get.getIntValue.get should equal (57)
+    totalRow.get("totalOutcome").get.getIntValue.get should equal (50)
+    totalRow.get("totalProfit").get.getIntValue.get should equal (7)
+
+
   }
 
 }

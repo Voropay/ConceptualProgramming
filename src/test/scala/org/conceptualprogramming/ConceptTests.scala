@@ -2,8 +2,10 @@ package org.conceptualprogramming
 
 import org.concepualprogramming.core.dependencies.operations._
 import org.concepualprogramming.core.dependencies._
-import org.concepualprogramming.core.{CPSubstitutions, CPInheritedConcept, CPStrictConcept, CPAttributeName}
-import org.concepualprogramming.core.datatypes.{CPValue, CPIntValue}
+import org.concepualprogramming.core.execution_steps.expressions.functions.GroupingFunctions
+import org.concepualprogramming.core.execution_steps.expressions.{CPFunctionCall, CPAttribute, CPExpression}
+import org.concepualprogramming.core._
+import org.concepualprogramming.core.datatypes.{CPStringValue, CPValue, CPIntValue}
 import org.scalatest.{Matchers, FlatSpec}
 
 /**
@@ -109,6 +111,87 @@ class ConceptTests extends FlatSpec with Matchers {
 
   }
 
+  "Grouping context" should "prepare objects correctly" in {
+    val concept = new CPGroupingConcept (
+      "test",
+      "table" :: "row" :: Nil,
+      "sum",
+      Nil,
+      Nil,
+      Map("sum" -> new CPFunctionCall("Grouping.sum", Map("operand" -> new CPAttribute(new CPAttributeName("t", "val"))))),
+      CPArithmeticalDependency(new CPConstantOperand(CPIntValue(5)), new CPAttributeOperand(CPAttributeName("", "sum")), ">") :: Nil)
+    val subst1 = new CPSubstitutions(
+      Map(new CPAttributeName("", "table") -> CPStringValue("A1"), new CPAttributeName("", "row") -> CPStringValue("1"), new CPAttributeName("t", "cell") -> CPStringValue("1"), new CPAttributeName("t", "val") -> CPIntValue(1)),
+      Map("t" -> "val")
+    )
+    val subst2 = new CPSubstitutions(
+      Map(new CPAttributeName("", "table") -> CPStringValue("A1"), new CPAttributeName("", "row") -> CPStringValue("1"), new CPAttributeName("t", "cell") -> CPStringValue("2"), new CPAttributeName("t", "val") -> CPIntValue(2)),
+      Map("t" -> "val")
+    )
+    val subst3 = new CPSubstitutions(
+      Map(new CPAttributeName("", "table") -> CPStringValue("A1"), new CPAttributeName("", "row") -> CPStringValue("2"), new CPAttributeName("t", "cell") -> CPStringValue("1"), new CPAttributeName("t", "val") -> CPIntValue(3)),
+      Map("t" -> "val")
+    )
+    val subst4 = new CPSubstitutions(
+      Map(new CPAttributeName("", "table") -> CPStringValue("A1"), new CPAttributeName("", "row") -> CPStringValue("2"), new CPAttributeName("t", "cell") -> CPStringValue("2"), new CPAttributeName("t", "val") -> CPIntValue(4)),
+      Map("t" -> "val")
+    )
+    val subst5 = new CPSubstitutions(
+      Map(new CPAttributeName("", "table") -> CPStringValue("A2"), new CPAttributeName("", "row") -> CPStringValue("1"), new CPAttributeName("t", "cell") -> CPStringValue("1"), new CPAttributeName("t", "val") -> CPIntValue(5)),
+      Map("t" -> "val")
+    )
+    val subst6 = new CPSubstitutions(
+      Map(new CPAttributeName("", "table") -> CPStringValue("A2"), new CPAttributeName("", "row") -> CPStringValue("1"), new CPAttributeName("t", "cell") -> CPStringValue("2"), new CPAttributeName("t", "val") -> CPIntValue(6)),
+      Map("t" -> "val")
+    )
+    val grouped = concept.groupSubstitutions(subst1 :: subst2 :: subst3 :: subst4 :: subst5 :: subst6 :: Nil)
+    grouped.size should equal (3)
+    val key1 = Map("table" -> CPStringValue("A1"), "row" -> CPStringValue("1"))
+    val key2 = Map("table" -> CPStringValue("A1"), "row" -> CPStringValue("2"))
+    val key3 = Map("table" -> CPStringValue("A2"), "row" -> CPStringValue("1"))
+    grouped.contains(key1) should be (true)
+    grouped.get(key1).get.size should equal (2)
+    grouped.contains(key2) should be (true)
+    grouped.get(key3).get.size should equal (2)
+    grouped.contains(key3) should be (true)
+    grouped.get(key3).get.size should equal (2)
 
+    val context = new CPExecutionContext
+    GroupingFunctions.register(context)
+    val aggregated = concept.aggregateAttributes(grouped, context)
+    aggregated.size should equal (3)
+    aggregated.contains(key1) should be (true)
+    aggregated.get(key1).get.get("sum").get.getIntValue.get should equal (3)
+    aggregated.contains(key2) should be (true)
+    aggregated.get(key2).get.get("sum").get.getIntValue.get should equal (7)
+    aggregated.contains(key3) should be (true)
+    aggregated.get(key3).get.get("sum").get.getIntValue.get should equal (11)
+
+    val conceptSubst = concept.prepareConceptAttributes(grouped, aggregated)
+    conceptSubst.size should equal (3)
+    conceptSubst.find(subst => {
+      val attrs = subst.attributesValues
+      attrs.get(new CPAttributeName("", "sum")).get.getIntValue.get == 3 &&
+        attrs.get(new CPAttributeName("", "table")).get.getStringValue.get == "A1" &&
+        attrs.get(new CPAttributeName("", "row")).get.getStringValue.get == "1"
+    }).isDefined should be (true)
+
+    val filtered = conceptSubst.filter(concept.checkGroupedAttributesDependencies(_))
+    filtered.size should equal (2)
+    filtered.find(subst => {
+      val attrs = subst.attributesValues
+      attrs.get(new CPAttributeName("", "sum")).get.getIntValue.get == 7 &&
+        attrs.get(new CPAttributeName("", "table")).get.getStringValue.get == "A1" &&
+        attrs.get(new CPAttributeName("", "row")).get.getStringValue.get == "2"
+    }).isDefined should be (true)
+
+    val objects = filtered.map(concept.prepareObjectFromAttributesValues(_))
+    objects.size should equal (2)
+    objects.find(obj => {
+      obj.get.get("sum").get.getIntValue.get == 7  &&
+        obj.get.get("table").get.getStringValue.get == "A1" &&
+        obj.get.get("row").get.getStringValue.get == "2"
+    }).isDefined should be (true)
+  }
 
 }

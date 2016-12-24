@@ -34,7 +34,6 @@ case class CPStrictConcept (
     if(attributes.find(curAttr => !conceptAttributesNames.contains(curAttr)).isDefined) {
       return None
     }
-    val attributesForCurrentObject = attributes.map(curAttr => curAttr -> conceptAttributesNames.get(curAttr).get)
-    Some(CPObject(name, attributesForCurrentObject, defaultAttribute))
+    Some(CPObject(name, conceptAttributesNames, defaultAttribute))
   }
 }

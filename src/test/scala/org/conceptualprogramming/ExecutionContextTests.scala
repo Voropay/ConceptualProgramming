@@ -4,9 +4,9 @@ import org.concepualprogramming.core.datatypes.{CPGreater, CPStringValue, CPBool
 import org.concepualprogramming.core.dependencies.operations.{CPConstantOperand, CPAttributeOperand}
 import org.concepualprogramming.core.dependencies.{CPArithmeticalDependency, CPEqualsDependency}
 import org.concepualprogramming.core.execution_steps.expressions.operations.CPAdd
-import org.concepualprogramming.core.execution_steps.expressions.{CPFunctionCall, CPVariable, CPConstant}
+import org.concepualprogramming.core.execution_steps.expressions.{CPAttribute, CPFunctionCall, CPVariable, CPConstant}
 import org.concepualprogramming.core.execution_steps._
-import org.concepualprogramming.core.execution_steps.expressions.functions.{ObjectsFunctions, CPCompositeFunctionDefinition}
+import org.concepualprogramming.core.execution_steps.expressions.functions.{GroupingFunctions, ObjectsFunctions, CPCompositeFunctionDefinition}
 import org.concepualprogramming.core._
 import org.scalatest.{Matchers, FlatSpec}
 
@@ -145,7 +145,6 @@ class ExecutionContextTests extends FlatSpec with Matchers {
     context.deleteFrame
   }
 
-
   "Function calls" should "be executed correctly" in {
 
     val context = new CPExecutionContext
@@ -178,6 +177,28 @@ class ExecutionContextTests extends FlatSpec with Matchers {
     context.addFunctionDefinition(positiveValuesCount)
     val positive =  new CPFunctionCall("positiveValuesCount", Map())
     positive.calculate(context).get.getIntValue.get should be (1)
+
+    GroupingFunctions.register(context)
+    val subst1 = new CPSubstitutions(
+      Map(new CPAttributeName("c1", "name") -> CPStringValue("A1"), new CPAttributeName("c1", "val") -> CPIntValue(10)),
+      Map("c1" -> "val")
+    )
+    val subst2 = new CPSubstitutions(
+      Map(new CPAttributeName("c1", "name") -> CPStringValue("A1"), new CPAttributeName("c1", "val") -> CPIntValue(12)),
+      Map("c1" -> "val")
+    )
+    val subst3 = new CPSubstitutions(
+      Map(new CPAttributeName("c1", "name") -> CPStringValue("A1"), new CPAttributeName("c1", "val") -> CPIntValue(14)),
+      Map("c1" -> "val")
+    )
+    context.setSubstitutionsList(subst1 :: subst2 :: subst3 :: Nil)
+    val expr = new CPAttribute(new CPAttributeName("c1", "val"))
+    val sum = new CPFunctionCall("Grouping.sum", Map("operand" -> expr))
+    sum.calculate(context).get.getIntValue.get should be (36)
+    val count = new CPFunctionCall("Grouping.count", Map())
+    count.calculate(context).get.getIntValue.get should be (3)
+    val avg = new CPFunctionCall("Grouping.avg", Map("operand" -> expr))
+    avg.calculate(context).get.getIntValue.get should be (12)
   }
 
   "while step" should "be executed correctly" in {
@@ -228,5 +249,17 @@ class ExecutionContextTests extends FlatSpec with Matchers {
     val objects2 = CPConcept.resolveDecisionTree(concept, Map(), context)
     objects2.size should equal (5)
     objects2.head.name should equal ("Values")
+  }
+
+  "Attribute variables" should "be executed correctly" in {
+    val context = new CPExecutionContext
+    val subst = new CPSubstitutions(
+      Map(new CPAttributeName("c1", "name") -> CPStringValue("A1"), new CPAttributeName("c1", "val") -> CPIntValue(10)),
+      Map("c1" -> "val")
+    )
+    context.setSubstitutions(Some(subst))
+    val attr = new CPAttribute(new CPAttributeName("c1", "name"))
+    val res = attr.calculate(context)
+    res.get.getStringValue.get should equal ("A1")
   }
 }

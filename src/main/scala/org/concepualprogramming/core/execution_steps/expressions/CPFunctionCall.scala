@@ -12,11 +12,6 @@ class CPFunctionCall(name: String, args: Map[String, CPExpression]) extends CPEx
     if(definition.isEmpty) {
       return None
     }
-    val argsValuesOpt = args.mapValues(_.calculate(context))
-    if(argsValuesOpt.find(entry => entry._2.isEmpty).isDefined) {
-      return None
-    }
-    val argsValues = argsValuesOpt.mapValues(_.get)
-    return definition.get.calculate(argsValues, context)
+    return definition.get.calculate(args, context)
   }
 }

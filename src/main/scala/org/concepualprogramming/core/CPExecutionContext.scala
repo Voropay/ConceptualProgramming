@@ -121,6 +121,18 @@ class CPExecutionContext {
     frameStack.top.functions.put(function.name, function)
   }
 
+  def setSubstitutionsList(subst: List[CPSubstitutions]) = {
+    frameStack.top.substitutionsList = subst
+  }
+
+  def getSubstitutionsList: List[CPSubstitutions] = frameStack.top.substitutionsList
+
+  def setSubstitutions(subst: Option[CPSubstitutions]) = {
+    frameStack.top.substitutions = subst
+  }
+
+  def getSubstitutions: Option[CPSubstitutions] = frameStack.top.substitutions
+
 
   class CPExecutionFrame {
     var depth: Integer = 0
@@ -130,6 +142,8 @@ class CPExecutionContext {
     var valueResult: Option[CPValue] = None
     var variables = mutable.Map[String, CPValue]()
     var functions = mutable.Map[String, CPFunctionDefinition]()
+    var substitutionsList = List[CPSubstitutions]()
+    var substitutions: Option[CPSubstitutions] = None
     var transparent = false
   }
 
