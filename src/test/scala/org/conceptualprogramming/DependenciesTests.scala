@@ -1,6 +1,8 @@
 package org.conceptualprogramming
 
-import org.concepualprogramming.core.CPAttributeName
+import org.concepualprogramming.core.execution_steps.expressions.{CPConstant, CPAttribute}
+import org.concepualprogramming.core.execution_steps.expressions.operations.{CPMul, CPDiv}
+import org.concepualprogramming.core.{CPExecutionContext, CPSubstitutions, CPAttributeName}
 import org.concepualprogramming.core.datatypes.{CPDoubleValue, CPIntValue}
 import org.concepualprogramming.core.dependencies._
 import org.concepualprogramming.core.dependencies.operations.{CPAttributeOperand, CPDivOperation, CPConstantOperand, CPMulOperation}
@@ -10,187 +12,140 @@ import org.scalatest.{Matchers, FlatSpec}
  * Created by oleksii.voropai on 8/13/2016.
  */
 class DependenciesTests extends FlatSpec with Matchers {
-  "Constant dependency" should "check and infer values correctly" in {
-    val a = new CPAttributeName("a", "val")
-    val b = new CPAttributeName("b", "val")
-    val d: CPConstantDependency = new CPConstantDependency(a, CPIntValue(1))
-    d.check(Map(a -> CPIntValue(1))) should be (true)
-    d.check(Map(b -> CPIntValue(2))) should be (true)
-    d.check(Map(a -> CPIntValue(2))) should be (false)
-    val i1 = d.infer(Map(a -> CPIntValue(1)))
-    i1.size should equal (0)
-    val i2 = d.infer(Map(b -> CPIntValue(2)))
-    i2.size should equal (1)
-    i2.get(a).get.getIntValue.get should equal (1)
-
-    d.isDefined(Map()) should be (false)
-    d.isDefined(Map(a -> CPIntValue(1))) should be (true)
-  }
 
   "Equals dependency" should "check and infer values correctly" in {
+    val context = new CPExecutionContext
     val a = new CPAttributeName("a", "val")
     val b = new CPAttributeName("b", "val")
     val c = new CPAttributeName("c", "val")
-    val d: CPEqualsDependency = new CPEqualsDependency(a :: b :: c :: Nil)
-    d.check(Map(a -> CPIntValue(1), b -> CPIntValue(1), c -> CPIntValue(1))) should be (true)
-    d.check(Map(a -> CPIntValue(1), b -> CPIntValue(1), c -> CPIntValue(2))) should be (false)
-    d.check(Map(b -> CPIntValue(1), c -> CPIntValue(1))) should be (true)
-    val i1 = d.infer(Map(a -> CPIntValue(1)))
+    val d = CPDependency(a :: b :: c :: Nil)
+    val s1 = new CPSubstitutions(Map(a -> CPIntValue(1), b -> CPIntValue(1), c -> CPIntValue(1)), Map())
+    context.setSubstitutions(Some(s1))
+    d.check(context) should be (true)
+    val s2 = new CPSubstitutions(Map(a -> CPIntValue(1), b -> CPIntValue(1), c -> CPIntValue(2)), Map())
+    context.setSubstitutions(Some(s2))
+    d.check(context) should be (false)
+    val s3 = new CPSubstitutions(Map(b -> CPIntValue(1), c -> CPIntValue(1)), Map())
+    context.setSubstitutions(Some(s3))
+    d.check(context) should be (true)
+    val s4 = new CPSubstitutions(Map(a -> CPIntValue(1)), Map())
+    context.setSubstitutions(Some(s4))
+    val i1 = d.infer(context)
     i1.size should equal (2)
     i1.get(b).get.getIntValue.get should equal (1)
     i1.get(c).get.getIntValue.get should equal (1)
-    val i2 = d.infer(Map(new CPAttributeName("d", "val") -> CPIntValue(1)))
+    val s5 = new CPSubstitutions(Map(new CPAttributeName("d", "val") -> CPIntValue(1)), Map())
+    context.setSubstitutions(Some(s5))
+    val i2 = d.infer(context)
     i2.size should equal (0)
-
-    d.isDefined(Map()) should be (false)
-    d.isDefined(Map(a -> CPIntValue(1))) should be (true)
   }
 
   "Arithmetical dependencies" should "check and infer values correctly" in {
+    val context = new CPExecutionContext
     val a = new CPAttributeName("a", "val")
     val b = new CPAttributeName("b", "val")
-    val div = new CPDivOperation(new CPAttributeOperand(a), new CPAttributeOperand(b))
-    val mul = new CPMulOperation(div, new CPConstantOperand(CPIntValue(100)))
-    val d = new CPArithmeticalEqualsDependency(new CPConstantOperand(CPIntValue(50)), mul)
-    d.check(Map(a -> CPIntValue(1), b -> CPIntValue(2))) should be (true)
-    d.check(Map(a -> CPIntValue(1), b -> CPIntValue(1))) should be (false)
-    d.check(Map(b -> CPIntValue(1))) should be (true)
-    val i1 = d.infer(Map(a -> CPIntValue(1)))
+    val div = CPDiv(new CPAttribute(a), new CPAttribute(b))
+    val mul = new CPMul(div, new CPConstant(CPIntValue(100)))
+    val d = CPDependency(new CPConstant(CPIntValue(50)), mul, "==")
+    val s1 = new CPSubstitutions(Map(a -> CPIntValue(1), b -> CPIntValue(2)), Map())
+    context.setSubstitutions(Some(s1))
+    d.check(context) should be (true)
+    val s2 = new CPSubstitutions(Map(a -> CPIntValue(1), b -> CPIntValue(1)), Map())
+    context.setSubstitutions(Some(s2))
+    d.check(context) should be (false)
+    val s3 = new CPSubstitutions(Map(b -> CPIntValue(1)), Map())
+    context.setSubstitutions(Some(s3))
+    d.check(context) should be (true)
+    val s4 = new CPSubstitutions(Map(a -> CPIntValue(1)), Map())
+    context.setSubstitutions(Some(s4))
+    val i1 = d.infer(context)
     i1.get(b).get.getIntValue.get should equal (2)
-    val i2 = d.infer(Map(new CPAttributeName("c", "val") -> CPIntValue(1)))
+    val s5 = new CPSubstitutions(Map(new CPAttributeName("c", "val") -> CPIntValue(1)), Map())
+    context.setSubstitutions(Some(s5))
+    val i2 = d.infer(context)
     i2.size should equal (0)
 
-    d.isDefined(Map()) should be (false)
-    d.isDefined(Map(a -> CPIntValue(1))) should be (false)
-    d.isDefined(Map(a -> CPIntValue(1), b -> CPIntValue(1))) should be (true)
+    val d1 = CPDependency(new CPConstant(CPIntValue(60)), mul, ">")
+    val s6 = new CPSubstitutions(Map(a -> CPIntValue(1), b -> CPIntValue(2)), Map())
+    context.setSubstitutions(Some(s6))
+    d1.check(context) should be (true)
+    val s7 = new CPSubstitutions(Map(a -> CPIntValue(2), b -> CPIntValue(3)), Map())
+    context.setSubstitutions(Some(s7))
+    d1.check(context) should be (false)
 
-    val d1 = CPArithmeticalDependency(new CPConstantOperand(CPIntValue(60)), mul, ">")
-    d1.check(Map(a -> CPIntValue(1), b -> CPIntValue(2))) should be (true)
-    d1.check(Map(a -> CPIntValue(2), b -> CPIntValue(3))) should be (false)
+    val d2 = CPDependency(new CPConstant(CPIntValue(50)), mul, ">=")
+    val s8 = new CPSubstitutions(Map(a -> CPIntValue(1), b -> CPIntValue(2)), Map())
+    context.setSubstitutions(Some(s8))
+    d2.check(context) should be (true)
+    val s9 = new CPSubstitutions(Map(a -> CPIntValue(2), b -> CPIntValue(3)), Map())
+    context.setSubstitutions(Some(s9))
+    d2.check(context) should be (false)
 
-    d1.isDefined(Map()) should be (false)
-    d1.isDefined(Map(a -> CPIntValue(1))) should be (false)
-    d1.isDefined(Map(a -> CPIntValue(1), b -> CPIntValue(1))) should be (true)
+    val d3 = CPDependency(new CPConstant(CPIntValue(40)), mul, "<")
+    val s10 = new CPSubstitutions(Map(a -> CPIntValue(1), b -> CPIntValue(2)), Map())
+    context.setSubstitutions(Some(s10))
+    d3.check(context) should be (true)
+    val s11 = new CPSubstitutions(Map(a -> CPIntValue(1), b -> CPIntValue(3)), Map())
+    context.setSubstitutions(Some(s11))
+    d3.check(context) should be (false)
 
-    val d2 = CPArithmeticalDependency(new CPConstantOperand(CPIntValue(50)), mul, ">=")
-    d2.check(Map(a -> CPIntValue(1), b -> CPIntValue(2))) should be (true)
-    d2.check(Map(a -> CPIntValue(2), b -> CPIntValue(3))) should be (false)
+    val d4 = CPDependency(new CPConstant(CPIntValue(50)), mul, "<=")
+    val s12 = new CPSubstitutions(Map(a -> CPIntValue(1), b -> CPIntValue(2)), Map())
+    context.setSubstitutions(Some(s12))
+    d4.check(context) should be (true)
+    val s13 = new CPSubstitutions(Map(a -> CPIntValue(1), b -> CPIntValue(3)), Map())
+    context.setSubstitutions(Some(s13))
+    d4.check(context) should be (false)
 
-    val d3 = CPArithmeticalDependency(new CPConstantOperand(CPIntValue(40)), mul, "<")
-    d3.check(Map(a -> CPIntValue(1), b -> CPIntValue(2))) should be (true)
-    d3.check(Map(a -> CPIntValue(1), b -> CPIntValue(3))) should be (false)
+    val d5 = CPDependency(new CPConstant(CPIntValue(50)), mul, "!=")
+    val s14 = new CPSubstitutions(Map(a -> CPIntValue(1), b -> CPIntValue(2)), Map())
+    context.setSubstitutions(Some(s14))
+    d5.check(context) should be (false)
+    val s15 = new CPSubstitutions(Map(a -> CPIntValue(1), b -> CPIntValue(3)), Map())
+    context.setSubstitutions(Some(s15))
+    d5.check(context) should be (true)
 
-    val d4 = CPArithmeticalDependency(new CPConstantOperand(CPIntValue(50)), mul, "<=")
-    d4.check(Map(a -> CPIntValue(1), b -> CPIntValue(2))) should be (true)
-    d4.check(Map(a -> CPIntValue(1), b -> CPIntValue(3))) should be (false)
-
-    val d5 = CPArithmeticalDependency(new CPConstantOperand(CPIntValue(50)), mul, "!=")
-    d5.check(Map(a -> CPIntValue(1), b -> CPIntValue(2))) should be (false)
-    d5.check(Map(a -> CPIntValue(1), b -> CPIntValue(3))) should be (true)
-
-    val d6 = CPArithmeticalDependency(new CPAttributeOperand(CPAttributeName("p", "val")), new CPConstantOperand(CPIntValue(0)), "<")
-    d6.check(Map(CPAttributeName("p", "val") -> CPDoubleValue(-2))) should be (true)
-  }
-
-  "Logical dependencies" should "check and infer values correctly" in {
-    val a = new CPAttributeName("a", "val")
-    val b = new CPAttributeName("b", "val")
-    val d1 = CPArithmeticalDependency(new CPAttributeOperand(a), new CPConstantOperand(CPIntValue(0)), "=")
-    val d2 = CPArithmeticalDependency(new CPAttributeOperand(b), new CPConstantOperand(CPIntValue(10)), "=")
-    val and = new CPLogicalAndDependency(d1 :: d2 :: Nil)
-    and.check(Map()) should be (true)
-    and.check(Map(a -> CPIntValue(0))) should be (true)
-    and.check(Map(a -> CPIntValue(0), b -> CPIntValue(10))) should be (true)
-    and.check(Map(a -> CPIntValue(0), b -> CPIntValue(11))) should be (false)
-
-    and.isDefined(Map()) should be (false)
-    and.isDefined(Map(a -> CPIntValue(1))) should be (false)
-    and.isDefined(Map(a -> CPIntValue(1), b -> CPIntValue(1))) should be (true)
-
-    val inferedAnd = and.infer(Map())
-    inferedAnd.size should equal (2)
-    inferedAnd.get(a).get.getIntValue.get should equal (0)
-    inferedAnd.get(b).get.getIntValue.get should equal (10)
-
-    val or = new CPLogicalOrDependency(d1 :: d2 :: Nil)
-    or.check(Map()) should be (true)
-    or.check(Map(a -> CPIntValue(0))) should be (true)
-    or.check(Map(a -> CPIntValue(0), b -> CPIntValue(10))) should be (true)
-    or.check(Map(a -> CPIntValue(0), b -> CPIntValue(11))) should be (true)
-    or.check(Map(a -> CPIntValue(10), b -> CPIntValue(11))) should be (false)
-
-    or.isDefined(Map()) should be (false)
-    or.isDefined(Map(a -> CPIntValue(1))) should be (false)
-    or.isDefined(Map(a -> CPIntValue(1), b -> CPIntValue(1))) should be (true)
-
-    val inferedOr = or.infer(Map(a -> CPIntValue(10)))
-    inferedOr.size should equal (1)
-    inferedOr.get(b).get.getIntValue.get should equal (10)
-
-    val not = new CPLogicalNotDependency(d1)
-    not.check(Map()) should be (true)
-    not.check(Map(a -> CPIntValue(0))) should be (false)
-    not.check(Map(a -> CPIntValue(1))) should be (true)
-
-    not.isDefined(Map()) should be (false)
-    not.isDefined(Map(a -> CPIntValue(1))) should be (true)
+    val d6 = CPDependency(new CPAttribute(CPAttributeName("p", "val")), new CPConstant(CPIntValue(0)), "<")
+    val s16 = new CPSubstitutions(Map(CPAttributeName("p", "val") -> CPDoubleValue(-2)), Map())
+    context.setSubstitutions(Some(s16))
+    d6.check(context) should be (true)
   }
 
   "Dependencies" should "be compared correctly" in {
-    val dc1: CPConstantDependency = new CPConstantDependency(CPAttributeName("a", "val"), CPIntValue(1))
-    val dc2: CPConstantDependency = new CPConstantDependency(CPAttributeName("a", "val"), CPIntValue(1))
-    val dc3: CPConstantDependency = new CPConstantDependency(CPAttributeName("b", "val"), CPIntValue(1))
-    dc1.equals(dc2) should be (true)
-    dc1.equals(dc3) should be (false)
 
-    val de1: CPEqualsDependency = new CPEqualsDependency(CPAttributeName("a", "val") :: CPAttributeName("b", "val") :: CPAttributeName("c", "val") :: Nil)
-    val de2: CPEqualsDependency = new CPEqualsDependency(CPAttributeName("c", "val") :: CPAttributeName("b", "val") :: CPAttributeName("a", "val") :: Nil)
-    val de3: CPEqualsDependency = new CPEqualsDependency(CPAttributeName("a", "val") :: CPAttributeName("b", "val") :: CPAttributeName("d", "val") :: Nil)
+    val de1 = CPDependency(CPAttributeName("a", "val") :: CPAttributeName("b", "val") :: CPAttributeName("c", "val") :: Nil)
+    val de2 = CPDependency(CPAttributeName("c", "val") :: CPAttributeName("b", "val") :: CPAttributeName("a", "val") :: Nil)
+    val de3 = CPDependency(CPAttributeName("a", "val") :: CPAttributeName("b", "val") :: CPAttributeName("d", "val") :: Nil)
     de1.equals(de2) should be (true)
     de1.equals(de3) should be (false)
 
-    val de4: CPEqualsDependency = new CPEqualsDependency(CPAttributeName("a", "val") :: CPAttributeName("b", "val") :: Nil)
-    val de5: CPEqualsDependency = new CPEqualsDependency(CPAttributeName("a", "val") :: CPAttributeName("b", "val") :: Nil)
+    val de4 = CPDependency(CPAttributeName("a", "val") :: CPAttributeName("b", "val") :: Nil)
+    val de5 = CPDependency(CPAttributeName("a", "val") :: CPAttributeName("b", "val") :: Nil)
     de4.equals(de5) should be (true)
 
-    val dae1 = new CPArithmeticalEqualsDependency(
-      new CPConstantOperand(CPIntValue(50)),
-      new CPMulOperation(new CPAttributeOperand(CPAttributeName("a", "val")), new CPAttributeOperand(CPAttributeName("b", "val")))
+    val dae1 = CPDependency(
+      new CPConstant(CPIntValue(50)),
+      new CPMul(new CPAttribute(CPAttributeName("a", "val")), new CPAttribute(CPAttributeName("b", "val"))),
+      "=="
     )
-    val dae2 = new CPArithmeticalEqualsDependency(
-      new CPMulOperation(new CPAttributeOperand(CPAttributeName("b", "val")), new CPAttributeOperand(CPAttributeName("a", "val"))),
-      new CPConstantOperand(CPIntValue(50))
+    val dae2 = CPDependency(
+      new CPMul(new CPAttribute(CPAttributeName("b", "val")), new CPAttribute(CPAttributeName("a", "val"))),
+      new CPConstant(CPIntValue(50)),
+      "=="
     )
     (dae1 == dae2) should be (true)
 
-    val dag1 = CPArithmeticalDependency(
-      new CPConstantOperand(CPIntValue(50)),
-      new CPMulOperation(new CPAttributeOperand(CPAttributeName("a", "val")), new CPAttributeOperand(CPAttributeName("b", "val"))),
+    val dag1 = CPDependency(
+      new CPConstant(CPIntValue(50)),
+      new CPMul(new CPAttribute(CPAttributeName("a", "val")), new CPAttribute(CPAttributeName("b", "val"))),
       ">"
     )
-    val dag2 = CPArithmeticalDependency(
-      new CPConstantOperand(CPIntValue(50)),
-      new CPMulOperation(new CPAttributeOperand(CPAttributeName("b", "val")), new CPAttributeOperand(CPAttributeName("a", "val"))),
+    val dag2 = CPDependency(
+      new CPConstant(CPIntValue(50)),
+      new CPMul(new CPAttribute(CPAttributeName("b", "val")), new CPAttribute(CPAttributeName("a", "val"))),
       ">"
     )
     (dag1 == dag2) should be (true)
-
-    val a = new CPAttributeName("a", "val")
-    val b = new CPAttributeName("b", "val")
-    val d1 = CPArithmeticalDependency(new CPAttributeOperand(a), new CPConstantOperand(CPIntValue(0)), "=")
-    val d2 = CPArithmeticalDependency(new CPAttributeOperand(b), new CPConstantOperand(CPIntValue(10)), "=")
-
-    val and1 = new CPLogicalAndDependency(d1 :: d2 :: Nil)
-    val and2 = new CPLogicalAndDependency(d2 :: d1 :: Nil)
-    (and1 == and2) should be (true)
-
-    val or1 = new CPLogicalOrDependency(d1 :: d2 :: Nil)
-    val or2 = new CPLogicalOrDependency(d2 :: d1 :: Nil)
-    (or1 == or2) should be (true)
-
-    val not1 = new CPLogicalNotDependency(d1)
-    val not2 = new CPLogicalNotDependency(d1)
-    (not1 == not2) should be (true)
   }
 
 }
