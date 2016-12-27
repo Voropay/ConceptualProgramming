@@ -1,6 +1,6 @@
 package org.concepualprogramming.core.execution_steps.expressions
 
-import org.concepualprogramming.core.CPExecutionContext
+import org.concepualprogramming.core.{CPAttributeName, CPExecutionContext}
 import org.concepualprogramming.core.datatypes.CPValue
 
 /**
@@ -8,5 +8,6 @@ import org.concepualprogramming.core.datatypes.CPValue
  */
 trait CPExpression {
   def calculate(context: CPExecutionContext): Option[CPValue]
-
+  def isDefined(context: CPExecutionContext): Boolean
+  def infer(result: CPValue, context: CPExecutionContext) : Map[CPAttributeName, CPValue]
 }

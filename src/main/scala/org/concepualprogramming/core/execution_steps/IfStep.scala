@@ -84,4 +84,11 @@ class IfStep(condition: CPExpression, thenBlock: CPExecutionStep, elseBlock: CPE
       context.nextStep
     }
   }
+
+  override def isDefined(context: CPExecutionContext): Boolean = {
+    if(!condition.isDefined(context) || !thenBlock.isDefined(context) || !elseBlock.isDefined(context)) {
+      return false
+    }
+    return true
+  }
 }

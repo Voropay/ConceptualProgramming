@@ -1,6 +1,6 @@
 package org.concepualprogramming.core.execution_steps.expressions.operations
 
-import org.concepualprogramming.core.CPExecutionContext
+import org.concepualprogramming.core.{CPAttributeName, CPExecutionContext}
 import org.concepualprogramming.core.datatypes.{CPBooleanValue, CPValue}
 import org.concepualprogramming.core.execution_steps.expressions.CPExpression
 
@@ -24,5 +24,27 @@ case class CPNotEquals(operand1: CPExpression, operand2: CPExpression) extends C
           (operand1 == other.operand2 && operand2 == other.operand1)
       case _ => false
     }
+  }
+
+  override def isDefined(context: CPExecutionContext): Boolean = operand1.isDefined(context) && operand2.isDefined(context)
+
+  override def infer(result: CPValue, context: CPExecutionContext): Map[CPAttributeName, CPValue] = {
+    if(!result.getBooleanValue.get) {
+      val op1Defined = operand1.isDefined(context)
+      val op2Defined = operand2.isDefined(context)
+      if(op1Defined && !op2Defined) {
+        val value1 = operand1.calculate(context)
+        if(value1.isDefined) {
+          return operand2.infer(value1.get, context)
+        }
+      }
+      if(op2Defined && !op1Defined) {
+        val value2 = operand2.calculate(context)
+        if(value2.isDefined) {
+          return operand1.infer(value2.get, context)
+        }
+      }
+    }
+    Map()
   }
 }

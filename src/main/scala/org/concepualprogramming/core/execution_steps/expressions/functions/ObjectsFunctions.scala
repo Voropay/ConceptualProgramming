@@ -28,9 +28,10 @@ object ObjectsFunctions {
       return Some(CPBooleanValue(objects.isEmpty))
     }
     new BuiltInFunctionDefinition(
-    "Objects.isEmpty",
-    "name" :: Nil,
-    isEmpty
+      "Objects.isEmpty",
+      "name" :: Nil,
+      isEmpty,
+      CPFunctionDefinition.checkAttributesDefined
     )
   }
 
@@ -50,7 +51,8 @@ object ObjectsFunctions {
     new BuiltInFunctionDefinition(
       "Objects.size",
       "name" :: Nil,
-      size
+      size,
+      CPFunctionDefinition.checkAttributesDefined
     )
   }
 }

@@ -1,6 +1,6 @@
 package org.concepualprogramming.core.dependencies
 
-import org.concepualprogramming.core.CPAttributeName
+import org.concepualprogramming.core.{CPExecutionContext, CPAttributeName}
 import org.concepualprogramming.core.datatypes.CPValue
 
 /**

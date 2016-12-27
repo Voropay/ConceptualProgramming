@@ -30,6 +30,13 @@ class ForStep(startOperator: CPExecutionStep, condition: CPExpression, endOperat
     context.nextStep
   }
 
+  override def isDefined(context: CPExecutionContext): Boolean = {
+    if(!startOperator.isDefined(context) || !condition.isDefined(context) || !endOperator.isDefined(context) || !body.isDefined(context)) {
+      return false
+    }
+    return true
+  }
+
   private class DecisionNode(query: Map[String, CPValue], context: CPExecutionContext) extends CPDecisionNode {
 
     var curDecisionNode: CPDecisionNode = null

@@ -19,6 +19,8 @@ class ReturnObjectsStep(returnObjectsName: String) extends CPExecutionStep{
   override def createDecisionNode(query: Map[String, CPValue], context: CPExecutionContext): CPDecisionNode = null
 
   override def setCurrentNodeResolvingResult(res: List[CPObject], context: CPExecutionContext): Unit = {
-
   }
+
+  //TODO: replace returnObjectsName with expression and check that it's defined
+  override def isDefined(context: CPExecutionContext): Boolean = true
 }

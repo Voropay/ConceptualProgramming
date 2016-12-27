@@ -63,4 +63,12 @@ class WhileStep(condition: CPExpression, body: CPExecutionStep) extends CPExecut
     }
 
   }
+
+  override def isDefined(context: CPExecutionContext): Boolean = {
+    if(!condition.isDefined(context) || !body.isDefined(context)) {
+      return false
+    } else {
+      return true
+    }
+  }
 }

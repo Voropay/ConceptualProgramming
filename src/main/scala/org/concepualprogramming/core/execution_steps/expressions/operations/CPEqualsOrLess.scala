@@ -1,6 +1,6 @@
 package org.concepualprogramming.core.execution_steps.expressions.operations
 
-import org.concepualprogramming.core.CPExecutionContext
+import org.concepualprogramming.core.{CPAttributeName, CPExecutionContext}
 import org.concepualprogramming.core.datatypes.{CPBooleanValue, CPValue}
 import org.concepualprogramming.core.execution_steps.expressions.CPExpression
 
@@ -29,4 +29,8 @@ case class CPEqualsOrLess(operand1: CPExpression, operand2: CPExpression) extend
       case _ => false
     }
   }
+
+  override def isDefined(context: CPExecutionContext): Boolean = operand1.isDefined(context) && operand2.isDefined(context)
+
+  override def infer(result: CPValue, context: CPExecutionContext): Map[CPAttributeName, CPValue] = Map()
 }

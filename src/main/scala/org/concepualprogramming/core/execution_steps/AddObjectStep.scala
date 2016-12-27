@@ -1,7 +1,7 @@
 package org.concepualprogramming.core.execution_steps
 
 import org.concepualprogramming.core.datatypes.CPValue
-import org.concepualprogramming.core.execution_steps.expressions.CPExpression
+import org.concepualprogramming.core.execution_steps.expressions.{CPFunctionDefinition, CPExpression}
 import org.concepualprogramming.core.{CPDecisionNode, CPExecutionContext, CPObject}
 
 /**
@@ -24,4 +24,6 @@ class AddObjectStep(name: String, attributes: Map[String, CPExpression], default
   override def needsResolve(context: CPExecutionContext): Boolean = false
 
   override def setCurrentNodeResolvingResult(res: List[CPObject], context: CPExecutionContext): Unit = {}
+
+  override def isDefined(context: CPExecutionContext): Boolean = CPFunctionDefinition.checkAttributesDefined(attributes, context)
 }

@@ -22,4 +22,6 @@ class VariableStep(variableName: String, operand: CPExpression) extends CPExecut
   override def needsResolve(context: CPExecutionContext): Boolean = false
 
   override def setCurrentNodeResolvingResult(res: List[CPObject], context: CPExecutionContext): Unit = {}
+
+  override def isDefined(context: CPExecutionContext): Boolean = operand.isDefined(context)
 }

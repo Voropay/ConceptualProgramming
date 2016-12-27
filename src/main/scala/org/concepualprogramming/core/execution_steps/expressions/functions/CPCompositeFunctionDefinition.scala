@@ -27,4 +27,10 @@ class CPCompositeFunctionDefinition (_name: String, _argsNames: List[String], bo
     return res
   }
 
+  override def isDefined(args: Map[String, CPExpression], context: CPExecutionContext): Boolean = {
+    if(!CPFunctionDefinition.checkAttributesDefined(args, context)) {
+      return false
+    }
+    return body.isDefined(context)
+  }
 }

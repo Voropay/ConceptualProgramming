@@ -1,6 +1,6 @@
 package org.concepualprogramming.core.execution_steps.expressions.operations
 
-import org.concepualprogramming.core.CPExecutionContext
+import org.concepualprogramming.core.{CPAttributeName, CPExecutionContext}
 import org.concepualprogramming.core.datatypes.{CPBooleanValue, CPValue}
 import org.concepualprogramming.core.execution_steps.expressions.CPExpression
 
@@ -24,6 +24,16 @@ case class CPNot(operand: CPExpression) extends CPExpression {
     other match {
       case other: CPNot => (operand == other.operand)
       case _ => false
+    }
+  }
+
+  override def isDefined(context: CPExecutionContext): Boolean = operand.isDefined(context)
+
+  override def infer(result: CPValue, context: CPExecutionContext): Map[CPAttributeName, CPValue] = {
+    if(result.getBooleanValue.get) {
+      operand.infer(CPBooleanValue(false), context)
+    } else {
+      operand.infer(CPBooleanValue(true), context)
     }
   }
 }

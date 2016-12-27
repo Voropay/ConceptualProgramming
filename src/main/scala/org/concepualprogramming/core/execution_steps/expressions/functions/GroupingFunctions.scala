@@ -39,7 +39,8 @@ object GroupingFunctions {
     new BuiltInFunctionDefinition(
       "Grouping.sum",
       "operand" :: Nil,
-      sum
+      sum,
+      CPFunctionDefinition.checkAttributesDefined
     )
   }
 
@@ -54,7 +55,8 @@ object GroupingFunctions {
     new BuiltInFunctionDefinition(
       "Grouping.count",
       List(),
-      count
+      count,
+      CPFunctionDefinition.checkAttributesDefined
     )
   }
 
@@ -86,7 +88,8 @@ object GroupingFunctions {
     new BuiltInFunctionDefinition(
       "Grouping.avg",
       "operand" :: Nil,
-      avg
+      avg,
+      CPFunctionDefinition.checkAttributesDefined
     )
   }
 /* TODO: implement first-class functions

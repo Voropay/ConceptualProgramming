@@ -11,4 +11,5 @@ trait CPExecutionStep {
   def needsResolve(context: CPExecutionContext): Boolean
   def createDecisionNode(query: Map[String, CPValue], context: CPExecutionContext): CPDecisionNode
   def setCurrentNodeResolvingResult(res: List[CPObject], context: CPExecutionContext): Unit
+  def isDefined(context: CPExecutionContext): Boolean
 }

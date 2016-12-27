@@ -21,4 +21,5 @@ class ReturnValueStep(expr: CPExpression) extends CPExecutionStep {
 
   override def setCurrentNodeResolvingResult(res: List[CPObject], context: CPExecutionContext): Unit = {}
 
+  override def isDefined(context: CPExecutionContext): Boolean = expr.isDefined(context)
 }

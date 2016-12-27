@@ -22,6 +22,10 @@ class CompositeStep(body: List[CPExecutionStep]) extends CPExecutionStep{
     context.nextStep
   }
 
+  override def isDefined(context: CPExecutionContext): Boolean = {
+    steps.find(!_.isDefined(context)).isEmpty
+  }
+
   override def createDecisionNode(query: Map[String, CPValue], context: CPExecutionContext): CPDecisionNode = new DecisionNode(query, context)
 
   override def needsResolve(context: CPExecutionContext): Boolean = {body.find(_.needsResolve(context)).isDefined}

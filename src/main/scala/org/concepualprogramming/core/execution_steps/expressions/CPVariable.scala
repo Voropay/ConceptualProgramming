@@ -1,6 +1,6 @@
 package org.concepualprogramming.core.execution_steps.expressions
 
-import org.concepualprogramming.core.CPExecutionContext
+import org.concepualprogramming.core.{CPAttributeName, CPExecutionContext}
 import org.concepualprogramming.core.datatypes.CPValue
 
 /**
@@ -16,4 +16,8 @@ case class CPVariable(name: String) extends CPExpression{
       case _ => false
     }
   }
+
+  override def isDefined(context: CPExecutionContext): Boolean = true
+
+  override def infer(result: CPValue, context: CPExecutionContext): Map[CPAttributeName, CPValue] = Map()
 }

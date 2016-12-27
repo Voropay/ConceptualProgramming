@@ -25,4 +25,6 @@ class ConceptResolvingStep(definition: CPConcept) extends CPExecutionStep{
     context.nextStep
   }
 
+  //TODO: move query to definition, replace CPValue with CPExpression and check that it's defined
+  override def isDefined(context: CPExecutionContext): Boolean = true
 }

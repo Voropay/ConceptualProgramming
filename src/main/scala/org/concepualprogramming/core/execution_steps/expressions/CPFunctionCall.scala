@@ -1,6 +1,6 @@
 package org.concepualprogramming.core.execution_steps.expressions
 
-import org.concepualprogramming.core.CPExecutionContext
+import org.concepualprogramming.core.{CPAttributeName, CPExecutionContext}
 import org.concepualprogramming.core.datatypes.CPValue
 
 /**
@@ -14,4 +14,14 @@ class CPFunctionCall(name: String, args: Map[String, CPExpression]) extends CPEx
     }
     return definition.get.calculate(args, context)
   }
+
+  override def isDefined(context: CPExecutionContext): Boolean = {
+    val definition = context.getFunctionDefinition(name)
+    if(definition.isEmpty) {
+      return false
+    }
+    return definition.get.isDefined(args, context)
+  }
+
+  override def infer(result: CPValue, context: CPExecutionContext): Map[CPAttributeName, CPValue] = Map()
 }
