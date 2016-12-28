@@ -1,7 +1,7 @@
 package org.concepualprogramming.core
 
 import org.concepualprogramming.core.datatypes.CPValue
-import org.concepualprogramming.core.dependencies.{CPDependency, CPAttributesDependency}
+import org.concepualprogramming.core.dependencies.CPDependency
 import org.concepualprogramming.core.utils.Utils
 
 import scala.collection.immutable.SortedMap

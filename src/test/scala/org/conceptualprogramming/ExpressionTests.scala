@@ -3,7 +3,6 @@ package org.conceptualprogramming
 import org.concepualprogramming.core.execution_steps.expressions.operations._
 import org.concepualprogramming.core.{CPSubstitutions, CPExecutionContext, CPAttributeName}
 import org.concepualprogramming.core.datatypes.{CPDoubleValue, CPBooleanValue, CPIntValue}
-import org.concepualprogramming.core.dependencies.operations._
 import org.concepualprogramming.core.execution_steps.expressions.{CPAttribute, CPVariable, CPConstant}
 import org.scalatest._
 

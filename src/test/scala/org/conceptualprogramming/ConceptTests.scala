@@ -1,6 +1,5 @@
 package org.conceptualprogramming
 
-import org.concepualprogramming.core.dependencies.operations._
 import org.concepualprogramming.core.dependencies._
 import org.concepualprogramming.core.execution_steps.expressions.functions.GroupingFunctions
 import org.concepualprogramming.core.execution_steps.expressions.operations.{CPMul, CPSub}

@@ -5,7 +5,6 @@ import org.concepualprogramming.core.execution_steps.expressions.operations.{CPM
 import org.concepualprogramming.core.{CPExecutionContext, CPSubstitutions, CPAttributeName}
 import org.concepualprogramming.core.datatypes.{CPDoubleValue, CPIntValue}
 import org.concepualprogramming.core.dependencies._
-import org.concepualprogramming.core.dependencies.operations.{CPAttributeOperand, CPDivOperation, CPConstantOperand, CPMulOperation}
 import org.scalatest.{Matchers, FlatSpec}
 
 /**

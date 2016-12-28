@@ -1,6 +1,6 @@
 package org.conceptualprogramming
 
-import org.concepualprogramming.core.dependencies.{CPDependency, CPConstantDependency, CPEqualsDependency}
+import org.concepualprogramming.core.dependencies.CPDependency
 import org.concepualprogramming.core.{CPStrictConcept, CPAttributeName, CPObject}
 import org.concepualprogramming.core.datatypes.{CPIntValue, CPStringValue}
 import org.concepualprogramming.core.knowledgebase.{KnowledgeBase, InMemoryKnowledgeBaseImpl}

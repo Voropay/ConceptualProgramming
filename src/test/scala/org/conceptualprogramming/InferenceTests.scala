@@ -4,8 +4,7 @@ import org.concepualprogramming.core.datatypes._
 import org.concepualprogramming.core._
 import org.concepualprogramming.core.execution_steps.expressions.operations.CPEquals
 import org.concepualprogramming.core.execution_steps.expressions.operations._
-import org.concepualprogramming.core.dependencies.operations.{CPSubOperation, CPConstantOperand, CPAttributeOperand, CPMulOperation}
-import org.concepualprogramming.core.dependencies.{CPDependency, CPArithmeticalDependency, CPConstantDependency, CPEqualsDependency}
+import org.concepualprogramming.core.dependencies.CPDependency
 import org.concepualprogramming.core.execution_steps._
 import org.concepualprogramming.core.execution_steps.expressions.{CPAttribute, CPConstant, CPVariable}
 

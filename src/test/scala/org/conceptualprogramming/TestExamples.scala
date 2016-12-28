@@ -1,7 +1,6 @@
 package org.conceptualprogramming
 
 import org.concepualprogramming.core.dependencies._
-import org.concepualprogramming.core.dependencies.operations.{CPSubOperation, CPAttributeOperand, CPConstantOperand}
 import org.concepualprogramming.core._
 import org.concepualprogramming.core.datatypes.{CPDoubleValue, CPStringValue, CPIntValue}
 import org.concepualprogramming.core.execution_steps.expressions.operations.CPSub
@@ -559,8 +558,6 @@ class TestExamples extends FlatSpec with Matchers {
     totalRow.get("totalIncome").get.getIntValue.get should equal (57)
     totalRow.get("totalOutcome").get.getIntValue.get should equal (50)
     totalRow.get("totalProfit").get.getIntValue.get should equal (7)
-
-
   }
 
 }

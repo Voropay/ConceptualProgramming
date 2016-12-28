@@ -1,7 +1,7 @@
 package org.concepualprogramming.core
 
 import org.concepualprogramming.core.datatypes.CPValue
-import org.concepualprogramming.core.dependencies.{CPDependency, CPAttributesDependency}
+import org.concepualprogramming.core.dependencies.CPDependency
 
 /**
  * Created by oleksii.voropai on 9/3/2016.
