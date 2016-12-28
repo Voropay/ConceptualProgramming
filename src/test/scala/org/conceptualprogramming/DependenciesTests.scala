@@ -1,8 +1,9 @@
 package org.conceptualprogramming
 
-import org.concepualprogramming.core.execution_steps.expressions.{CPConstant, CPAttribute}
+import org.concepualprogramming.core.execution_steps.ConceptResolvingStep
+import org.concepualprogramming.core.execution_steps.expressions.{CPVariable, CPConstant, CPAttribute}
 import org.concepualprogramming.core.execution_steps.expressions.operations.{CPMul, CPDiv}
-import org.concepualprogramming.core.{CPExecutionContext, CPSubstitutions, CPAttributeName}
+import org.concepualprogramming.core._
 import org.concepualprogramming.core.datatypes.{CPDoubleValue, CPIntValue}
 import org.concepualprogramming.core.dependencies._
 import org.scalatest.{Matchers, FlatSpec}
@@ -145,6 +146,34 @@ class DependenciesTests extends FlatSpec with Matchers {
       ">"
     )
     (dag1 == dag2) should be (true)
+  }
+
+  "Dependencies" should "handle variables correctly" in {
+    val context = new CPExecutionContext
+    context.knowledgeBase.add(new CPObject("Var", Map("val" -> CPIntValue(1)), "val"))
+    context.knowledgeBase.add(new CPObject("Var", Map("val" -> CPIntValue(-1)), "val"))
+    val step = new ConceptResolvingStep(
+      new CPStrictConcept(
+        "PositiveVariable",
+        "val" :: Nil,
+        "val",
+        ("Var", "v") :: Nil,
+        CPDependency(CPAttributeName("", "val") :: CPAttributeName("v", "val") :: Nil)  ::
+          CPDependency(
+            new CPAttribute(CPAttributeName("v", "val")),
+            new CPVariable("a"),
+            ">"
+          ) :: Nil
+      )
+    )
+    context.setVariable("a", CPIntValue(0))
+
+    step.execute(Map(), context)
+    context.getCurrentStep should equal (1)
+    val res = context.knowledgeBase.getObjects("PositiveVariable")
+    res.size should equal (1)
+    res.head.name should equal ("PositiveVariable")
+    res.head.get("val").get.getIntValue.get should equal (1)
   }
 
 }
