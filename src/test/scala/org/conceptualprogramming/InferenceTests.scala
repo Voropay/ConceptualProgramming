@@ -5,9 +5,9 @@ import org.concepualprogramming.core._
 import org.concepualprogramming.core.execution_steps.expressions.operations.CPEquals
 import org.concepualprogramming.core.execution_steps.expressions.operations._
 import org.concepualprogramming.core.dependencies.operations.{CPSubOperation, CPConstantOperand, CPAttributeOperand, CPMulOperation}
-import org.concepualprogramming.core.dependencies.{CPArithmeticalDependency, CPConstantDependency, CPEqualsDependency}
+import org.concepualprogramming.core.dependencies.{CPDependency, CPArithmeticalDependency, CPConstantDependency, CPEqualsDependency}
 import org.concepualprogramming.core.execution_steps._
-import org.concepualprogramming.core.execution_steps.expressions.{CPConstant, CPVariable}
+import org.concepualprogramming.core.execution_steps.expressions.{CPAttribute, CPConstant, CPVariable}
 
 import org.scalatest.{Matchers, FlatSpec}
 
@@ -31,9 +31,9 @@ class InferenceTests extends FlatSpec with Matchers {
       "row" :: "val" :: Nil,
       "val",
       ("Cell", "c1") :: Nil,
-      new CPEqualsDependency(CPAttributeName("", "row") :: CPAttributeName("c1", "row") :: Nil) ::
-        new CPEqualsDependency(CPAttributeName("", "val") :: CPAttributeName("c1", "val") :: Nil) ::
-        new CPConstantDependency(CPAttributeName("c1", "col"), CPIntValue(2)) :: Nil
+        CPDependency(CPAttributeName("", "row") :: CPAttributeName("c1", "row") :: Nil) ::
+        CPDependency(CPAttributeName("", "val") :: CPAttributeName("c1", "val") :: Nil) ::
+        CPDependency(CPAttributeName("c1", "col"), CPIntValue(2)) :: Nil
     )
 
     val query: Map[CPAttributeName, CPValue] = Map()
@@ -77,43 +77,45 @@ class InferenceTests extends FlatSpec with Matchers {
     val cval = new CPAttributeName("c", "val")
     val crow = new CPAttributeName("c", "row")
     val query = Map(arow -> CPIntValue(1))
-    val d1: CPEqualsDependency = new CPEqualsDependency(arow :: brow :: Nil)
-    val d2: CPEqualsDependency = new CPEqualsDependency(crow :: brow :: Nil)
-    val d3: CPEqualsDependency = new CPEqualsDependency(aval :: cval :: Nil)
-    val d4: CPConstantDependency = new CPConstantDependency(cval, CPIntValue(10))
+    val d1 = CPDependency(arow :: brow :: Nil)
+    val d2 = CPDependency(crow :: brow :: Nil)
+    val d3 = CPDependency(aval :: cval :: Nil)
+    val d4 = CPDependency(cval, CPIntValue(10))
 
     val concept = new CPStrictConcept("", Nil, "", Nil, Nil)
-    val inferedQuery = concept.inferValuesFromDependencies(query, d1 :: d2 :: d3 :: d4 :: Nil)
-    inferedQuery.get.size should equal (5)
-    inferedQuery.get.get(aval).get.getIntValue.get should equal (10)
-    inferedQuery.get.get(arow).get.getIntValue.get should equal (1)
-    inferedQuery.get.get(brow).get.getIntValue.get should equal (1)
-    inferedQuery.get.get(crow).get.getIntValue.get should equal (1)
-    inferedQuery.get.get(cval).get.getIntValue.get should equal (10)
+    val context = new CPExecutionContext
+    val inferredQuery = concept.inferValuesFromDependencies(query, d1 :: d2 :: d3 :: d4 :: Nil, context)
+    inferredQuery.get.size should equal (5)
+    inferredQuery.get.get(aval).get.getIntValue.get should equal (10)
+    inferredQuery.get.get(arow).get.getIntValue.get should equal (1)
+    inferredQuery.get.get(brow).get.getIntValue.get should equal (1)
+    inferredQuery.get.get(crow).get.getIntValue.get should equal (1)
+    inferredQuery.get.get(cval).get.getIntValue.get should equal (10)
   }
 
   "InheritedConcept" should "infer inherited attributes correctly" in {
+    val context = new CPExecutionContext
     val c = new CPInheritedConcept(
       "Income",
       ("Cell", "c") :: Nil,
       Map(),
-      Map(CPAttributeName("c", "col") -> new CPConstantOperand(CPIntValue(1))),
+      Map(CPAttributeName("c", "col") -> CPConstant(CPIntValue(1))),
       Nil
     )
     val q1: Map[CPAttributeName, CPValue] = Map()
-    val r1 = c.inferValues(q1).get
+    val r1 = c.inferValues(q1, context).get
     r1.size should equal(1)
     r1.get(CPAttributeName("c", "col")).get should equal (CPIntValue(1))
 
     val q2 = q1 + (CPAttributeName("", "row") -> CPIntValue(2))
-    val r2 = c.inferValues(q2).get
+    val r2 = c.inferValues(q2, context).get
     r2.size should equal(3)
     r2.get(CPAttributeName("c", "row")).get should equal (CPIntValue(2))
     r2.get(CPAttributeName("", "row")).get should equal (CPIntValue(2))
     r2.get(CPAttributeName("c", "col")).get should equal (CPIntValue(1))
 
     val q3 = q2 + (CPAttributeName("c", "val") -> CPIntValue(10))
-    val r3 = c.inferValues(q3).get
+    val r3 = c.inferValues(q3, context).get
     r3.size should equal(5)
     r3.get(CPAttributeName("c", "row")).get should equal (CPIntValue(2))
     r3.get(CPAttributeName("", "row")).get should equal (CPIntValue(2))
@@ -124,27 +126,27 @@ class InferenceTests extends FlatSpec with Matchers {
     val p = new CPInheritedConcept(
       "Profit",
       ("Income", "i") :: ("Outcome", "o") :: Nil,
-      Map("val" -> new CPSubOperation(new CPAttributeOperand(CPAttributeName("i", "val")), CPAttributeOperand(CPAttributeName("o", "val")))),
+      Map("val" -> new CPSub(new CPAttribute(CPAttributeName("i", "val")), CPAttribute(CPAttributeName("o", "val")))),
       Map(),
-      CPArithmeticalDependency(new CPConstantOperand(CPIntValue(0)), new CPAttributeOperand(CPAttributeName("", "val")), "<") :: Nil
+      CPDependency(new CPConstant(CPIntValue(0)), new CPAttribute(CPAttributeName("", "val")), "<") :: Nil
     )
     val q11: Map[CPAttributeName, CPValue] = Map()
-    val r11 = p.inferValues(q11).get
+    val r11 = p.inferValues(q11, context).get
     r11.size should equal(0)
 
     val q12 = q11 + (CPAttributeName("i", "row") -> CPIntValue(2), CPAttributeName("i", "val") -> CPIntValue(12))
-    val r12 = p.inferValues(q12).get
+    val r12 = p.inferValues(q12, context).get
     r12.size should equal(4)
     r12.get(CPAttributeName("", "row")).get should equal (CPIntValue(2))
     r12.get(CPAttributeName("o", "row")).get should equal (CPIntValue(2))
 
     val q13 = q12 + (CPAttributeName("o", "val") -> CPIntValue(8))
-    val r13 = p.inferValues(q13).get
+    val r13 = p.inferValues(q13, context).get
     r13.size should equal(6)
     r13.get(CPAttributeName("", "val")).get should equal (CPIntValue(4))
 
     val q14 = q12 + (CPAttributeName("o", "val") -> CPIntValue(18))
-    val r14 = p.inferValues(q14)
+    val r14 = p.inferValues(q14, context)
     r14.isEmpty should be (true)
   }
 
@@ -162,7 +164,7 @@ class InferenceTests extends FlatSpec with Matchers {
       "Income",
       ("Cell", "c") :: Nil,
       Map(),
-      Map(CPAttributeName("c", "col") -> new CPConstantOperand(CPIntValue(2))),
+      Map(CPAttributeName("c", "col") -> new CPConstant(CPIntValue(2))),
       Nil
     )
 
@@ -213,9 +215,9 @@ class InferenceTests extends FlatSpec with Matchers {
       "row" :: "val" :: Nil,
       "val",
       ("Cell", "c1") :: Nil,
-      new CPEqualsDependency(CPAttributeName("", "row") :: CPAttributeName("c1", "row") :: Nil) ::
-        new CPEqualsDependency(CPAttributeName("", "val") :: CPAttributeName("c1", "val") :: Nil) ::
-        new CPConstantDependency(CPAttributeName("c1", "col"), CPIntValue(2)) :: Nil
+        CPDependency(CPAttributeName("", "row") :: CPAttributeName("c1", "row") :: Nil) ::
+        CPDependency(CPAttributeName("", "val") :: CPAttributeName("c1", "val") :: Nil) ::
+        CPDependency(CPAttributeName("c1", "col"), CPIntValue(2)) :: Nil
     )
     context.knowledgeBase.add(income)
 
@@ -239,7 +241,7 @@ class InferenceTests extends FlatSpec with Matchers {
       "Outcome",
       ("Cell", "c") :: Nil,
       Map(),
-      Map(CPAttributeName("c", "col") -> new CPConstantOperand(CPIntValue(3))),
+      Map(CPAttributeName("c", "col") -> new CPConstant(CPIntValue(3))),
       Nil
     )
 
@@ -247,7 +249,7 @@ class InferenceTests extends FlatSpec with Matchers {
       "Profit",
       ("Income", "i") :: ("Outcome", "o") :: Nil,
       Map(
-        "val" -> new CPSubOperation(new CPAttributeOperand(CPAttributeName("i", "val")), new CPAttributeOperand(CPAttributeName("o", "val")))),
+        "val" -> new CPSub(new CPAttribute(CPAttributeName("i", "val")), new CPAttribute(CPAttributeName("o", "val")))),
       Map(),
       Nil
     )
@@ -304,10 +306,10 @@ class InferenceTests extends FlatSpec with Matchers {
         "val" :: Nil,
         "val",
         ("Var", "v") :: Nil,
-        new CPEqualsDependency(CPAttributeName("", "val") :: CPAttributeName("v", "val") :: Nil)  ::
-          CPArithmeticalDependency(
-            new CPAttributeOperand(CPAttributeName("v", "val")),
-            new CPConstantOperand(CPIntValue(0)),
+          CPDependency(CPAttributeName("", "val") :: CPAttributeName("v", "val") :: Nil)  ::
+          CPDependency(
+            new CPAttribute(CPAttributeName("v", "val")),
+            new CPConstant(CPIntValue(0)),
             ">"
           ) :: Nil
       )
@@ -345,10 +347,10 @@ class InferenceTests extends FlatSpec with Matchers {
         "val" :: Nil,
         "val",
         ("Var", "v") :: Nil,
-        new CPEqualsDependency(CPAttributeName("", "val") :: CPAttributeName("v", "val") :: Nil) ::
-          CPArithmeticalDependency(
-            new CPAttributeOperand(CPAttributeName("v", "val")),
-            new CPConstantOperand(CPIntValue(0)),
+          CPDependency(CPAttributeName("", "val") :: CPAttributeName("v", "val") :: Nil) ::
+          CPDependency(
+            CPAttribute("v", "val"),
+            new CPConstant(CPIntValue(0)),
             ">"
           ) :: Nil
       )
@@ -359,10 +361,10 @@ class InferenceTests extends FlatSpec with Matchers {
         "val" :: Nil,
         "val",
         ("Var", "v") :: Nil,
-        new CPEqualsDependency(CPAttributeName("", "val") :: CPAttributeName("v", "val") :: Nil) ::
-          CPArithmeticalDependency(
-            new CPAttributeOperand(CPAttributeName("v", "val")),
-            new CPConstantOperand(CPIntValue(0)),
+          CPDependency(CPAttributeName("", "val") :: CPAttributeName("v", "val") :: Nil) ::
+          CPDependency(
+            new CPAttribute(CPAttributeName("v", "val")),
+            new CPConstant(CPIntValue(0)),
             "<"
           ) :: Nil
       )

@@ -1,7 +1,7 @@
 package org.concepualprogramming.core
 
 import org.concepualprogramming.core.datatypes.CPValue
-import org.concepualprogramming.core.dependencies.CPAttributesDependency
+import org.concepualprogramming.core.dependencies.{CPDependency, CPAttributesDependency}
 import org.concepualprogramming.core.execution_steps.expressions.CPExpression
 
 /**
@@ -12,17 +12,17 @@ case class CPGroupingConcept (
                           attributes: List[String],
                           defaultAttribute: String,
                           childConcepts: List[Tuple2[String, String]],
-                          attributesDependencies: List[CPAttributesDependency],
+                          attributesDependencies: List[CPDependency],
                           groupedAttributes: Map[String, CPExpression],
-                          groupedAttributesDependencies: List[CPAttributesDependency]) extends CPAbstractConcept with CPConcept {
+                          groupedAttributesDependencies: List[CPDependency]) extends CPAbstractConcept with CPConcept {
 
-  override def inferValues(attributesValues: Map[CPAttributeName, CPValue]): Option[Map[CPAttributeName, CPValue]] = inferValuesFromDependencies(attributesValues, attributesDependencies)
+  override def inferValues(attributesValues: Map[CPAttributeName, CPValue], context: CPExecutionContext): Option[Map[CPAttributeName, CPValue]] = inferValuesFromDependencies(attributesValues, attributesDependencies, context)
 
   override def prepareObjects(attributesValues: List[CPSubstitutions], context: CPExecutionContext): List[Option[CPObject]] = {
     val groupedSubstitutions: Map[Map[String, CPValue], List[CPSubstitutions]] = groupSubstitutions(attributesValues)
     val aggregatedAttributes: Map[Map[String, CPValue], Map[String, CPValue]] = aggregateAttributes(groupedSubstitutions, context)
     val conceptAttributesValues: List[CPSubstitutions] = prepareConceptAttributes(groupedSubstitutions, aggregatedAttributes)
-    val filteredSubstitutions = conceptAttributesValues.filter(checkGroupedAttributesDependencies(_))
+    val filteredSubstitutions = conceptAttributesValues.filter(checkGroupedAttributesDependencies(_, context))
     val objects = filteredSubstitutions.map(prepareObjectFromAttributesValues(_))
     return objects
   }
@@ -91,7 +91,8 @@ case class CPGroupingConcept (
     Some(CPObject(name, conceptAttributesNames, defaultAttribute))
   }
 
-  def checkGroupedAttributesDependencies(substitutions: CPSubstitutions): Boolean = {
-    groupedAttributesDependencies.isEmpty || groupedAttributesDependencies.find(!_.check(substitutions.attributesValues)).isDefined
+  def checkGroupedAttributesDependencies(substitutions: CPSubstitutions, context: CPExecutionContext): Boolean = {
+    context.setSubstitutions(Some(substitutions))
+    groupedAttributesDependencies.isEmpty || groupedAttributesDependencies.find(!_.check(context)).isDefined
   }
 }

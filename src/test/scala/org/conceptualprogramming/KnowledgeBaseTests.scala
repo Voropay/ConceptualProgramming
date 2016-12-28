@@ -1,6 +1,6 @@
 package org.conceptualprogramming
 
-import org.concepualprogramming.core.dependencies.{CPConstantDependency, CPEqualsDependency}
+import org.concepualprogramming.core.dependencies.{CPDependency, CPConstantDependency, CPEqualsDependency}
 import org.concepualprogramming.core.{CPStrictConcept, CPAttributeName, CPObject}
 import org.concepualprogramming.core.datatypes.{CPIntValue, CPStringValue}
 import org.concepualprogramming.core.knowledgebase.{KnowledgeBase, InMemoryKnowledgeBaseImpl}
@@ -39,23 +39,23 @@ class KnowledgeBaseTests extends FlatSpec with Matchers {
       "val" :: "row" :: Nil,
       "val",
       ("a", "a1") :: ("b", "b1") :: Nil,
-      new CPEqualsDependency(CPAttributeName("a1", "val") :: CPAttributeName("b1", "val") :: Nil) ::
-        new CPConstantDependency(CPAttributeName("b1", "row"), CPIntValue(1)) :: Nil
+        CPDependency(CPAttributeName("a1", "val") :: CPAttributeName("b1", "val") :: Nil) ::
+        CPDependency(CPAttributeName("b1", "row"), CPIntValue(1)) :: Nil
     )
     val c2 = new CPStrictConcept(
       "c1",
       "row" :: "val" :: Nil,
       "val",
       ("b", "b1") :: ("a", "a1") :: ("c", "c1") :: Nil,
-      new CPConstantDependency(CPAttributeName("b1", "row"), CPIntValue(1)) ::
-        new CPEqualsDependency(CPAttributeName("a1", "val") :: CPAttributeName("b1", "val") :: CPAttributeName("c1", "val") :: Nil) :: Nil
+      CPDependency(CPAttributeName("b1", "row"), CPIntValue(1)) ::
+      CPDependency(CPAttributeName("a1", "val") :: CPAttributeName("b1", "val") :: CPAttributeName("c1", "val") :: Nil) :: Nil
     )
     val c3 = new CPStrictConcept(
       "c1",
       "row" :: "val" :: Nil,
       "val", ("b", "b1") :: ("a", "a1") :: Nil,
-      new CPConstantDependency(CPAttributeName("b1", "row"), CPIntValue(1)) ::
-        new CPEqualsDependency(CPAttributeName("a1", "val") :: CPAttributeName("b1", "val") :: Nil) :: Nil
+      CPDependency(CPAttributeName("b1", "row"), CPIntValue(1)) ::
+      CPDependency(CPAttributeName("a1", "val") :: CPAttributeName("b1", "val") :: Nil) :: Nil
     )
 
     kb.add(c1) should be (true)

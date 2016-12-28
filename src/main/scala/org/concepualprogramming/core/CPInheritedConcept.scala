@@ -1,8 +1,9 @@
 package org.concepualprogramming.core
 
 import org.concepualprogramming.core.datatypes.CPValue
-import org.concepualprogramming.core.dependencies.{CPArithmeticalEqualsDependency, CPAttributesDependency}
+import org.concepualprogramming.core.dependencies.{CPDependency, CPArithmeticalEqualsDependency, CPAttributesDependency}
 import org.concepualprogramming.core.dependencies.operations.{CPAttributeOperand, CPDependencyExpression}
+import org.concepualprogramming.core.execution_steps.expressions.{CPAttribute, CPExpression}
 import org.concepualprogramming.core.utils.Utils
 
 /**
@@ -11,15 +12,15 @@ import org.concepualprogramming.core.utils.Utils
 case class CPInheritedConcept(
                                name: String,
                                childConcepts: List[Tuple2[String, String]],
-                               overriddenAttributes: Map[String, CPDependencyExpression],
-                               specifiedAttributes: Map[CPAttributeName, CPDependencyExpression],
-                               filterDependencies: List[CPAttributesDependency]
+                               overriddenAttributes: Map[String, CPExpression],
+                               specifiedAttributes: Map[CPAttributeName, CPExpression],
+                               filterDependencies: List[CPDependency]
                                ) extends CPAbstractConcept with CPConcept {
 
-  val attributesDependencies: List[CPAttributesDependency] = prepareDependencies(overriddenAttributes, specifiedAttributes, filterDependencies)
+  val attributesDependencies: List[CPDependency] = prepareDependencies(overriddenAttributes, specifiedAttributes, filterDependencies)
 
-  override def inferValues(query: Map[CPAttributeName, CPValue]): Option[Map[CPAttributeName, CPValue]] = {
-    val attributesValues = inferValuesFromDependencies(query, attributesDependencies)
+  override def inferValues(query: Map[CPAttributeName, CPValue], context: CPExecutionContext): Option[Map[CPAttributeName, CPValue]] = {
+    val attributesValues = inferValuesFromDependencies(query, attributesDependencies, context)
     if(attributesValues.isEmpty) {
       return None
     }
@@ -38,19 +39,21 @@ case class CPInheritedConcept(
         }
       }
     }
-    return inferValuesFromDependencies(newAttributes, attributesDependencies)
+    return inferValuesFromDependencies(newAttributes, attributesDependencies, context)
   }
 
-  def prepareDependencies(overriddenAttributes: Map[String, CPDependencyExpression],
-                          specifiedAttributes: Map[CPAttributeName, CPDependencyExpression],
-                          filterDependencies: List[CPAttributesDependency]): List[CPAttributesDependency] = {
-    val overridden = overriddenAttributes.map(entry => new CPArithmeticalEqualsDependency(
-      new CPAttributeOperand(CPAttributeName("", entry._1)),
-      entry._2
+  def prepareDependencies(overriddenAttributes: Map[String, CPExpression],
+                          specifiedAttributes: Map[CPAttributeName, CPExpression],
+                          filterDependencies: List[CPDependency]): List[CPDependency] = {
+    val overridden = overriddenAttributes.map(entry => CPDependency(
+      new CPAttribute(CPAttributeName("", entry._1)),
+      entry._2,
+      "=="
     )).toList
-    val specified = specifiedAttributes.map(entry => new CPArithmeticalEqualsDependency(
-      new CPAttributeOperand(entry._1),
-      entry._2
+    val specified = specifiedAttributes.map(entry => CPDependency(
+      new CPAttribute(entry._1),
+      entry._2,
+      "=="
     )).toList
     overridden ::: specified ::: filterDependencies
   }

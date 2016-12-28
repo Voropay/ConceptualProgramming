@@ -1,7 +1,7 @@
 package org.concepualprogramming.core
 
 import org.concepualprogramming.core.datatypes.CPValue
-import org.concepualprogramming.core.dependencies.CPAttributesDependency
+import org.concepualprogramming.core.dependencies.{CPDependency, CPAttributesDependency}
 import org.concepualprogramming.core.utils.Utils
 
 import scala.collection.immutable.SortedMap
@@ -14,7 +14,7 @@ case class CPStrictConcept (
                              attributes: List[String],
                              defaultAttribute: String,
                              childConcepts: List[Tuple2[String, String]],
-                             attributesDependencies: List[CPAttributesDependency]) extends CPAbstractConcept with CPConcept {
+                             attributesDependencies: List[CPDependency]) extends CPAbstractConcept with CPConcept {
 
   override def equals(other: Any): Boolean = other match {
     case other: CPStrictConcept =>
@@ -26,7 +26,7 @@ case class CPStrictConcept (
     case _ => false
   }
 
-  override def inferValues(attributesValues: Map[CPAttributeName, CPValue]): Option[Map[CPAttributeName, CPValue]] = inferValuesFromDependencies(attributesValues, attributesDependencies)
+  override def inferValues(attributesValues: Map[CPAttributeName, CPValue], context: CPExecutionContext): Option[Map[CPAttributeName, CPValue]] = inferValuesFromDependencies(attributesValues, attributesDependencies, context)
 
   def prepareObjectFromAttributesValues(substitutions: CPSubstitutions): Option[CPObject] = {
     val attributesForCurrentConcept = substitutions.attributesValues.filter(entry => entry._1.conceptName == "")

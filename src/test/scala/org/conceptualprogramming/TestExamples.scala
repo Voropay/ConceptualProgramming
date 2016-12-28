@@ -1,10 +1,11 @@
 package org.conceptualprogramming
 
-import org.concepualprogramming.core.dependencies.{CPArithmeticalDependency, CPConstantDependency, CPEqualsDependency, CPArithmeticalEqualsDependency}
+import org.concepualprogramming.core.dependencies._
 import org.concepualprogramming.core.dependencies.operations.{CPSubOperation, CPAttributeOperand, CPConstantOperand}
 import org.concepualprogramming.core._
 import org.concepualprogramming.core.datatypes.{CPDoubleValue, CPStringValue, CPIntValue}
-import org.concepualprogramming.core.execution_steps.expressions.{CPAttribute, CPFunctionCall}
+import org.concepualprogramming.core.execution_steps.expressions.operations.CPSub
+import org.concepualprogramming.core.execution_steps.expressions.{CPConstant, CPAttribute, CPFunctionCall}
 import org.concepualprogramming.core.execution_steps.expressions.functions.GroupingFunctions
 import org.concepualprogramming.core.execution_steps.{ReturnObjectsStep, ConceptResolvingStep}
 import org.concepualprogramming.core.knowledgebase.KnowledgeBase
@@ -22,9 +23,9 @@ class TestExamples extends FlatSpec with Matchers {
       "name" :: Nil,
       "name",
       ("American", "american") :: ("Weapon", "weapon") :: ("Sells", "sells") :: ("Hostile", "hostile") :: Nil,
-      new CPEqualsDependency(CPAttributeName("", "name") :: CPAttributeName("american", "name") :: CPAttributeName("sells", "seller") :: Nil) ::
-        new CPEqualsDependency(CPAttributeName("weapon", "name") :: CPAttributeName("sells", "product") :: Nil) ::
-        new CPEqualsDependency(CPAttributeName("sells", "buyer") :: CPAttributeName("hostile", "name") :: Nil) ::
+      CPDependency(CPAttributeName("", "name") :: CPAttributeName("american", "name") :: CPAttributeName("sells", "seller") :: Nil) ::
+        CPDependency(CPAttributeName("weapon", "name") :: CPAttributeName("sells", "product") :: Nil) ::
+        CPDependency(CPAttributeName("sells", "buyer") :: CPAttributeName("hostile", "name") :: Nil) ::
         Nil
     )
     context.knowledgeBase.add(criminal)
@@ -40,10 +41,10 @@ class TestExamples extends FlatSpec with Matchers {
       "seller" :: "product" :: "buyer" :: Nil,
       "product",
       ("Missle", "missle") :: ("Owns", "owns") :: Nil,
-      new CPConstantDependency(CPAttributeName("", "seller"), CPStringValue("West")) ::
-        new CPConstantDependency(CPAttributeName("", "buyer"), CPStringValue("Nono")) ::
-        new CPEqualsDependency(CPAttributeName("", "product") :: CPAttributeName("missle", "name") :: CPAttributeName("owns", "object") :: Nil) ::
-        new CPEqualsDependency(CPAttributeName("", "buyer") :: CPAttributeName("owns", "owner") :: Nil) ::
+      CPDependency(CPAttributeName("", "seller"), CPStringValue("West")) ::
+        CPDependency(CPAttributeName("", "buyer"), CPStringValue("Nono")) ::
+        CPDependency(CPAttributeName("", "product") :: CPAttributeName("missle", "name") :: CPAttributeName("owns", "object") :: Nil) ::
+        CPDependency(CPAttributeName("", "buyer") :: CPAttributeName("owns", "owner") :: Nil) ::
         Nil
     )
     context.knowledgeBase.add(sells)
@@ -53,7 +54,7 @@ class TestExamples extends FlatSpec with Matchers {
       "name" :: Nil,
       "name",
       ("Missle", "missle") :: Nil,
-      new CPEqualsDependency(CPAttributeName("", "name") :: CPAttributeName("missle", "name") :: Nil) :: Nil
+      CPDependency(CPAttributeName("", "name") :: CPAttributeName("missle", "name") :: Nil) :: Nil
     )
     context.knowledgeBase.add(weapon)
 
@@ -62,8 +63,8 @@ class TestExamples extends FlatSpec with Matchers {
       "name" :: Nil,
       "name",
       ("Enemy", "enemy") :: Nil,
-      new CPEqualsDependency(CPAttributeName("", "name") :: CPAttributeName("enemy", "name") :: Nil) ::
-        new CPConstantDependency(CPAttributeName("enemy", "target"), CPStringValue("America")) ::
+      CPDependency(CPAttributeName("", "name") :: CPAttributeName("enemy", "name") :: Nil) ::
+        CPDependency(CPAttributeName("enemy", "target"), CPStringValue("America")) ::
         Nil
     )
     context.knowledgeBase.add(hostile)
@@ -89,9 +90,9 @@ class TestExamples extends FlatSpec with Matchers {
       "name" :: Nil,
       "name",
       ("American", "american") :: ("Weapon", "weapon") :: ("Sells", "sells") :: ("Hostile", "hostile") :: Nil,
-      new CPEqualsDependency(CPAttributeName("", "name") :: CPAttributeName("american", "name") :: CPAttributeName("sells", "seller") :: Nil) ::
-        new CPEqualsDependency(CPAttributeName("weapon", "name") :: CPAttributeName("sells", "product") :: Nil) ::
-        new CPEqualsDependency(CPAttributeName("sells", "buyer") :: CPAttributeName("hostile", "name") :: Nil) ::
+      CPDependency(CPAttributeName("", "name") :: CPAttributeName("american", "name") :: CPAttributeName("sells", "seller") :: Nil) ::
+        CPDependency(CPAttributeName("weapon", "name") :: CPAttributeName("sells", "product") :: Nil) ::
+        CPDependency(CPAttributeName("sells", "buyer") :: CPAttributeName("hostile", "name") :: Nil) ::
         Nil
     )
     context.knowledgeBase.add(criminal)
@@ -107,10 +108,10 @@ class TestExamples extends FlatSpec with Matchers {
       "seller" :: "product" :: "buyer" :: Nil,
       "product",
       ("Missle", "missle") :: ("Owns", "owns") :: Nil,
-      new CPConstantDependency(CPAttributeName("", "seller"), CPStringValue("West")) ::
-        new CPConstantDependency(CPAttributeName("", "buyer"), CPStringValue("Nono")) ::
-        new CPEqualsDependency(CPAttributeName("", "product") :: CPAttributeName("missle", "name") :: CPAttributeName("owns", "object") :: Nil) ::
-        new CPEqualsDependency(CPAttributeName("", "buyer") :: CPAttributeName("owns", "owner") :: Nil) ::
+      CPDependency(CPAttributeName("", "seller"), CPStringValue("West")) ::
+        CPDependency(CPAttributeName("", "buyer"), CPStringValue("Nono")) ::
+        CPDependency(CPAttributeName("", "product") :: CPAttributeName("missle", "name") :: CPAttributeName("owns", "object") :: Nil) ::
+        CPDependency(CPAttributeName("", "buyer") :: CPAttributeName("owns", "owner") :: Nil) ::
         Nil
     )
     context.knowledgeBase.add(sells)
@@ -120,7 +121,7 @@ class TestExamples extends FlatSpec with Matchers {
       "name" :: Nil,
       "name",
       ("Missle", "missle") :: Nil,
-      new CPEqualsDependency(CPAttributeName("", "name") :: CPAttributeName("missle", "name") :: Nil) :: Nil
+      CPDependency(CPAttributeName("", "name") :: CPAttributeName("missle", "name") :: Nil) :: Nil
     )
     context.knowledgeBase.add(weapon)
 
@@ -129,8 +130,8 @@ class TestExamples extends FlatSpec with Matchers {
       "name" :: Nil,
       "name",
       ("Enemy", "enemy") :: Nil,
-      new CPEqualsDependency(CPAttributeName("", "name") :: CPAttributeName("enemy", "name") :: Nil) ::
-        new CPConstantDependency(CPAttributeName("enemy", "target"), CPStringValue("America")) ::
+      CPDependency(CPAttributeName("", "name") :: CPAttributeName("enemy", "name") :: Nil) ::
+        CPDependency(CPAttributeName("enemy", "target"), CPStringValue("America")) ::
         Nil
     )
     context.knowledgeBase.add(hostile)
@@ -171,9 +172,9 @@ class TestExamples extends FlatSpec with Matchers {
       "val" :: "row" :: Nil,
       "val",
       ("Cell", "c") :: Nil,
-      new CPEqualsDependency(CPAttributeName("", "val") :: CPAttributeName("c", "val") :: Nil) ::
-        new CPEqualsDependency(CPAttributeName("", "row") :: CPAttributeName("c", "row") :: Nil) ::
-        new CPConstantDependency(CPAttributeName("c", "col"), CPIntValue(1)) :: Nil
+      CPDependency(CPAttributeName("", "val") :: CPAttributeName("c", "val") :: Nil) ::
+        CPDependency(CPAttributeName("", "row") :: CPAttributeName("c", "row") :: Nil) ::
+        CPDependency(CPAttributeName("c", "col"), CPIntValue(1)) :: Nil
     )
 
     val income = new CPStrictConcept(
@@ -181,9 +182,9 @@ class TestExamples extends FlatSpec with Matchers {
       "val" :: "row" :: Nil,
       "val",
       ("Cell", "c") :: Nil,
-      new CPEqualsDependency(CPAttributeName("", "val") :: CPAttributeName("c", "val") :: Nil) ::
-        new CPEqualsDependency(CPAttributeName("", "row") :: CPAttributeName("c", "row") :: Nil) ::
-        new CPConstantDependency(CPAttributeName("c", "col"), CPIntValue(2)) :: Nil
+      CPDependency(CPAttributeName("", "val") :: CPAttributeName("c", "val") :: Nil) ::
+        CPDependency(CPAttributeName("", "row") :: CPAttributeName("c", "row") :: Nil) ::
+        CPDependency(CPAttributeName("c", "col"), CPIntValue(2)) :: Nil
     )
 
     val outcome = new CPStrictConcept(
@@ -191,9 +192,9 @@ class TestExamples extends FlatSpec with Matchers {
       "val" :: "row" :: Nil,
       "val",
       ("Cell", "c") :: Nil,
-      new CPEqualsDependency(CPAttributeName("", "val") :: CPAttributeName("c", "val") :: Nil) ::
-        new CPEqualsDependency(CPAttributeName("", "row") :: CPAttributeName("c", "row") :: Nil) ::
-        new CPConstantDependency(CPAttributeName("c", "col"), CPIntValue(3)) :: Nil
+      CPDependency(CPAttributeName("", "val") :: CPAttributeName("c", "val") :: Nil) ::
+        CPDependency(CPAttributeName("", "row") :: CPAttributeName("c", "row") :: Nil) ::
+        CPDependency(CPAttributeName("c", "col"), CPIntValue(3)) :: Nil
     )
 
     val profit = new CPStrictConcept(
@@ -201,10 +202,11 @@ class TestExamples extends FlatSpec with Matchers {
       "val" :: "row" :: Nil,
       "val",
       ("Income", "i") :: ("Outcome", "o") :: Nil,
-      new CPEqualsDependency(CPAttributeName("", "row") :: CPAttributeName("i", "row") :: CPAttributeName("o", "row") :: Nil) ::
-        new CPArithmeticalEqualsDependency(
-          new CPAttributeOperand(CPAttributeName("", "val")),
-          new CPSubOperation(CPAttributeOperand(CPAttributeName("i", "val")), CPAttributeOperand(CPAttributeName("o", "val")))
+      CPDependency(CPAttributeName("", "row") :: CPAttributeName("i", "row") :: CPAttributeName("o", "row") :: Nil) ::
+        CPDependency(
+          new CPAttribute(CPAttributeName("", "val")),
+          new CPSub(CPAttribute(CPAttributeName("i", "val")), CPAttribute(CPAttributeName("o", "val"))),
+          "=="
         ) :: Nil
     )
 
@@ -213,12 +215,12 @@ class TestExamples extends FlatSpec with Matchers {
       "val" :: "row" :: "name" :: Nil,
       "name",
       ("Profit", "p") :: ("Name", "n") :: Nil,
-      new CPEqualsDependency(CPAttributeName("", "row") :: CPAttributeName("p", "row") :: CPAttributeName("n", "row") :: Nil) ::
-        new CPEqualsDependency(CPAttributeName("", "val") :: CPAttributeName("p", "val") :: Nil) ::
-        new CPEqualsDependency(CPAttributeName("", "name") :: CPAttributeName("n", "val") :: Nil) ::
-        CPArithmeticalDependency(
-          new CPAttributeOperand(CPAttributeName("p", "val")),
-          new CPConstantOperand(CPIntValue(0)),
+      CPDependency(CPAttributeName("", "row") :: CPAttributeName("p", "row") :: CPAttributeName("n", "row") :: Nil) ::
+        CPDependency(CPAttributeName("", "val") :: CPAttributeName("p", "val") :: Nil) ::
+        CPDependency(CPAttributeName("", "name") :: CPAttributeName("n", "val") :: Nil) ::
+        CPDependency(
+          new CPAttribute(CPAttributeName("p", "val")),
+          new CPConstant(CPIntValue(0)),
           "<"
         ) :: Nil
     )
@@ -257,7 +259,7 @@ class TestExamples extends FlatSpec with Matchers {
       "Name",
       ("Cell", "c") :: Nil,
       Map(),
-      Map(CPAttributeName("c", "col") -> new CPConstantOperand(CPIntValue(1))),
+      Map(CPAttributeName("c", "col") -> new CPConstant(CPIntValue(1))),
       Nil
     )
 
@@ -265,7 +267,7 @@ class TestExamples extends FlatSpec with Matchers {
       "Income",
       ("Cell", "c") :: Nil,
       Map(),
-      Map(CPAttributeName("c", "col") -> new CPConstantOperand(CPIntValue(2))),
+      Map(CPAttributeName("c", "col") -> new CPConstant(CPIntValue(2))),
       Nil
     )
 
@@ -273,7 +275,7 @@ class TestExamples extends FlatSpec with Matchers {
       "Outcome",
       ("Cell", "c") :: Nil,
       Map(),
-      Map(CPAttributeName("c", "col") -> new CPConstantOperand(CPIntValue(3))),
+      Map(CPAttributeName("c", "col") -> new CPConstant(CPIntValue(3))),
       Nil
     )
 
@@ -281,7 +283,7 @@ class TestExamples extends FlatSpec with Matchers {
       "Profit",
       ("Income", "i") :: ("Outcome", "o") :: Nil,
       Map(
-        "val" -> new CPSubOperation(new CPAttributeOperand(CPAttributeName("i", "val")), new CPAttributeOperand(CPAttributeName("o", "val")))),
+        "val" -> new CPSub(new CPAttribute(CPAttributeName("i", "val")), new CPAttribute(CPAttributeName("o", "val")))),
       Map(),
       Nil
     )
@@ -291,13 +293,13 @@ class TestExamples extends FlatSpec with Matchers {
       ("Profit", "p") :: Nil,
       Map(),
       Map(),
-      CPArithmeticalDependency(new CPAttributeOperand(CPAttributeName("p", "val")), new CPConstantOperand(CPIntValue(0)), "<") :: Nil
+      CPDependency(new CPAttribute(CPAttributeName("p", "val")), new CPConstant(CPIntValue(0)), "<") :: Nil
     )
 
     val toNotify = new CPInheritedConcept(
       "ToNotify",
       ("Unprofitable", "u") :: ("Name", "n") :: Nil,
-      Map("val" -> new CPAttributeOperand(CPAttributeName("u", "val")), "name" -> new CPAttributeOperand(CPAttributeName("n", "val"))),
+      Map("val" -> new CPAttribute(CPAttributeName("u", "val")), "name" -> new CPAttribute(CPAttributeName("n", "val"))),
       Map(),
       Nil
     )
@@ -340,7 +342,7 @@ class TestExamples extends FlatSpec with Matchers {
       "Name",
       ("Cell", "c") :: Nil,
       Map(),
-      Map(CPAttributeName("c", "col") -> new CPConstantOperand(CPIntValue(1))),
+      Map(CPAttributeName("c", "col") -> new CPConstant(CPIntValue(1))),
       Nil
     )
 
@@ -348,7 +350,7 @@ class TestExamples extends FlatSpec with Matchers {
       "Income",
       ("Cell", "c") :: Nil,
       Map(),
-      Map(CPAttributeName("c", "col") -> new CPConstantOperand(CPIntValue(2))),
+      Map(CPAttributeName("c", "col") -> new CPConstant(CPIntValue(2))),
       Nil
     )
 
@@ -356,7 +358,7 @@ class TestExamples extends FlatSpec with Matchers {
       "Outcome",
       ("Cell", "c") :: Nil,
       Map(),
-      Map(CPAttributeName("c", "col") -> new CPConstantOperand(CPIntValue(3))),
+      Map(CPAttributeName("c", "col") -> new CPConstant(CPIntValue(3))),
       Nil
     )
 
@@ -364,7 +366,7 @@ class TestExamples extends FlatSpec with Matchers {
       "Profit",
       ("Income", "i") :: ("Outcome", "o") :: Nil,
       Map(
-        "val" -> new CPSubOperation(new CPAttributeOperand(CPAttributeName("i", "val")), new CPAttributeOperand(CPAttributeName("o", "val")))),
+        "val" -> new CPSub(new CPAttribute(CPAttributeName("i", "val")), new CPAttribute(CPAttributeName("o", "val")))),
       Map(),
       Nil
     )
@@ -374,13 +376,13 @@ class TestExamples extends FlatSpec with Matchers {
       ("Profit", "p") :: Nil,
       Map(),
       Map(),
-      CPArithmeticalDependency(new CPAttributeOperand(CPAttributeName("p", "val")), new CPConstantOperand(CPIntValue(0)), "<") :: Nil
+      CPDependency(new CPAttribute(CPAttributeName("p", "val")), new CPConstant(CPIntValue(0)), "<") :: Nil
     )
 
     val toNotify = new CPInheritedConcept(
       "ToNotify",
       ("Unprofitable", "u") :: ("Name", "n") :: Nil,
-      Map("val" -> new CPAttributeOperand(CPAttributeName("u", "val")), "name" -> new CPAttributeOperand(CPAttributeName("n", "val"))),
+      Map("val" -> new CPAttribute(CPAttributeName("u", "val")), "name" -> new CPAttribute(CPAttributeName("n", "val"))),
       Map(),
       Nil
     )
@@ -414,7 +416,7 @@ class TestExamples extends FlatSpec with Matchers {
       "Name",
       ("Cell", "c") :: Nil,
       Map(),
-      Map(CPAttributeName("c", "col") -> new CPConstantOperand(CPIntValue(1))),
+      Map(CPAttributeName("c", "col") -> new CPConstant(CPIntValue(1))),
       Nil
     )
 
@@ -422,7 +424,7 @@ class TestExamples extends FlatSpec with Matchers {
       "Income",
       ("Cell", "c") :: Nil,
       Map(),
-      Map(CPAttributeName("c", "col") -> new CPConstantOperand(CPIntValue(2))),
+      Map(CPAttributeName("c", "col") -> new CPConstant(CPIntValue(2))),
       Nil
     )
 
@@ -430,7 +432,7 @@ class TestExamples extends FlatSpec with Matchers {
       "Outcome",
       ("Cell", "c") :: Nil,
       Map(),
-      Map(CPAttributeName("c", "col") -> new CPConstantOperand(CPIntValue(3))),
+      Map(CPAttributeName("c", "col") -> new CPConstant(CPIntValue(3))),
       Nil
     )
 
@@ -438,7 +440,7 @@ class TestExamples extends FlatSpec with Matchers {
       "Profit",
       ("Income", "i") :: ("Outcome", "o") :: Nil,
       Map(
-        "val" -> new CPSubOperation(new CPAttributeOperand(CPAttributeName("i", "val")), new CPAttributeOperand(CPAttributeName("o", "val")))),
+        "val" -> new CPSub(new CPAttribute(CPAttributeName("i", "val")), new CPAttribute(CPAttributeName("o", "val")))),
       Map(),
       Nil
     )
@@ -448,13 +450,13 @@ class TestExamples extends FlatSpec with Matchers {
       ("Profit", "p") :: Nil,
       Map(),
       Map(),
-      CPArithmeticalDependency(new CPAttributeOperand(CPAttributeName("p", "val")), new CPConstantOperand(CPIntValue(0)), "<") :: Nil
+      CPDependency(new CPAttribute(CPAttributeName("p", "val")), new CPConstant(CPIntValue(0)), "<") :: Nil
     )
 
     val toNotify = new CPInheritedConcept(
       "ToNotify",
       ("Unprofitable", "u") :: ("Name", "n") :: Nil,
-      Map("val" -> new CPAttributeOperand(CPAttributeName("u", "val")), "name" -> new CPAttributeOperand(CPAttributeName("n", "val"))),
+      Map("val" -> new CPAttribute(CPAttributeName("u", "val")), "name" -> new CPAttribute(CPAttributeName("n", "val"))),
       Map(),
       Nil
     )
@@ -504,7 +506,7 @@ class TestExamples extends FlatSpec with Matchers {
       "Name",
       ("Cell", "c") :: Nil,
       Map(),
-      Map(CPAttributeName("c", "col") -> new CPConstantOperand(CPIntValue(1))),
+      Map(CPAttributeName("c", "col") -> new CPConstant(CPIntValue(1))),
       Nil
     )
 
@@ -512,7 +514,7 @@ class TestExamples extends FlatSpec with Matchers {
       "Income",
       ("Cell", "c") :: Nil,
       Map(),
-      Map(CPAttributeName("c", "col") -> new CPConstantOperand(CPIntValue(2))),
+      Map(CPAttributeName("c", "col") -> new CPConstant(CPIntValue(2))),
       Nil
     )
 
@@ -520,7 +522,7 @@ class TestExamples extends FlatSpec with Matchers {
       "Outcome",
       ("Cell", "c") :: Nil,
       Map(),
-      Map(CPAttributeName("c", "col") -> new CPConstantOperand(CPIntValue(3))),
+      Map(CPAttributeName("c", "col") -> new CPConstant(CPIntValue(3))),
       Nil
     )
 
@@ -528,7 +530,7 @@ class TestExamples extends FlatSpec with Matchers {
       "Profit",
       ("Income", "i") :: ("Outcome", "o") :: Nil,
       Map(
-        "val" -> new CPSubOperation(new CPAttributeOperand(CPAttributeName("i", "val")), new CPAttributeOperand(CPAttributeName("o", "val")))),
+        "val" -> new CPSub(new CPAttribute(CPAttributeName("i", "val")), new CPAttribute(CPAttributeName("o", "val")))),
       Map(),
       Nil
     )
@@ -545,7 +547,7 @@ class TestExamples extends FlatSpec with Matchers {
       Nil,
       "totalProfit",
       ("Profit" , "p") :: ("Income" , "i") :: ("Outcome" , "o") :: Nil,
-      new CPEqualsDependency(CPAttributeName("i", "row") :: CPAttributeName("o", "row") :: CPAttributeName("p", "row") :: Nil) :: Nil,
+      CPDependency(CPAttributeName("i", "row") :: CPAttributeName("o", "row") :: CPAttributeName("p", "row") :: Nil) :: Nil,
       Map("totalIncome" -> new CPFunctionCall("Grouping.sum", Map("operand" -> new CPAttribute(new CPAttributeName("i", "val")))),
         "totalOutcome" -> new CPFunctionCall("Grouping.sum", Map("operand" -> new CPAttribute(new CPAttributeName("o", "val")))),
         "totalProfit" -> new CPFunctionCall("Grouping.sum", Map("operand" -> new CPAttribute(new CPAttributeName("p", "val"))))),

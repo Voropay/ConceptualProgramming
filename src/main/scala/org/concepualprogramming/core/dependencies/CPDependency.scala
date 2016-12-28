@@ -1,6 +1,6 @@
 package org.concepualprogramming.core.dependencies
 
-import org.concepualprogramming.core.execution_steps.expressions.CPExpression
+import org.concepualprogramming.core.execution_steps.expressions.{CPConstant, CPAttribute, CPExpression}
 import org.concepualprogramming.core.execution_steps.expressions.operations._
 import org.concepualprogramming.core.{CPExecutionContext, CPAttributeName}
 import org.concepualprogramming.core.datatypes.{CPBooleanValue, CPValue}
@@ -27,4 +27,5 @@ object CPDependency {
   }
 
   def apply(attributesNames: List[CPAttributeName]) = new CPAttributesLinkDependency(attributesNames)
+  def apply(attributesName: CPAttributeName, value: CPValue) = new CPExpressionDependency(new CPEquals(new CPAttribute(attributesName), new CPConstant(value)), CPBooleanValue(true))
 }

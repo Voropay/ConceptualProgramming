@@ -36,3 +36,7 @@ case class CPAttribute(attrName: CPAttributeName) extends CPExpression {
     }
   }
 }
+
+object CPAttribute {
+  def apply(conceptName: String, attributeName: String) = new CPAttribute(new CPAttributeName(conceptName, attributeName))
+}

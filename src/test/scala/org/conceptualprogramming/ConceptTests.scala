@@ -3,7 +3,8 @@ package org.conceptualprogramming
 import org.concepualprogramming.core.dependencies.operations._
 import org.concepualprogramming.core.dependencies._
 import org.concepualprogramming.core.execution_steps.expressions.functions.GroupingFunctions
-import org.concepualprogramming.core.execution_steps.expressions.{CPFunctionCall, CPAttribute, CPExpression}
+import org.concepualprogramming.core.execution_steps.expressions.operations.{CPMul, CPSub}
+import org.concepualprogramming.core.execution_steps.expressions.{CPConstant, CPFunctionCall, CPAttribute, CPExpression}
 import org.concepualprogramming.core._
 import org.concepualprogramming.core.datatypes.{CPStringValue, CPValue, CPIntValue}
 import org.scalatest.{Matchers, FlatSpec}
@@ -19,31 +20,31 @@ class ConceptTests extends FlatSpec with Matchers {
       "val" :: "row" :: Nil,
       "val",
       ("b", "b1") :: ("a", "a1") :: Nil,
-      new CPEqualsDependency(CPAttributeName("a1", "val") :: CPAttributeName("b1", "val") :: Nil) :: new CPConstantDependency(CPAttributeName("b1", "row"), CPIntValue(1)) :: Nil
+      CPDependency(CPAttributeName("a1", "val") :: CPAttributeName("b1", "val") :: Nil) :: CPDependency(CPAttributeName("b1", "row"), CPIntValue(1)) :: Nil
     )
     val c2 = new CPStrictConcept(
       "c1",
       "row" :: "val" :: Nil,
       "val",
       ("b", "b1") :: ("a", "a1") :: Nil,
-      new CPConstantDependency(CPAttributeName("b1", "row"), CPIntValue(1)) :: new CPEqualsDependency(CPAttributeName("a1", "val") :: CPAttributeName("b1", "val") :: Nil) :: Nil
+      CPDependency(CPAttributeName("b1", "row"), CPIntValue(1)) :: CPDependency(CPAttributeName("a1", "val") :: CPAttributeName("b1", "val") :: Nil) :: Nil
     )
     c1.equals(c2) should be (true)
 
     val p1 = new CPInheritedConcept(
       "Profit",
       ("Outcome", "o") :: ("Income", "i") :: Nil,
-      Map("val" -> new CPSubOperation(new CPAttributeOperand(CPAttributeName("i", "val")), CPAttributeOperand(CPAttributeName("o", "val")))),
+      Map("val" -> new CPSub(new CPAttribute(CPAttributeName("i", "val")), CPAttribute(CPAttributeName("o", "val")))),
       Map(),
-      CPArithmeticalDependency(new CPConstantOperand(CPIntValue(0)), new CPAttributeOperand(CPAttributeName("", "val")), "<") :: Nil
+      CPDependency(new CPConstant(CPIntValue(0)), new CPAttribute(CPAttributeName("", "val")), "<") :: Nil
     )
 
     val p2 = new CPInheritedConcept(
       "Profit",
       ("Income", "i") :: ("Outcome", "o") :: Nil,
-      Map("val" -> new CPSubOperation(new CPAttributeOperand(CPAttributeName("i", "val")), CPAttributeOperand(CPAttributeName("o", "val")))),
+      Map("val" -> new CPSub(new CPAttribute(CPAttributeName("i", "val")), CPAttribute(CPAttributeName("o", "val")))),
       Map(),
-      CPArithmeticalDependency(new CPConstantOperand(CPIntValue(0)), new CPAttributeOperand(CPAttributeName("", "val")), "<") :: Nil
+      CPDependency(new CPConstant(CPIntValue(0)), new CPAttribute(CPAttributeName("", "val")), "<") :: Nil
     )
 
     p1 should equal (p2)
@@ -97,14 +98,14 @@ class ConceptTests extends FlatSpec with Matchers {
     val c = new CPInheritedConcept(
       "a",
       ("b", "b") :: Nil,
-      Map("val" -> new CPMulOperation(new CPAttributeOperand(CPAttributeName("b", "val")), new CPConstantOperand(CPIntValue(2)))),
-      Map(CPAttributeName("b", "col") -> new CPConstantOperand(CPIntValue(1))),
-      CPArithmeticalDependency(new CPConstantOperand(CPIntValue(50)), new CPAttributeOperand(CPAttributeName("b", "row")), ">") :: Nil
+      Map("val" -> new CPMul(new CPAttribute(CPAttributeName("b", "val")), new CPConstant(CPIntValue(2)))),
+      Map(CPAttributeName("b", "col") -> new CPConstant(CPIntValue(1))),
+      CPDependency(new CPConstant(CPIntValue(50)), new CPAttribute(CPAttributeName("b", "row")), ">") :: Nil
     )
     c.attributesDependencies.size should equal (3)
-    val d1 = new CPArithmeticalEqualsDependency(new CPAttributeOperand(CPAttributeName("", "val")), new CPMulOperation(new CPAttributeOperand(CPAttributeName("b", "val")), new CPConstantOperand(CPIntValue(2))))
-    val d2 = new CPArithmeticalEqualsDependency(new CPAttributeOperand(CPAttributeName("b", "col")), new CPConstantOperand(CPIntValue(1)))
-    val d3 = CPArithmeticalDependency(new CPConstantOperand(CPIntValue(50)), new CPAttributeOperand(CPAttributeName("b", "row")), ">")
+    val d1 = CPDependency(new CPAttribute(CPAttributeName("", "val")), new CPMul(new CPAttribute(CPAttributeName("b", "val")), new CPConstant(CPIntValue(2))), "==")
+    val d2 = CPDependency(new CPAttribute(CPAttributeName("b", "col")), new CPConstant(CPIntValue(1)), "==")
+    val d3 = CPDependency(new CPConstant(CPIntValue(50)), new CPAttribute(CPAttributeName("b", "row")), ">")
     c.attributesDependencies.find(_.equals(d1)) should not be empty
     c.attributesDependencies.find(_.equals(d2)) should not be empty
     c.attributesDependencies.find(_.equals(d3)) should not be empty
@@ -119,7 +120,7 @@ class ConceptTests extends FlatSpec with Matchers {
       Nil,
       Nil,
       Map("sum" -> new CPFunctionCall("Grouping.sum", Map("operand" -> new CPAttribute(new CPAttributeName("t", "val"))))),
-      CPArithmeticalDependency(new CPConstantOperand(CPIntValue(5)), new CPAttributeOperand(CPAttributeName("", "sum")), ">") :: Nil)
+      CPDependency(new CPConstant(CPIntValue(5)), new CPAttribute(CPAttributeName("", "sum")), ">") :: Nil)
     val subst1 = new CPSubstitutions(
       Map(new CPAttributeName("", "table") -> CPStringValue("A1"), new CPAttributeName("", "row") -> CPStringValue("1"), new CPAttributeName("t", "cell") -> CPStringValue("1"), new CPAttributeName("t", "val") -> CPIntValue(1)),
       Map("t" -> "val")
@@ -176,7 +177,7 @@ class ConceptTests extends FlatSpec with Matchers {
         attrs.get(new CPAttributeName("", "row")).get.getStringValue.get == "1"
     }).isDefined should be (true)
 
-    val filtered = conceptSubst.filter(concept.checkGroupedAttributesDependencies(_))
+    val filtered = conceptSubst.filter(concept.checkGroupedAttributesDependencies(_, context))
     filtered.size should equal (2)
     filtered.find(subst => {
       val attrs = subst.attributesValues
