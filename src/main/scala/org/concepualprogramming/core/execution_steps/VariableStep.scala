@@ -9,7 +9,7 @@ import org.concepualprogramming.core.{CPDecisionNode, CPExecutionContext, CPObje
  */
 class VariableStep(variableName: String, operand: CPExpression) extends CPExecutionStep {
 
-  override def execute(query: Map[String, CPValue], context: CPExecutionContext): Unit = {
+  override def execute(context: CPExecutionContext): Unit = {
     val value = operand.calculate(context)
     if(value.isDefined) {
       context.setVariable(variableName, value.get)
@@ -17,7 +17,7 @@ class VariableStep(variableName: String, operand: CPExpression) extends CPExecut
     context.nextStep
   }
 
-  override def createDecisionNode(query: Map[String, CPValue], context: CPExecutionContext): CPDecisionNode = null
+  override def createDecisionNode(context: CPExecutionContext): CPDecisionNode = null
 
   override def needsResolve(context: CPExecutionContext): Boolean = false
 

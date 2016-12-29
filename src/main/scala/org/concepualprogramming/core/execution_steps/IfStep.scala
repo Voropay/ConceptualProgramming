@@ -9,16 +9,16 @@ import org.concepualprogramming.core.{CPDecisionNode, CPExecutionContext, CPObje
  */
 class IfStep(condition: CPExpression, thenBlock: CPExecutionStep, elseBlock: CPExecutionStep) extends CPExecutionStep {
 
-  override def execute(query: Map[String, CPValue], context: CPExecutionContext): Unit = {
+  override def execute(context: CPExecutionContext): Unit = {
     val res = condition.calculate(context)
     if(res.isDefined) {
       if(res.get.getBooleanValue.get) {
         context.addTransparentFrame
-        thenBlock.execute(query, context)
+        thenBlock.execute(context)
         context.deleteFrame
       } else {
         context.addTransparentFrame
-        elseBlock.execute(query, context)
+        elseBlock.execute(context)
         context.deleteFrame
       }
     }
@@ -26,13 +26,13 @@ class IfStep(condition: CPExpression, thenBlock: CPExecutionStep, elseBlock: CPE
     //TODO: We should add exception raising or something like this.
   }
 
-  override def createDecisionNode(query: Map[String, CPValue], context: CPExecutionContext): CPDecisionNode = {
+  override def createDecisionNode(context: CPExecutionContext): CPDecisionNode = {
     val condRes = checkCondition(context)
     if(condRes.isDefined) {
       if(condRes.get) {
-        thenBlock.createDecisionNode(query, context)
+        thenBlock.createDecisionNode(context)
       } else {
-        elseBlock.createDecisionNode(query, context)
+        elseBlock.createDecisionNode(context)
       }
     } else {
       return null

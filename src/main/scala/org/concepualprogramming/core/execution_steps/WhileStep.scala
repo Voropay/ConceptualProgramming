@@ -9,18 +9,18 @@ import org.concepualprogramming.core.{CPDecisionNode, CPExecutionContext, CPObje
  */
 class WhileStep(condition: CPExpression, body: CPExecutionStep) extends CPExecutionStep {
 
-  override def execute(query: Map[String, CPValue], context: CPExecutionContext): Unit = {
+  override def execute(context: CPExecutionContext): Unit = {
     var res = condition.calculate(context)
     context.addTransparentFrame
     while(res.isDefined && res.get.getBooleanValue.get) {
-      body.execute(query, context)
+      body.execute(context)
       res = condition.calculate(context)
     }
     context.deleteFrame
     context.nextStep
   }
 
-  override def createDecisionNode(query: Map[String, CPValue], context: CPExecutionContext): CPDecisionNode = new DecisionNode(query, context)
+  override def createDecisionNode(context: CPExecutionContext): CPDecisionNode = new DecisionNode(context)
 
   override def needsResolve(context: CPExecutionContext): Boolean = body.needsResolve(context)
 
@@ -28,7 +28,7 @@ class WhileStep(condition: CPExpression, body: CPExecutionStep) extends CPExecut
     context.nextStep
   }
 
-  private class DecisionNode(query: Map[String, CPValue], context: CPExecutionContext) extends CPDecisionNode {
+  private class DecisionNode(context: CPExecutionContext) extends CPDecisionNode {
 
     var curDecisionNode: CPDecisionNode = null
     var nextBranchExists: Boolean = false
@@ -54,7 +54,7 @@ class WhileStep(condition: CPExpression, body: CPExecutionStep) extends CPExecut
     def findNextBranch: Unit = {
       val res = condition.calculate(context)
       if(res.isDefined && res.get.getBooleanValue.get) {
-        curDecisionNode = body.createDecisionNode(query, context)
+        curDecisionNode = body.createDecisionNode(context)
         nextBranchExists = true
       } else {
         nextBranchExists = false

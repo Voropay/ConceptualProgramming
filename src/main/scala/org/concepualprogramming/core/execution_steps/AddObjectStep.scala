@@ -9,7 +9,7 @@ import org.concepualprogramming.core.{CPDecisionNode, CPExecutionContext, CPObje
  */
 class AddObjectStep(name: String, attributes: Map[String, CPExpression], defaultAttribute: String) extends CPExecutionStep {
 
-  override def execute(query: Map[String, CPValue], context: CPExecutionContext): Unit = {
+  override def execute(context: CPExecutionContext): Unit = {
     val attrsOpt: Map[String, Option[CPValue]] = attributes.mapValues(_.calculate(context))
     if(!attrsOpt.values.exists(_.isEmpty)) {
       val attrVals = attrsOpt.mapValues(_.get)
@@ -19,7 +19,7 @@ class AddObjectStep(name: String, attributes: Map[String, CPExpression], default
     context.nextStep
   }
 
-  override def createDecisionNode(query: Map[String, CPValue], context: CPExecutionContext): CPDecisionNode = null
+  override def createDecisionNode(context: CPExecutionContext): CPDecisionNode = null
 
   override def needsResolve(context: CPExecutionContext): Boolean = false
 

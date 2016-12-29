@@ -311,9 +311,10 @@ class InferenceTests extends FlatSpec with Matchers {
             new CPConstant(CPIntValue(0)),
             ">"
           ) :: Nil
-      )
+      ),
+      Map()
     )
-    val step2 = new ReturnObjectsStep("Res")
+    val step2 = new ReturnObjectsStep(CPConstant(CPStringValue("Res")), Map())
     val concept = new CPFreeConcept("PositiveVariables", step1 :: step2 :: Nil)
     val objects = concept.resolve(Map(), context)
     objects.size should equal (1)
@@ -332,6 +333,22 @@ class InferenceTests extends FlatSpec with Matchers {
     objects1.size should equal (1)
     objects1.head.name should equal ("PositiveVariables")
     objects1.head.get("val").get.getIntValue.get should equal (1)
+
+    val step11 = new ConceptResolvingStep(
+      new CPStrictConcept(
+        "Res",
+        "val" :: Nil,
+        "val",
+        ("Var", "v") :: Nil,
+        CPDependency(CPAttributeName("", "val") :: CPAttributeName("v", "val") :: Nil) :: Nil
+      ),
+      Map()
+    )
+    val concept2 = new CPFreeConcept("Variables", step11 :: step2 :: Nil)
+    val objects2 = concept2.resolve(Map("val" -> CPIntValue(-1)), context)
+    objects2.size should equal (1)
+    objects2.head.name should equal ("Variables")
+    objects2.head.get("val").get.getIntValue.get should equal (-1)
   }
 
   "Composite Step" should "resolve objects correctly" in {
@@ -352,7 +369,8 @@ class InferenceTests extends FlatSpec with Matchers {
             new CPConstant(CPIntValue(0)),
             ">"
           ) :: Nil
-      )
+      ),
+      Map()
     )
     val negativeValueStep = new ConceptResolvingStep(
       new CPStrictConcept(
@@ -366,10 +384,11 @@ class InferenceTests extends FlatSpec with Matchers {
             new CPConstant(CPIntValue(0)),
             "<"
           ) :: Nil
-      )
+      ),
+      Map()
     )
-    val returnPositiveStep = new ReturnObjectsStep("PosRes")
-    val returnNegativeStep = new ReturnObjectsStep("NegRes")
+    val returnPositiveStep = new ReturnObjectsStep(CPConstant(CPStringValue("PosRes")), Map())
+    val returnNegativeStep = new ReturnObjectsStep(CPConstant(CPStringValue("NegRes")), Map())
     val compositePositiveStep = new CompositeStep(positiveValueStep :: returnPositiveStep :: Nil)
     val compositeNegativeStep = new CompositeStep(negativeValueStep :: returnNegativeStep :: Nil)
     val condPos = new CPEquals(new CPVariable("pos"), new CPConstant(CPBooleanValue(true)))

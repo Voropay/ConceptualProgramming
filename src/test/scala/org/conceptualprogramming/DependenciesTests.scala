@@ -164,11 +164,12 @@ class DependenciesTests extends FlatSpec with Matchers {
             new CPVariable("a"),
             ">"
           ) :: Nil
-      )
+      ),
+      Map()
     )
     context.setVariable("a", CPIntValue(0))
 
-    step.execute(Map(), context)
+    step.execute(context)
     context.getCurrentStep should equal (1)
     val res = context.knowledgeBase.getObjects("PositiveVariable")
     res.size should equal (1)

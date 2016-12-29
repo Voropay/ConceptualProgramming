@@ -131,6 +131,7 @@ class CPExecutionContext {
     frameStack.top.substitutions = subst
   }
 
+  //TODO: add visibility through stack if needed
   def getSubstitutions: Option[CPSubstitutions] = frameStack.top.substitutions
 
 

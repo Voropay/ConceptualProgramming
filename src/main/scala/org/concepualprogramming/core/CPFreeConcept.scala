@@ -16,9 +16,9 @@ class CPFreeConcept(_name: String, _steps: List[CPExecutionStep]) extends CPConc
     context.addFrame
     while(!context.isStopped && context.getCurrentStep < steps.size) {
       val step = steps(context.getCurrentStep)
-      step.execute(query, context)
+      step.execute(context)
     }
-    val res = context.getObjectResults.map(prepareObject(_))
+    val res = context.getObjectResults.map(prepareObject(_)).filter(checkQuery(_, query))
     context.deleteFrame
     return res
   }
@@ -35,6 +35,12 @@ class CPFreeConcept(_name: String, _steps: List[CPExecutionStep]) extends CPConc
     case other: CPFreeConcept =>
       name == other.name && steps.sameElements(other.steps)
     case _ => false
+  }
+
+  def checkQuery(obj: CPObject, query: Map[String, CPValue]): Boolean = {
+    query.isEmpty || query.find(attr => {
+      obj.get(attr._1).isEmpty || obj.get(attr._1).get != attr._2
+    }).isEmpty
   }
 
   private class DecisionNode(query: Map[String, CPValue], context: CPExecutionContext) extends CPDecisionNode {
@@ -54,15 +60,15 @@ class CPFreeConcept(_name: String, _steps: List[CPExecutionStep]) extends CPConc
           nextBranchExists = true
           return
         } else {
-          step.execute(query, context)
+          step.execute(context)
         }
       }
       nextBranchExists = false
-      results = context.getObjectResults.map(prepareObject(_))
+      results = context.getObjectResults.map(prepareObject(_)).filter(checkQuery(_, query))
       context.deleteFrame
     }
 
-    override def nextBranch: CPDecisionNode = steps(context.getCurrentStep).createDecisionNode(query, context)
+    override def nextBranch: CPDecisionNode = steps(context.getCurrentStep).createDecisionNode(context)
 
     override def getAllResults: List[CPObject] = results
 
@@ -77,7 +83,7 @@ class CPFreeConcept(_name: String, _steps: List[CPExecutionStep]) extends CPConc
         findNextConceptStep
       } else {
         nextBranchExists = false
-        results = context.getObjectResults.map(prepareObject(_))
+        results = context.getObjectResults.map(prepareObject(_)).filter(checkQuery(_, query))
         context.deleteFrame
       }
     }

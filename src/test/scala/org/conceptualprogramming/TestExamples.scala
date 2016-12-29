@@ -461,13 +461,13 @@ class TestExamples extends FlatSpec with Matchers {
     )
 
     val task = new CPFreeConcept("ToNotify",
-      new ConceptResolvingStep(name) ::
-      new ConceptResolvingStep(income) ::
-      new ConceptResolvingStep(outcome) ::
-      new ConceptResolvingStep(profit) ::
-      new ConceptResolvingStep(unprofitable) ::
-      new ConceptResolvingStep(toNotify) ::
-      new ReturnObjectsStep("ToNotify") ::  Nil
+      new ConceptResolvingStep(name, Map()) ::
+      new ConceptResolvingStep(income, Map()) ::
+      new ConceptResolvingStep(outcome, Map()) ::
+      new ConceptResolvingStep(profit, Map()) ::
+      new ConceptResolvingStep(unprofitable, Map()) ::
+      new ConceptResolvingStep(toNotify, Map()) ::
+      new ReturnObjectsStep(CPConstant(CPStringValue("ToNotify")), Map()) ::  Nil
     )
 
     val toNotifyRows = task.resolve(Map(), context)
@@ -483,8 +483,8 @@ class TestExamples extends FlatSpec with Matchers {
     toNotifyRow1.get("val").get.getIntValue.get should equal (-2)
 
     val taskWithQuery = new CPFreeConcept("ToNotify",
-      new ConceptResolvingStep(name) ::
-      new ReturnObjectsStep("Name") ::  Nil
+      new ConceptResolvingStep(name, Map()) ::
+      new ReturnObjectsStep(CPConstant(CPStringValue("Name")), Map()) ::  Nil
     )
 
     val names1 = taskWithQuery.resolve(Map("row" -> CPIntValue(1)), context)

@@ -36,8 +36,8 @@ class ExecutionContextTests extends FlatSpec with Matchers {
   "Return step" should "find objects correctly" in {
     val context = new CPExecutionContext
     context.knowledgeBase.add(new CPObject("Var", Map("val" -> CPIntValue(1)), "val"))
-    val step = new ReturnObjectsStep("Var")
-    step.execute(Map(), context)
+    val step = new ReturnObjectsStep(CPConstant(CPStringValue("Var")), Map())
+    step.execute(context)
     context.getCurrentStep should equal (-1)
     val res = context.getObjectResults
     res.size should equal (1)
@@ -61,21 +61,41 @@ class ExecutionContextTests extends FlatSpec with Matchers {
             new CPConstant(CPIntValue(0)),
             ">"
           ) :: Nil
-      )
+      ),
+      Map()
     )
 
-    step.execute(Map(), context)
+    step.execute(context)
     context.getCurrentStep should equal (1)
     val res = context.knowledgeBase.getObjects("PositiveVariable")
     res.size should equal (1)
     res.head.name should equal ("PositiveVariable")
     res.head.get("val").get.getIntValue.get should equal (1)
+
+    val step1 = new ConceptResolvingStep(
+      new CPStrictConcept(
+        "Variable",
+        "val" :: Nil,
+        "val",
+        ("Var", "v") :: Nil,
+        CPDependency(CPAttributeName("", "val") :: CPAttributeName("v", "val") :: Nil) :: Nil
+      ),
+      Map("val" -> CPConstant(CPIntValue(-1)))
+    )
+
+    step1.execute(context)
+    val res1 = context.knowledgeBase.getObjects("Variable")
+    res1.size should equal (1)
+    res1.head.name should equal ("Variable")
+    res1.head.get("val").get.getIntValue.get should equal (-1)
+
+
   }
 
     "Variable step" should "set variable value correctly" in {
       var v = new VariableStep("a", new CPConstant(CPIntValue(1)))
       val context = new CPExecutionContext
-      v.execute(Map(), context)
+      v.execute(context)
       context.getVariable("a").get.getIntValue.get should equal (1)
     }
 
@@ -83,7 +103,7 @@ class ExecutionContextTests extends FlatSpec with Matchers {
       var v = new ReturnValueStep(new CPVariable("a"))
       val context = new CPExecutionContext
       context.setVariable("a", CPIntValue(1))
-      v.execute(Map(), context)
+      v.execute(context)
       context.getCurrentStep should equal (-1)
       val res = context.getValueResult
       res.get.getIntValue.get should equal (1)
@@ -105,7 +125,8 @@ class ExecutionContextTests extends FlatSpec with Matchers {
               new CPConstant(CPIntValue(0)),
               ">"
             ) :: Nil
-        )
+        ),
+        Map()
       )
       val stepElse = new ConceptResolvingStep(
         new CPStrictConcept(
@@ -119,13 +140,14 @@ class ExecutionContextTests extends FlatSpec with Matchers {
               new CPConstant(CPIntValue(0)),
               "<"
             ) :: Nil
-        )
+        ),
+        Map()
       )
       val ifstep = new IfStep(new CPVariable("a"), stepThen, stepElse)
 
       context.addFrame
       context.setVariable("a", CPBooleanValue(true))
-      ifstep.execute(Map(), context)
+      ifstep.execute(context)
       context.getCurrentStep should equal (1)
       val res = context.knowledgeBase.getObjects("Res")
       res.size should equal (1)
@@ -135,7 +157,7 @@ class ExecutionContextTests extends FlatSpec with Matchers {
 
       context.addFrame
       context.setVariable("a", CPBooleanValue(false))
-      ifstep.execute(Map(), context)
+      ifstep.execute(context)
       context.getCurrentStep should equal (1)
       val res1 = context.knowledgeBase.getObjects("Res")
       res1.size should equal (1)
@@ -167,7 +189,8 @@ class ExecutionContextTests extends FlatSpec with Matchers {
               new CPConstant(CPIntValue(0)),
               ">"
             ) :: Nil
-        )
+        ),
+        Map()
       )
       val variableStep = new VariableStep("res", new CPFunctionCall("Objects.size", Map("name" -> CPConstant(CPStringValue("PosRes")))))
       val returnStep = new ReturnValueStep(new CPVariable(("res")))
@@ -210,7 +233,7 @@ class ExecutionContextTests extends FlatSpec with Matchers {
       val addObject = new AddObjectStep("Var", Map("val" -> CPVariable("i")), "val")
       val body = new CompositeStep(iInc :: addObject :: Nil)
       val whileStep = new WhileStep(exitCond, body)
-      val returnStep = new ReturnObjectsStep("Var")
+      val returnStep = new ReturnObjectsStep(CPConstant(CPStringValue("Var")), Map())
 
       val context = new CPExecutionContext
       ObjectsFunctions.register(context)
@@ -235,7 +258,7 @@ class ExecutionContextTests extends FlatSpec with Matchers {
       )
       val body = new AddObjectStep("Var", Map("val" -> CPVariable("i")), "val")
       val forStep = new ForStep(iInit, exitCond, iInc, body)
-      val returnStep = new ReturnObjectsStep("Var")
+      val returnStep = new ReturnObjectsStep(CPConstant(CPStringValue("Var")), Map())
 
       val context = new CPExecutionContext
       ObjectsFunctions.register(context)

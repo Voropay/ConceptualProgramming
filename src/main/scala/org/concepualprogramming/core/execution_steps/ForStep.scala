@@ -9,20 +9,20 @@ import org.concepualprogramming.core.{CPDecisionNode, CPExecutionContext, CPObje
  */
 class ForStep(startOperator: CPExecutionStep, condition: CPExpression, endOperator: CPExecutionStep, body: CPExecutionStep) extends CPExecutionStep {
 
-  override def execute(query: Map[String, CPValue], context: CPExecutionContext): Unit = {
+  override def execute(context: CPExecutionContext): Unit = {
     context.addTransparentFrame
-    startOperator.execute(query, context)
+    startOperator.execute(context)
     var res = condition.calculate(context)
     while(res.isDefined && res.get.getBooleanValue.get) {
-      body.execute(query, context)
-      endOperator.execute(query, context)
+      body.execute(context)
+      endOperator.execute(context)
       res = condition.calculate(context)
     }
     context.deleteFrame
     context.nextStep
   }
 
-  override def createDecisionNode(query: Map[String, CPValue], context: CPExecutionContext): CPDecisionNode = new DecisionNode(query, context)
+  override def createDecisionNode(context: CPExecutionContext): CPDecisionNode = new DecisionNode(context)
 
   override def needsResolve(context: CPExecutionContext): Boolean = startOperator.needsResolve(context) || endOperator.needsResolve(context) || body.needsResolve(context)
 
@@ -37,7 +37,7 @@ class ForStep(startOperator: CPExecutionStep, condition: CPExpression, endOperat
     return true
   }
 
-  private class DecisionNode(query: Map[String, CPValue], context: CPExecutionContext) extends CPDecisionNode {
+  private class DecisionNode(context: CPExecutionContext) extends CPDecisionNode {
 
     var curDecisionNode: CPDecisionNode = null
     var nextBranchExists: Boolean = false
@@ -46,10 +46,10 @@ class ForStep(startOperator: CPExecutionStep, condition: CPExpression, endOperat
     override def init(): Unit = {
       context.addTransparentFrame
       if(startOperator.needsResolve(context)) {
-        curDecisionNode = startOperator.createDecisionNode(query, context)
+        curDecisionNode = startOperator.createDecisionNode(context)
         nextBranchExists = true
       } else {
-        startOperator.execute(query, context)
+        startOperator.execute(context)
         findNextBranch
       }
     }
@@ -74,12 +74,12 @@ class ForStep(startOperator: CPExecutionStep, condition: CPExpression, endOperat
           val res = condition.calculate(context)
           if (res.isDefined && res.get.getBooleanValue.get) { //execute body
             if (body.needsResolve(context)) {
-              curDecisionNode = body.createDecisionNode(query, context)
+              curDecisionNode = body.createDecisionNode(context)
               nextBranchExists = true
               step = 1
               return
             } else {
-              body.execute(query, context)
+              body.execute(context)
               step = 1
             }
           } else { //end of loop
@@ -91,12 +91,12 @@ class ForStep(startOperator: CPExecutionStep, condition: CPExpression, endOperat
 
         if (step == 1) { //execute end operator
           if (endOperator.needsResolve(context)) {
-            curDecisionNode = endOperator.createDecisionNode(query, context)
+            curDecisionNode = endOperator.createDecisionNode(context)
             nextBranchExists = true
             step = 0
             return
           } else {
-            endOperator.execute(query, context)
+            endOperator.execute(context)
             step = 0
           }
         }

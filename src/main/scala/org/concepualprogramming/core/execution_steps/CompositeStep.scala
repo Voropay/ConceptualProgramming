@@ -12,11 +12,11 @@ class CompositeStep(body: List[CPExecutionStep]) extends CPExecutionStep{
 
   val steps = ArrayBuffer[CPExecutionStep]() ++ body
 
-  override def execute(query: Map[String, CPValue], context: CPExecutionContext): Unit = {
+  override def execute(context: CPExecutionContext): Unit = {
     context.addTransparentFrame
     while(!context.isStopped && context.getCurrentStep < steps.size) {
       val step = steps(context.getCurrentStep)
-      step.execute(query, context)
+      step.execute(context)
     }
     context.deleteFrame
     context.nextStep
@@ -26,7 +26,7 @@ class CompositeStep(body: List[CPExecutionStep]) extends CPExecutionStep{
     steps.find(!_.isDefined(context)).isEmpty
   }
 
-  override def createDecisionNode(query: Map[String, CPValue], context: CPExecutionContext): CPDecisionNode = new DecisionNode(query, context)
+  override def createDecisionNode(context: CPExecutionContext): CPDecisionNode = new DecisionNode(context)
 
   override def needsResolve(context: CPExecutionContext): Boolean = {body.find(_.needsResolve(context)).isDefined}
 
@@ -34,7 +34,7 @@ class CompositeStep(body: List[CPExecutionStep]) extends CPExecutionStep{
     context.nextStep
   }
 
-  private class DecisionNode(query: Map[String, CPValue], context: CPExecutionContext) extends CPDecisionNode {
+  private class DecisionNode(context: CPExecutionContext) extends CPDecisionNode {
 
     var nextBranchExists = false
 
@@ -43,7 +43,7 @@ class CompositeStep(body: List[CPExecutionStep]) extends CPExecutionStep{
       findNextConceptStep
     }
 
-    override def nextBranch: CPDecisionNode = steps(context.getCurrentStep).createDecisionNode(query, context)
+    override def nextBranch: CPDecisionNode = steps(context.getCurrentStep).createDecisionNode(context)
 
     override def getAllResults: List[CPObject] = List()
 
@@ -63,7 +63,7 @@ class CompositeStep(body: List[CPExecutionStep]) extends CPExecutionStep{
           nextBranchExists = true
           return
         } else {
-          step.execute(query, context)
+          step.execute(context)
         }
       }
       nextBranchExists = false

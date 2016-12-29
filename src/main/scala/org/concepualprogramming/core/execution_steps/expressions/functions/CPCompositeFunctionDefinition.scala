@@ -21,7 +21,7 @@ class CPCompositeFunctionDefinition (_name: String, _argsNames: List[String], bo
       return None
     }
     argsVals.foreach(entry => context.setVariable(entry._1, entry._2.get))
-    body.execute(Map(), context)
+    body.execute(context)
     val res = context.getValueResult
     context.deleteFrame
     return res
