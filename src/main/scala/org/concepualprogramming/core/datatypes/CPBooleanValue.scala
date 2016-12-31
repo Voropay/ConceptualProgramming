@@ -5,7 +5,7 @@ import java.time.LocalDate
 /**
  * Created by oleksii.voropai on 10/27/2016.
  */
-class CPBooleanValue(value: Boolean) extends CPValue {
+class CPBooleanValue(value: Boolean) extends CPValue with CPPrimitiveType {
 
   override def getTypeName: String = CPDataTypes.boolean.toString
 
@@ -21,6 +21,8 @@ class CPBooleanValue(value: Boolean) extends CPValue {
     case other: Int => getIntValue.get == other
     case other: Double => getDoubleValue.get == other
     case other: LocalDate => false
+    case other: Boolean => value == other
+    case _ => false
   }
 
   override def !?=(other: CPValue): Boolean = !similar(other)

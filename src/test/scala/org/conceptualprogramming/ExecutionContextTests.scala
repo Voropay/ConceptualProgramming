@@ -1,6 +1,6 @@
 package org.conceptualprogramming
 
-import org.concepualprogramming.core.datatypes.{CPGreater, CPStringValue, CPBooleanValue, CPIntValue}
+import org.concepualprogramming.core.datatypes.{CPStringValue, CPBooleanValue, CPIntValue}
 import org.concepualprogramming.core.dependencies.CPDependency
 import org.concepualprogramming.core.execution_steps.expressions.operations.CPAdd
 import org.concepualprogramming.core.execution_steps.expressions.{CPAttribute, CPFunctionCall, CPVariable, CPConstant}

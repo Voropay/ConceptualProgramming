@@ -7,7 +7,7 @@ import java.time.format.DateTimeFormatter
 /**
  * Created by oleksii.voropai on 8/6/2016.
  */
-class CPDateValue(value: LocalDate) extends CPValue {
+class CPDateValue(value: LocalDate) extends CPValue with CPPrimitiveType{
 
   override def getTypeName: String = CPDataTypes.date.toString
 
@@ -34,6 +34,8 @@ class CPDateValue(value: LocalDate) extends CPValue {
     case other: Int => getIntValue.isDefined && getIntValue.get == other
     case other: Double => getDoubleValue.get == other
     case other: LocalDate => getDateValue.isDefined && getDateValue.get == other
+    case other: Boolean => getBooleanValue.isDefined && getBooleanValue.get == other
+    case _ => false
   }
 
   override def hashCode:Int = {

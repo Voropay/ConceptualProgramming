@@ -6,7 +6,7 @@ import java.time.format.DateTimeFormatter
 /**
  * Created by oleksii.voropai on 8/6/2016.
  */
-class CPStringValue(value: String) extends CPValue{
+class CPStringValue(value: String) extends CPValue with CPPrimitiveType {
 
   override def getTypeName: String = CPDataTypes.string.toString
 
@@ -88,6 +88,8 @@ class CPStringValue(value: String) extends CPValue{
     case other: Int => getIntValue.isDefined && getIntValue.get == other
     case other: Double => getDoubleValue.isDefined && getDoubleValue.get == other
     case other: LocalDate => getDateValue.isDefined && getDateValue.get == other
+    case other: Boolean => getBooleanValue.isDefined && getBooleanValue.get == other
+    case _ => false
   }
 
   override def >(other: CPValue): Option[Boolean] = {

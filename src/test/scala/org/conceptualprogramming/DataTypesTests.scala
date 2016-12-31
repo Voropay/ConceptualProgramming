@@ -3,7 +3,10 @@ package org.conceptualprogramming
 
 import java.time.{LocalDate, Month}
 
+import org.concepualprogramming.core.CPExecutionContext
 import org.concepualprogramming.core.datatypes._
+import org.concepualprogramming.core.datatypes.composite.CPList
+import org.concepualprogramming.core.execution_steps.expressions.{CPConstant, CPFunctionCall}
 import org.scalatest._
 
 /**
@@ -151,36 +154,68 @@ class DataTypesTests extends FlatSpec with Matchers {
     (CPBooleanValue(true) + CPBooleanValue(false)).get.getBooleanValue.get should equal (true)
   }
 
-  "comparators" should "compare and be compared correctly" in {
-    val eq = new CPEquals
-    eq(CPIntValue(6), CPIntValue(6)).get should be (true)
-    eq should equal (new CPEquals)
-    (eq == new CPNotEquals) should not be (true)
+  "List" should "work correctly" in {
+    val context = new CPExecutionContext
+    val l1 = new CPList(List(CPIntValue(1), CPIntValue(2), CPIntValue(3)))
+    val l2 = new CPList(List(CPIntValue(1), CPIntValue(2), CPIntValue(3)))
+    (l1 == l2) should be (true)
+    CPList.register(context)
+    val size = new CPFunctionCall("List.size", Map("list" -> CPConstant(l1)))
+    size.calculate(context).get.getIntValue.get should equal (3)
+    val elementAt = new CPFunctionCall("List.elementAt", Map("list" -> CPConstant(l1), "pos" -> CPConstant(CPIntValue(1))))
+    elementAt.calculate(context).get.getIntValue.get should equal (2)
+    val empty1 = new CPFunctionCall("List.isEmpty", Map("list" -> CPConstant(l1)))
+    empty1.calculate(context).get.getBooleanValue.get should equal (false)
+    val head1 = new CPFunctionCall("List.head", Map("list" -> CPConstant(l1)))
+    head1.calculate(context).get.getIntValue.get should equal (1)
+    val tail1 = new CPFunctionCall("List.tail", Map("list" -> CPConstant(l1)))
+    val t1 = tail1.calculate(context)
+    val head2 = new CPFunctionCall("List.head", Map("list" -> CPConstant(t1.get)))
+    head2.calculate(context).get.getIntValue.get should equal (2)
+    val tail2 = new CPFunctionCall("List.tail", Map("list" -> CPConstant(t1.get)))
+    val t2 = tail2.calculate(context)
+    val head3 = new CPFunctionCall("List.head", Map("list" -> CPConstant(t2.get)))
+    head3.calculate(context).get.getIntValue.get should equal (3)
+    val tail3 = new CPFunctionCall("List.tail", Map("list" -> CPConstant(t2.get)))
+    val t3 = tail3.calculate(context)
+    val empty3 = new CPFunctionCall("List.isEmpty", Map("list" -> CPConstant(t3.get)))
+    empty3.calculate(context).get.getBooleanValue.get should equal (true)
 
-    val neq = new CPNotEquals
-    neq(CPIntValue(6), CPIntValue(7)).get should be (true)
-    neq should equal (new CPNotEquals)
-    (eq == new CPGreater) should not be (true)
+    new CPFunctionCall("List.contains", Map("list" -> CPConstant(l1), "element" -> CPConstant(CPIntValue(1)))).calculate(context).get should equal (CPBooleanValue(true))
+    new CPFunctionCall("List.contains", Map("list" -> CPConstant(l2), "element" -> CPConstant(CPIntValue(5)))).calculate(context).get should equal (CPBooleanValue(false))
 
-    val gt = new CPGreater
-    gt(CPIntValue(7), CPIntValue(6)).get should be (true)
-    gt should equal (new CPGreater)
-    (gt == new CPLess) should not be (true)
+    (new CPList(CPIntValue(1) :: Nil) ?= CPIntValue(1)) should be (true)
+    (new CPList(CPIntValue(1) :: Nil) ?= CPIntValue(2)) should be (false)
+    (new CPList(CPIntValue(1) :: CPIntValue(2) :: Nil) ?= CPIntValue(1)) should be (false)
+    (new CPList(Nil) ?= CPIntValue(0)) should be (false)
 
-    val ls = new CPLess
-    ls(CPIntValue(6), CPIntValue(7)).get should be (true)
-    ls should equal (new CPLess)
-    (ls == new CPGreaterOrEquals) should not be (true)
+    (new CPList(CPStringValue("1") :: Nil) ?= CPStringValue("1")) should be (true)
+    (new CPList(CPStringValue("1") :: Nil) ?= CPStringValue("2")) should be (false)
+    (new CPList(Nil) ?= CPStringValue("")) should be (true)
 
-    val gte = new CPGreaterOrEquals
-    gte(CPIntValue(6), CPIntValue(6)).get should be (true)
-    gte should equal (new CPGreaterOrEquals)
-    (gte == new CPLessOrEquals) should not be (true)
+    (new CPList(CPBooleanValue(true) :: Nil) ?= CPBooleanValue(true)) should be (true)
+    (new CPList(CPBooleanValue(true) :: Nil) ?= CPBooleanValue(false)) should be (false)
+    (new CPList(Nil) ?= CPBooleanValue(false)) should be (true)
 
-    val lse = new CPLessOrEquals
-    lse(CPIntValue(6), CPIntValue(6)).get should be (true)
-    lse should equal (new CPLessOrEquals)
-    (lse == new CPEquals) should not be (true)
+    val united = l1 + new CPList(List(CPIntValue(4), CPIntValue(5)))
+    val size1 = new CPFunctionCall("List.size", Map("list" -> CPConstant(united.get)))
+    size1.calculate(context).get.getIntValue.get should equal (5)
+    new CPFunctionCall("List.contains", Map("list" -> CPConstant(united.get), "element" -> CPConstant(CPIntValue(1)))).calculate(context).get should equal (CPBooleanValue(true))
+    new CPFunctionCall("List.contains", Map("list" -> CPConstant(united.get), "element" -> CPConstant(CPIntValue(5)))).calculate(context).get should equal (CPBooleanValue(true))
+
+    val intersected = united.get - l1
+    val size2 = new CPFunctionCall("List.size", Map("list" -> CPConstant(intersected.get)))
+    size2.calculate(context).get.getIntValue.get should equal (2)
+    new CPFunctionCall("List.contains", Map("list" -> CPConstant(intersected.get), "element" -> CPConstant(CPIntValue(4)))).calculate(context).get should equal (CPBooleanValue(true))
+    new CPFunctionCall("List.contains", Map("list" -> CPConstant(intersected.get), "element" -> CPConstant(CPIntValue(5)))).calculate(context).get should equal (CPBooleanValue(true))
+
+    val diff = united.get / l1
+    val size3 = new CPFunctionCall("List.size", Map("list" -> CPConstant(diff.get)))
+    size3.calculate(context).get.getIntValue.get should equal (3)
+    new CPFunctionCall("List.contains", Map("list" -> CPConstant(diff.get), "element" -> CPConstant(CPIntValue(1)))).calculate(context).get should equal (CPBooleanValue(true))
+    new CPFunctionCall("List.contains", Map("list" -> CPConstant(diff.get), "element" -> CPConstant(CPIntValue(2)))).calculate(context).get should equal (CPBooleanValue(true))
+    new CPFunctionCall("List.contains", Map("list" -> CPConstant(diff.get), "element" -> CPConstant(CPIntValue(3)))).calculate(context).get should equal (CPBooleanValue(true))
+
   }
 
 }

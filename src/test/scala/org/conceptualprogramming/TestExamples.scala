@@ -7,7 +7,6 @@ import org.concepualprogramming.core.execution_steps.expressions.operations.CPSu
 import org.concepualprogramming.core.execution_steps.expressions.{CPConstant, CPAttribute, CPFunctionCall}
 import org.concepualprogramming.core.execution_steps.expressions.functions.GroupingFunctions
 import org.concepualprogramming.core.execution_steps.{ReturnObjectsStep, ConceptResolvingStep}
-import org.concepualprogramming.core.knowledgebase.KnowledgeBase
 import org.scalatest.{Matchers, FlatSpec}
 
 /**

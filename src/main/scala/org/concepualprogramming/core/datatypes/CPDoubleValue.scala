@@ -5,7 +5,7 @@ import java.time.LocalDate
 /**
  * Created by oleksii.voropai on 8/6/2016.
  */
-class CPDoubleValue(value: Double) extends CPValue {
+class CPDoubleValue(value: Double) extends CPValue with CPPrimitiveType {
 
   override def getTypeName: String = CPDataTypes.double.toString
 
@@ -68,6 +68,8 @@ class CPDoubleValue(value: Double) extends CPValue {
     case other: Int => getIntValue.isDefined && getIntValue.get == other
     case other: Double => value == other
     case other: LocalDate => getDateValue.isDefined && getDateValue.get == other
+    case other: Boolean => getBooleanValue.isDefined && getBooleanValue.get == other
+    case _ => false
   }
 
   override def hashCode:Int = {

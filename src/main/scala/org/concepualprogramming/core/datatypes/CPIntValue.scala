@@ -5,7 +5,7 @@ import java.time.LocalDate
 /**
  * Created by oleksii.voropai on 8/6/2016.
  */
-class CPIntValue(value: Int) extends CPValue {
+class CPIntValue(value: Int) extends CPValue with CPPrimitiveType {
 
   override def getTypeName: String = CPDataTypes.int.toString
 
@@ -33,6 +33,8 @@ class CPIntValue(value: Int) extends CPValue {
     case other: Int => value == other
     case other: Double => getDoubleValue.isDefined && getDoubleValue.get == other
     case other: LocalDate => getDateValue.isDefined && getDateValue.get == other
+    case other: Boolean => getBooleanValue.isDefined && getBooleanValue.get == other
+    case _ => false
   }
 
   override def hashCode:Int = {

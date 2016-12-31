@@ -10,5 +10,4 @@ object CPDataTypes extends Enumeration {
   val string = Value("string")
   val date = Value("date")
   val boolean = Value("boolean")
-  val list = Value("list")
 }
