@@ -7,6 +7,7 @@ import org.concepualprogramming.core.{CPObject, CPDecisionNode, CPConcept, CPExe
 /**
  * Created by oleksii.voropai on 10/3/2016.
  */
+
 class ConceptResolvingStep(definition: CPConcept, queryExpr: Map[String, CPExpression]) extends CPExecutionStep{
 
   override def execute(context: CPExecutionContext): Unit = {

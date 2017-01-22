@@ -90,6 +90,8 @@ class ExecutionContextTests extends FlatSpec with Matchers {
     res1.head.get("val").get.getIntValue.get should equal (-1)
 
 
+
+
   }
 
     "Variable step" should "set variable value correctly" in {
@@ -164,6 +166,15 @@ class ExecutionContextTests extends FlatSpec with Matchers {
       res1.head.name should equal ("Res")
       res1.head.get("val").get.getIntValue.get should equal (-1)
       context.deleteFrame
+
+      context.setVariable("a", CPBooleanValue(false))
+      context.setVariable("b", CPIntValue(1))
+      val ifStep1 = new IfStep(new CPVariable("a"), new VariableStep("b", CPConstant(CPIntValue(2))), new NOPStep)
+      ifStep1.execute(context)
+      context.getVariable("b").get.getIntValue.get should equal (1)
+      context.setVariable("a", CPBooleanValue(true))
+      ifStep1.execute(context)
+      context.getVariable("b").get.getIntValue.get should equal (2)
     }
 
     "Function calls" should "be executed correctly" in {

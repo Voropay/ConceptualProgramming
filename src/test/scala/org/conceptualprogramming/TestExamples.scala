@@ -6,7 +6,7 @@ import org.concepualprogramming.core.datatypes.{CPDoubleValue, CPStringValue, CP
 import org.concepualprogramming.core.execution_steps.expressions.operations.CPSub
 import org.concepualprogramming.core.execution_steps.expressions.{CPConstant, CPAttribute, CPFunctionCall}
 import org.concepualprogramming.core.execution_steps.expressions.functions.GroupingFunctions
-import org.concepualprogramming.core.execution_steps.{ReturnObjectsStep, ConceptResolvingStep}
+import org.concepualprogramming.core.execution_steps.{ConceptDefinitionStep, CompositeStep, ReturnObjectsStep, ConceptResolvingStep}
 import org.scalatest.{Matchers, FlatSpec}
 
 /**
@@ -533,10 +533,10 @@ class TestExamples extends FlatSpec with Matchers {
       Nil
     )
 
-    context.knowledgeBase.add(name)
-    context.knowledgeBase.add(income)
-    context.knowledgeBase.add(outcome)
-    context.knowledgeBase.add(profit)
+    //context.knowledgeBase.add(name)
+    //context.knowledgeBase.add(income)
+    //context.knowledgeBase.add(outcome)
+    //context.knowledgeBase.add(profit)
 
     GroupingFunctions.register(context)
 
@@ -551,12 +551,26 @@ class TestExamples extends FlatSpec with Matchers {
         "totalProfit" -> new CPFunctionCall("Grouping.sum", Map("operand" -> new CPAttribute(new CPAttributeName("p", "val"))))),
       Nil
     )
-    val totalRows = totals.resolve(Map(), context)
+
+    val task = new CompositeStep(
+        new ConceptDefinitionStep(name) ::
+        new ConceptDefinitionStep(income) ::
+        new ConceptDefinitionStep(outcome) ::
+        new ConceptDefinitionStep(profit) ::
+        new ConceptResolvingStep(totals, Map()) ::
+        new ReturnObjectsStep(CPConstant(CPStringValue("Total")), Map()) ::
+        Nil
+    )
+    task.execute(context)
+    //val totalRows = totals.resolve(Map(), context)
+    val totalRows = context.getObjectResults
     totalRows.size should equal (1)
     val totalRow = totalRows.head
     totalRow.get("totalIncome").get.getIntValue.get should equal (57)
     totalRow.get("totalOutcome").get.getIntValue.get should equal (50)
     totalRow.get("totalProfit").get.getIntValue.get should equal (7)
+
+
   }
 
 }
