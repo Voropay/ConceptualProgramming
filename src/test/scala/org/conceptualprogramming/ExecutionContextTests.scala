@@ -206,8 +206,10 @@ class ExecutionContextTests extends FlatSpec with Matchers {
       val variableStep = new VariableStatement("res", new CPFunctionCall("Objects.size", Map("name" -> CPConstant(CPStringValue("PosRes")))))
       val returnStep = new ReturnValueStatement(new CPVariable(("res")))
       val body = new CompositeStatement(positiveValueStep :: variableStep :: returnStep :: Nil)
-      val positiveValuesCount= new CPCompositeFunctionDefinition("positiveValuesCount", Nil, body)
-      context.addFunctionDefinition(positiveValuesCount)
+      val positiveValuesCount = new CPCompositeFunctionDefinition("positiveValuesCount", Nil, body)
+
+      val positiveValuesCountDefinition = new FunctionDefinitionStatement(positiveValuesCount)
+      positiveValuesCountDefinition.execute(context)
       val positive =  new CPFunctionCall("positiveValuesCount", Map())
       positive.calculate(context).get.getIntValue.get should be (1)
 
