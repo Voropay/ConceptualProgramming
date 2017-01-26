@@ -351,7 +351,7 @@ class InferenceTests extends FlatSpec with Matchers {
     objects2.head.get("val").get.getIntValue.get should equal (-1)
   }
 
-  "Composite Step" should "resolve objects correctly" in {
+  "Composite statement" should "resolve objects correctly" in {
 
     val context = new CPExecutionContext
     context.knowledgeBase.add(new CPObject("Var", Map("val" -> CPIntValue(1)), "val"))

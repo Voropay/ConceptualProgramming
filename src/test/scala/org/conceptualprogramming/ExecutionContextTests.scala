@@ -33,7 +33,7 @@ class ExecutionContextTests extends FlatSpec with Matchers {
     obj3.head.get("val").get.getIntValue.get should equal (1)
   }
 
-  "Return step" should "find objects correctly" in {
+  "Return statement" should "find objects correctly" in {
     val context = new CPExecutionContext
     context.knowledgeBase.add(new CPObject("Var", Map("val" -> CPIntValue(1)), "val"))
     val step = new ReturnObjectsStatement(CPConstant(CPStringValue("Var")), Map())
@@ -45,7 +45,7 @@ class ExecutionContextTests extends FlatSpec with Matchers {
     res.head.get("val").get.getIntValue.get should equal (1)
   }
 
-  "Resolve step" should "resolve objects correctly" in {
+  "Resolve statement" should "resolve objects correctly" in {
     val context = new CPExecutionContext
     context.knowledgeBase.add(new CPObject("Var", Map("val" -> CPIntValue(1)), "val"))
     context.knowledgeBase.add(new CPObject("Var", Map("val" -> CPIntValue(-1)), "val"))
@@ -94,14 +94,14 @@ class ExecutionContextTests extends FlatSpec with Matchers {
 
   }
 
-    "Variable step" should "set variable value correctly" in {
+    "Variable statement" should "set variable value correctly" in {
       var v = new VariableStatement("a", new CPConstant(CPIntValue(1)))
       val context = new CPExecutionContext
       v.execute(context)
       context.getVariable("a").get.getIntValue.get should equal (1)
     }
 
-    "Return value step" should "return variable value correctly" in {
+    "Return value statement" should "return variable value correctly" in {
       var v = new ReturnValueStatement(new CPVariable("a"))
       val context = new CPExecutionContext
       context.setVariable("a", CPIntValue(1))
@@ -111,7 +111,7 @@ class ExecutionContextTests extends FlatSpec with Matchers {
       res.get.getIntValue.get should equal (1)
     }
 
-    "If step" should "execute nested steps correctly" in {
+    "If statement" should "execute nested statements correctly" in {
       val context = new CPExecutionContext
       context.knowledgeBase.add(new CPObject("Var", Map("val" -> CPIntValue(1)), "val"))
       context.knowledgeBase.add(new CPObject("Var", Map("val" -> CPIntValue(-1)), "val"))
@@ -234,7 +234,7 @@ class ExecutionContextTests extends FlatSpec with Matchers {
       avg.calculate(context).get.getIntValue.get should be (12)
     }
 
-    "while step" should "be executed correctly" in {
+    "while statement" should "be executed correctly" in {
       val iInit = new VariableStatement("i", CPConstant(CPIntValue(0)))
       val iInc = new VariableStatement("i", new CPAdd(new CPVariable("i"), CPConstant(CPIntValue(1))))
       val exitCond = new org.concepualprogramming.core.statements.expressions.operations.CPLess(
@@ -260,7 +260,7 @@ class ExecutionContextTests extends FlatSpec with Matchers {
 
     }
 
-    "for step" should "be executed correctly" in {
+    "for statement" should "be executed correctly" in {
       val iInit = new VariableStatement("i", CPConstant(CPIntValue(0)))
       val iInc = new VariableStatement("i", new CPAdd(new CPVariable("i"), CPConstant(CPIntValue(1))))
       val exitCond = new org.concepualprogramming.core.statements.expressions.operations.CPLess(
