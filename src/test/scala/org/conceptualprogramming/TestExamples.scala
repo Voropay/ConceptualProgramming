@@ -3,10 +3,10 @@ package org.conceptualprogramming
 import org.concepualprogramming.core.dependencies._
 import org.concepualprogramming.core._
 import org.concepualprogramming.core.datatypes.{CPDoubleValue, CPStringValue, CPIntValue}
-import org.concepualprogramming.core.execution_steps.expressions.operations.CPSub
-import org.concepualprogramming.core.execution_steps.expressions.{CPConstant, CPAttribute, CPFunctionCall}
-import org.concepualprogramming.core.execution_steps.expressions.functions.GroupingFunctions
-import org.concepualprogramming.core.execution_steps.{ConceptDefinitionStep, CompositeStep, ReturnObjectsStep, ConceptResolvingStep}
+import org.concepualprogramming.core.statements.expressions.operations.CPSub
+import org.concepualprogramming.core.statements.expressions.{CPConstant, CPAttribute, CPFunctionCall}
+import org.concepualprogramming.core.statements.expressions.functions.GroupingFunctions
+import org.concepualprogramming.core.statements.{ConceptDefinitionStatement, CompositeStatement, ReturnObjectsStatement, ConceptResolvingStatement}
 import org.scalatest.{Matchers, FlatSpec}
 
 /**
@@ -460,13 +460,13 @@ class TestExamples extends FlatSpec with Matchers {
     )
 
     val task = new CPFreeConcept("ToNotify",
-      new ConceptResolvingStep(name, Map()) ::
-      new ConceptResolvingStep(income, Map()) ::
-      new ConceptResolvingStep(outcome, Map()) ::
-      new ConceptResolvingStep(profit, Map()) ::
-      new ConceptResolvingStep(unprofitable, Map()) ::
-      new ConceptResolvingStep(toNotify, Map()) ::
-      new ReturnObjectsStep(CPConstant(CPStringValue("ToNotify")), Map()) ::  Nil
+      new ConceptResolvingStatement(name, Map()) ::
+      new ConceptResolvingStatement(income, Map()) ::
+      new ConceptResolvingStatement(outcome, Map()) ::
+      new ConceptResolvingStatement(profit, Map()) ::
+      new ConceptResolvingStatement(unprofitable, Map()) ::
+      new ConceptResolvingStatement(toNotify, Map()) ::
+      new ReturnObjectsStatement(CPConstant(CPStringValue("ToNotify")), Map()) ::  Nil
     )
 
     val toNotifyRows = task.resolve(Map(), context)
@@ -482,8 +482,8 @@ class TestExamples extends FlatSpec with Matchers {
     toNotifyRow1.get("val").get.getIntValue.get should equal (-2)
 
     val taskWithQuery = new CPFreeConcept("ToNotify",
-      new ConceptResolvingStep(name, Map()) ::
-      new ReturnObjectsStep(CPConstant(CPStringValue("Name")), Map()) ::  Nil
+      new ConceptResolvingStatement(name, Map()) ::
+      new ReturnObjectsStatement(CPConstant(CPStringValue("Name")), Map()) ::  Nil
     )
 
     val names1 = taskWithQuery.resolve(Map("row" -> CPIntValue(1)), context)
@@ -552,13 +552,13 @@ class TestExamples extends FlatSpec with Matchers {
       Nil
     )
 
-    val task = new CompositeStep(
-        new ConceptDefinitionStep(name) ::
-        new ConceptDefinitionStep(income) ::
-        new ConceptDefinitionStep(outcome) ::
-        new ConceptDefinitionStep(profit) ::
-        new ConceptResolvingStep(totals, Map()) ::
-        new ReturnObjectsStep(CPConstant(CPStringValue("Total")), Map()) ::
+    val task = new CompositeStatement(
+        new ConceptDefinitionStatement(name) ::
+        new ConceptDefinitionStatement(income) ::
+        new ConceptDefinitionStatement(outcome) ::
+        new ConceptDefinitionStatement(profit) ::
+        new ConceptResolvingStatement(totals, Map()) ::
+        new ReturnObjectsStatement(CPConstant(CPStringValue("Total")), Map()) ::
         Nil
     )
     task.execute(context)

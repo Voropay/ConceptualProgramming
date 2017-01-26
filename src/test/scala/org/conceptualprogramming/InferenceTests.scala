@@ -2,11 +2,11 @@ package org.conceptualprogramming
 
 import org.concepualprogramming.core.datatypes._
 import org.concepualprogramming.core._
-import org.concepualprogramming.core.execution_steps.expressions.operations.CPEquals
-import org.concepualprogramming.core.execution_steps.expressions.operations._
+import org.concepualprogramming.core.statements.expressions.operations.CPEquals
+import org.concepualprogramming.core.statements.expressions.operations._
 import org.concepualprogramming.core.dependencies.CPDependency
-import org.concepualprogramming.core.execution_steps._
-import org.concepualprogramming.core.execution_steps.expressions.{CPAttribute, CPConstant, CPVariable}
+import org.concepualprogramming.core.statements._
+import org.concepualprogramming.core.statements.expressions.{CPAttribute, CPConstant, CPVariable}
 
 import org.scalatest.{Matchers, FlatSpec}
 
@@ -299,7 +299,7 @@ class InferenceTests extends FlatSpec with Matchers {
     val context = new CPExecutionContext
     context.knowledgeBase.add(new CPObject("Var", Map("val" -> CPIntValue(1)), "val"))
     context.knowledgeBase.add(new CPObject("Var", Map("val" -> CPIntValue(-1)), "val"))
-    val step1 = new ConceptResolvingStep(
+    val step1 = new ConceptResolvingStatement(
       new CPStrictConcept(
         "Res",
         "val" :: Nil,
@@ -314,7 +314,7 @@ class InferenceTests extends FlatSpec with Matchers {
       ),
       Map()
     )
-    val step2 = new ReturnObjectsStep(CPConstant(CPStringValue("Res")), Map())
+    val step2 = new ReturnObjectsStatement(CPConstant(CPStringValue("Res")), Map())
     val concept = new CPFreeConcept("PositiveVariables", step1 :: step2 :: Nil)
     val objects = concept.resolve(Map(), context)
     objects.size should equal (1)
@@ -334,7 +334,7 @@ class InferenceTests extends FlatSpec with Matchers {
     objects1.head.name should equal ("PositiveVariables")
     objects1.head.get("val").get.getIntValue.get should equal (1)
 
-    val step11 = new ConceptResolvingStep(
+    val step11 = new ConceptResolvingStatement(
       new CPStrictConcept(
         "Res",
         "val" :: Nil,
@@ -357,7 +357,7 @@ class InferenceTests extends FlatSpec with Matchers {
     context.knowledgeBase.add(new CPObject("Var", Map("val" -> CPIntValue(1)), "val"))
     context.knowledgeBase.add(new CPObject("Var", Map("val" -> CPIntValue(-1)), "val"))
 
-    val positiveValueStep = new ConceptResolvingStep(
+    val positiveValueStep = new ConceptResolvingStatement(
       new CPStrictConcept(
         "PosRes",
         "val" :: Nil,
@@ -372,7 +372,7 @@ class InferenceTests extends FlatSpec with Matchers {
       ),
       Map()
     )
-    val negativeValueStep = new ConceptResolvingStep(
+    val negativeValueStep = new ConceptResolvingStatement(
       new CPStrictConcept(
         "NegRes",
         "val" :: Nil,
@@ -387,14 +387,14 @@ class InferenceTests extends FlatSpec with Matchers {
       ),
       Map()
     )
-    val returnPositiveStep = new ReturnObjectsStep(CPConstant(CPStringValue("PosRes")), Map())
-    val returnNegativeStep = new ReturnObjectsStep(CPConstant(CPStringValue("NegRes")), Map())
-    val compositePositiveStep = new CompositeStep(positiveValueStep :: returnPositiveStep :: Nil)
-    val compositeNegativeStep = new CompositeStep(negativeValueStep :: returnNegativeStep :: Nil)
+    val returnPositiveStep = new ReturnObjectsStatement(CPConstant(CPStringValue("PosRes")), Map())
+    val returnNegativeStep = new ReturnObjectsStatement(CPConstant(CPStringValue("NegRes")), Map())
+    val compositePositiveStep = new CompositeStatement(positiveValueStep :: returnPositiveStep :: Nil)
+    val compositeNegativeStep = new CompositeStatement(negativeValueStep :: returnNegativeStep :: Nil)
     val condPos = new CPEquals(new CPVariable("pos"), new CPConstant(CPBooleanValue(true)))
 
-    val variableStep = new VariableStep("pos", new CPConstant(CPBooleanValue(true)))
-    val ifStep = new IfStep(condPos, compositePositiveStep, compositeNegativeStep)
+    val variableStep = new VariableStatement("pos", new CPConstant(CPBooleanValue(true)))
+    val ifStep = new IfStatement(condPos, compositePositiveStep, compositeNegativeStep)
 
     val concept = new CPFreeConcept("Variables", variableStep :: ifStep :: Nil)
 

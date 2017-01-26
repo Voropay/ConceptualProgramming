@@ -1,7 +1,7 @@
 package org.concepualprogramming.core
 
 import org.concepualprogramming.core.datatypes.CPValue
-import org.concepualprogramming.core.execution_steps.expressions.CPFunctionDefinition
+import org.concepualprogramming.core.statements.expressions.CPFunctionDefinition
 import org.concepualprogramming.core.knowledgebase.KnowledgeBase
 
 import scala.collection.mutable

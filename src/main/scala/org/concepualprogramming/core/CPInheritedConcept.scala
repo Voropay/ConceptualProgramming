@@ -2,7 +2,7 @@ package org.concepualprogramming.core
 
 import org.concepualprogramming.core.datatypes.CPValue
 import org.concepualprogramming.core.dependencies.CPDependency
-import org.concepualprogramming.core.execution_steps.expressions.{CPAttribute, CPExpression}
+import org.concepualprogramming.core.statements.expressions.{CPAttribute, CPExpression}
 import org.concepualprogramming.core.utils.Utils
 
 /**

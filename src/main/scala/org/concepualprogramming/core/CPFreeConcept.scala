@@ -1,16 +1,16 @@
 package org.concepualprogramming.core
 
 import org.concepualprogramming.core.datatypes.CPValue
-import org.concepualprogramming.core.execution_steps.CPExecutionStep
+import org.concepualprogramming.core.statements.CPStatement
 import org.concepualprogramming.core.utils.Utils
 import scala.collection.mutable.ArrayBuffer
 
 /**
  * Created by oleksii.voropai on 10/2/2016.
  */
-class CPFreeConcept(_name: String, _steps: List[CPExecutionStep]) extends CPConcept{
+class CPFreeConcept(_name: String, _steps: List[CPStatement]) extends CPConcept{
 
-  val steps = ArrayBuffer[CPExecutionStep]() ++ _steps
+  val steps = ArrayBuffer[CPStatement]() ++ _steps
 
   override def resolve(query: Map[String, CPValue], context: CPExecutionContext): List[CPObject] = {
     context.addFrame

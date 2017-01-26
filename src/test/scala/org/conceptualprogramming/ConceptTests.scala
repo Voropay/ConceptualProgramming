@@ -1,9 +1,9 @@
 package org.conceptualprogramming
 
 import org.concepualprogramming.core.dependencies._
-import org.concepualprogramming.core.execution_steps.expressions.functions.GroupingFunctions
-import org.concepualprogramming.core.execution_steps.expressions.operations.{CPMul, CPSub}
-import org.concepualprogramming.core.execution_steps.expressions.{CPConstant, CPFunctionCall, CPAttribute, CPExpression}
+import org.concepualprogramming.core.statements.expressions.functions.GroupingFunctions
+import org.concepualprogramming.core.statements.expressions.operations.{CPMul, CPSub}
+import org.concepualprogramming.core.statements.expressions.{CPConstant, CPFunctionCall, CPAttribute, CPExpression}
 import org.concepualprogramming.core._
 import org.concepualprogramming.core.datatypes.{CPStringValue, CPValue, CPIntValue}
 import org.scalatest.{Matchers, FlatSpec}

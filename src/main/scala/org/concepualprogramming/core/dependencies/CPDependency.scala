@@ -1,7 +1,7 @@
 package org.concepualprogramming.core.dependencies
 
-import org.concepualprogramming.core.execution_steps.expressions.{CPConstant, CPAttribute, CPExpression}
-import org.concepualprogramming.core.execution_steps.expressions.operations._
+import org.concepualprogramming.core.statements.expressions.{CPConstant, CPAttribute, CPExpression}
+import org.concepualprogramming.core.statements.expressions.operations._
 import org.concepualprogramming.core.{CPExecutionContext, CPAttributeName}
 import org.concepualprogramming.core.datatypes.{CPBooleanValue, CPValue}
 

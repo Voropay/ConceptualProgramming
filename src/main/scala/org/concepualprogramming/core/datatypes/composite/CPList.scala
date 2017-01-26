@@ -4,8 +4,8 @@ import java.time.LocalDate
 
 import org.concepualprogramming.core.CPExecutionContext
 import org.concepualprogramming.core.datatypes.{CPIntValue, CPBooleanValue, CPPrimitiveType, CPValue}
-import org.concepualprogramming.core.execution_steps.expressions.functions.BuiltInFunctionDefinition
-import org.concepualprogramming.core.execution_steps.expressions.{CPExpression, CPFunctionDefinition}
+import org.concepualprogramming.core.statements.expressions.functions.BuiltInFunctionDefinition
+import org.concepualprogramming.core.statements.expressions.{CPExpression, CPFunctionDefinition}
 
 /**
  * Created by oleksii.voropai on 12/30/2016.
