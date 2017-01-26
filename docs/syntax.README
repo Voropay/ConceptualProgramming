@@ -1,0 +1,167 @@
+The basics of syntax
+
+Expression is the part of almost any language elements and can be used for value calculations.
+Expression may consists of constants, variables, object attributes operators and functions, they also may include sub expressions wrapped with parentheses.
+```
+<expr> ::= <constant> |
+           <attribute> |
+           <variable> |
+           <functionCall> |
+           <operator> |
+           <subExpr>
+```
+
+Constant is a literal that represents fixed value of one of basic or composite types.
+```
+<constant> ::= <boolean> |
+               <int> |
+               <float> |
+               <date> |
+               <string> |
+               <composite>
+<boolean>   ::= true | false
+<int>       ::= [<sign>] {<digit>}
+<float>     ::= [<sign>] {<digit>} . <digit> {<digit>}
+<string>    ::= " {<character>} " | ' {<character>} '
+<date>      ::= <digit><digit>.<digit><digit>.<digit><digit><digit><digit>  // there must be all supported date formats
+<composite> ::= <list> // it's a place for all other composite types not implemented yet e.g. maps, objects, classes, lambdas etc.
+<list>      ::= \[ [<constant> {, <constant>}] \]
+```
+Attribute represents attribute of a specific concept or object. It consists of concept alias and attribute name separated by dot.
+Aliases and names have the same syntax as variables in all other languages. They can contain letters, digits, underscores, and dollar signs and begin with a latin letter, underscore, and dollar signs.
+```
+<attribute>             ::= <identifier> . <identifier>
+<identifier>            ::= <identifierStartSymbol> {<identifierBodySymbol>}
+<identifierStartSymbol> ::= a | ... | z | A | ... | Z | _ | $
+<identifierBodySymbol>  ::= a | ... | z | A | ... | Z | _ | $ | 0 | ... | 9
+```
+Variable is a name which is related to a value.
+```
+<variable> ::= <identifier>
+```
+Function call can also be a part of expression. It consists of function name identifier and and a list of arguments separated by comma and wrapped with parentheses.
+```
+<functionCall> ::= <identifier> ( [<expr> {, <expr>}] )
+```
+Operator represents one of the builtin arithmetic, logical and comparison operations.
+```
+<operator> ::= <add> |
+               <sub> |
+               <mul> |
+               <div> |
+               <and> |
+               <or> |
+               <not> |
+               <equals> |
+               <notEquals> |
+               <greater> |
+               <greaterOrEquals> |
+               <less> |
+               <lessOrEquals>
+<add> ::= <expr> + <expr>
+<sub> ::= <expr> - <expr>
+<mul> ::= <expr> * <expr>
+<div> ::= <expr> / <expr>
+<and> ::= <expr> && <expr>
+<or> ::= <expr> \|\| <expr>
+<not> ::= ! <expr>
+<equals> ::= <expr> == <expr>
+<notEquals> ::= <expr> != <expr>
+<greater> ::= <expr> \> <expr>
+<greaterOrEquals> ::= <expr> \>= <expr>
+<less> ::= <expr> \< <expr>
+<lessOrEquals> ::= <expr> \<= <expr>
+```
+Sub expression is a nested expression wrapped with parentheses. It signifies an order in which expression elements will be calculated.
+```
+<subExpr> ::= ( <expr> )
+```
+
+Statement is a smallest standalone element of programming language.
+```
+<statement> ::= <variableAssignment> |
+                <returnValue> |
+                <returnObject> |
+                <if> |
+                <while> |
+                <for> |
+                <functionDefinition> |
+                <objectDefinition> |
+                <conceptDefinition> |
+                <resolveConcept> |
+                <compositeStatement>
+```
+Variable assignment statement allow assigning value to a variable in imperative style.
+```
+<variableAssignment> ::= <identifier> = <expr>
+```
+Return value statement can be used to stop function execution and allow to specify a return value to be passed back to the code that called the function.
+```
+<returnValue> ::= return <expr>
+```
+Return object statement can be used to stop free concept resolving routine execution and allow to specify a object to be passed back to the code that called it.
+```
+<returnValue> ::= return <identifier> [ ( [<identifier> : <expr> {, <identifier> : <expr>}] ) ]
+```
+If is a standard conditional statement.
+```
+<if> ::= if ( <expr> ) [<compositeStatement>] else [<compositeStatement>]
+```
+For is a standard for-loop statement.
+```
+<for> ::= for ( [<statement>]; [<expr>]; [<statement>]) <compositeStatement>
+```
+While is a standard while-loop statement.
+```
+<while> ::= while ( [<expr>] ) <compositeStatement>
+```
+Function definition allows to create a function.
+```
+<functionDefinition> ::= def <identifier> ( [<identifier> {, <identifier>}] ) <compositeStatement>
+```
+Object definition is a statement that allows to create an object and add it to a knowledge base.
+```
+<objectDefinition> ::= object <identifier> ( <identifier> : <expr> {, <identifier> : <expr>})
+```
+Concept definition is a statement that allows to create child concept based on relations between child concepts and objects. Relations are based on dependencies of their attributes.
+```
+<conceptDefinition> ::= concept <concept>
+```
+Concept resolving statement allows to define concept, resolve it and create objects.
+```
+<resolveConcept> ::= object <concept>
+```
+At the moment there are 4 types of concepts supported by the language
+```
+<concept> ::= <strictConcept> |
+              <inheritedConcept> |
+              <groupingConcept> |
+              <freeConcept>
+```
+Strict concept is a Prolog-style concept where all attribute dependencies are defined explicitly.
+```
+<strictConcept> ::= <identifier> ( <identifier> [<comparison> <expr>] {, <identifier> [<comparison> <expr>]}) :=
+                    <identifier> [ : <identifier>] ( <identifier> [<comparison> <expr>] {, <identifier> [<comparison> <expr>]})
+                    {, <identifier> [ : <identifier>] ( <identifier> [<comparison> <expr>] {, <identifier> [<comparison> <expr>]})}
+                    {, <expr>}
+<comparison>    ::= = | != | \> | \< | \>= | \<=
+```
+Inherited concept is a concept which attributes are implicitly derived from parent concepts.
+```
+<inheritedConcept> ::= <identifier> [( <identifier> [<comparison> <expr>] {, <identifier> [<comparison> <expr>]})] :=>
+                       <identifier> [ : <identifier>] ( <identifier> [<comparison> <expr>] {, <identifier> [<comparison> <expr>]})
+                       {, <identifier> [ : <identifier>] ( <identifier> [<comparison> <expr>] {, <identifier> [<comparison> <expr>]})}
+                       {, <expr>}
+```
+Grouping concept is a concept which attributes are calculated as aggregation of parent concept attributes.
+```
+<groupingConcept> ::= <identifier> ( <identifier> [<groupingComparison> <expr>] {, <identifier> [<groupingComparison> <expr>]}) :=<
+                      <identifier> [ : <identifier>] ( <identifier> [<comparison> <expr>] {, <identifier> [<comparison> <expr>]})
+                      {, <identifier> [ : <identifier>] ( <identifier> [<comparison> <expr>] {, <identifier> [<comparison> <expr>]})}
+                      {, <expr>}
+<comparison>      ::= : | <comparison>
+```
+Free concept allows to define object creation in imperative style
+```
+<freeConcept> ::= <identifier> := <compositeStatement>
+```
