@@ -10,7 +10,7 @@ trait CPValue {
 
   def getTypeName: String
   def getIntValue: Option[Int]
-  def getDoubleValue: Option[Double]
+  def getFloatingValue: Option[Double]
   def getStringValue: Option[String]
   def getDateValue: Option[LocalDate]
   def getBooleanValue: Option[Boolean]

@@ -21,11 +21,11 @@ case class CPList(values: List[CPValue]) extends CPCompositeType {
     }
   }
 
-  override def getDoubleValue: Option[Double] = {
+  override def getFloatingValue: Option[Double] = {
     if(values.size != 1) {
       return None
     } else {
-      return values.head.getDoubleValue
+      return values.head.getFloatingValue
     }
   }
 
@@ -58,7 +58,7 @@ case class CPList(values: List[CPValue]) extends CPCompositeType {
     case other: CPPrimitiveType => values.size <= 1 && other.similar(this)
     case other: String => values.size <= 1 && getStringValue.isDefined && getStringValue.get == other
     case other: Int => values.size <= 1 && getIntValue.isDefined && getIntValue.get == other
-    case other: Double => values.size <= 1 && getDoubleValue.isDefined && getDoubleValue.get == other
+    case other: Double => values.size <= 1 && getFloatingValue.isDefined && getFloatingValue.get == other
     case other: LocalDate => values.size <= 1 && getDateValue.isDefined && getDateValue.get == other
     case other: Boolean => values.size <= 1 && getBooleanValue.isDefined && getBooleanValue.get == other
     case _ => false

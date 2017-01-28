@@ -1,7 +1,7 @@
 package org.concepualprogramming.core.statements.expressions.functions
 
 import org.concepualprogramming.core.{CPSubstitutions, CPExecutionContext}
-import org.concepualprogramming.core.datatypes.{CPDoubleValue, CPIntValue, CPBooleanValue, CPValue}
+import org.concepualprogramming.core.datatypes.{CPFloatingValue, CPIntValue, CPBooleanValue, CPValue}
 import org.concepualprogramming.core.statements.expressions.{CPExpression, CPFunctionDefinition}
 
 /**
@@ -79,11 +79,11 @@ object GroupingFunctions {
       }
       val head = substValues.head
       val sum = substValues.tail.foldLeft(head){_.get + _.get}
-      if(sum.isEmpty || sum.get.getDoubleValue.isEmpty) {
+      if(sum.isEmpty || sum.get.getFloatingValue.isEmpty) {
         return None
       }
       val count = substList.size
-      return Some(CPDoubleValue(sum.get.getDoubleValue.get / count))
+      return Some(CPFloatingValue(sum.get.getFloatingValue.get / count))
     }
     new BuiltInFunctionDefinition(
       "Grouping.avg",

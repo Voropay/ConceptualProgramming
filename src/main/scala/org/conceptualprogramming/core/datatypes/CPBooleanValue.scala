@@ -13,13 +13,13 @@ class CPBooleanValue(value: Boolean) extends CPValue with CPPrimitiveType {
 
   override def >(other: CPValue): Option[Boolean] = Some((value && !other.getBooleanValue.get))
 
-  override def getDoubleValue: Option[Double] = if(value) {Some(1)} else {Some(0)}
+  override def getFloatingValue: Option[Double] = if(value) {Some(1)} else {Some(0)}
 
   override def similar(other: Any): Boolean = other match {
     case other: CPValue => other.getBooleanValue.get == value
     case other: String => other.equalsIgnoreCase(getStringValue.get)
     case other: Int => getIntValue.get == other
-    case other: Double => getDoubleValue.get == other
+    case other: Double => getFloatingValue.get == other
     case other: LocalDate => false
     case other: Boolean => value == other
     case _ => false

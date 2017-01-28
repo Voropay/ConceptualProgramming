@@ -11,7 +11,7 @@ class CPDateValue(value: LocalDate) extends CPValue with CPPrimitiveType{
 
   override def getTypeName: String = CPDataTypes.date.toString
 
-  override def getDoubleValue: Option[Double] = Some(value.getDayOfMonth.toDouble)
+  override def getFloatingValue: Option[Double] = Some(value.getDayOfMonth.toDouble)
 
   override def getStringValue: Option[String] = Some(value.format(DateTimeFormatter.ofPattern("yyyy-MMM-dd")))
 
@@ -32,7 +32,7 @@ class CPDateValue(value: LocalDate) extends CPValue with CPPrimitiveType{
     case other: CPValue => other.getDateValue.isDefined && other.getDateValue.get == value
     case other: String => other == getStringValue.get
     case other: Int => getIntValue.isDefined && getIntValue.get == other
-    case other: Double => getDoubleValue.get == other
+    case other: Double => getFloatingValue.get == other
     case other: LocalDate => getDateValue.isDefined && getDateValue.get == other
     case other: Boolean => getBooleanValue.isDefined && getBooleanValue.get == other
     case _ => false

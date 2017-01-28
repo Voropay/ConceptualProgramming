@@ -2,7 +2,7 @@ package org.conceptualprogramming
 
 import org.concepualprogramming.core.statements.expressions.operations._
 import org.concepualprogramming.core.{CPSubstitutions, CPExecutionContext, CPAttributeName}
-import org.concepualprogramming.core.datatypes.{CPDoubleValue, CPBooleanValue, CPIntValue}
+import org.concepualprogramming.core.datatypes.{CPFloatingValue, CPBooleanValue, CPIntValue}
 import org.concepualprogramming.core.statements.expressions.{CPAttribute, CPVariable, CPConstant}
 import org.scalatest._
 
@@ -117,7 +117,7 @@ class ExpressionTests extends FlatSpec with Matchers {
 
     val div2 = new CPDiv(div, new CPAttribute(new CPAttributeName("a", "b")))
     div2.isDefined(context) should be (false)
-    val inferred = div2.infer(CPDoubleValue(1.5), context)
+    val inferred = div2.infer(CPFloatingValue(1.5), context)
     inferred.get(new CPAttributeName("a", "b")).get.getIntValue.get should equal (2)
   }
 

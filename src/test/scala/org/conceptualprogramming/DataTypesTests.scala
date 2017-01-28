@@ -16,7 +16,7 @@ class DataTypesTests extends FlatSpec with Matchers {
   "An IntValue" should "return values of all basic types" in {
     val value = CPIntValue(10);
     value.getTypeName should equal ("int");
-    value.getDoubleValue.get should equal (10.0)
+    value.getFloatingValue.get should equal (10.0)
     value.getIntValue.get should equal (10)
     value.getStringValue.get should equal ("10")
     value.getDateValue should equal (None)
@@ -27,9 +27,9 @@ class DataTypesTests extends FlatSpec with Matchers {
   }
 
   "An DoubleValue" should "return values of all basic types" in {
-    val value = CPDoubleValue(10.6);
+    val value = CPFloatingValue(10.6);
     value.getTypeName should equal ("double");
-    value.getDoubleValue.get should equal (10.6)
+    value.getFloatingValue.get should equal (10.6)
     value.getIntValue.get should equal (11)
     value.getStringValue.get should equal ("10.6")
     value.getDateValue should equal (None)
@@ -39,14 +39,14 @@ class DataTypesTests extends FlatSpec with Matchers {
   "An StringValue" should "return values of all basic types" in {
     val value = CPStringValue("10");
     value.getTypeName should equal ("string");
-    value.getDoubleValue.get should equal (10.0)
+    value.getFloatingValue.get should equal (10.0)
     value.getIntValue.get should equal (10)
     value.getStringValue.get should equal ("10")
     value.getDateValue should equal (None)
     value.getBooleanValue.get should be (true)
 
     val value1 = CPStringValue("10.3")
-    value1.getDoubleValue.get should equal (10.3)
+    value1.getFloatingValue.get should equal (10.3)
     value1.getIntValue should equal (None)
 
     val value2 = CPStringValue("2016-Aug-06");
@@ -59,7 +59,7 @@ class DataTypesTests extends FlatSpec with Matchers {
   "An DateValue" should "return values of all basic types" in {
     val value = CPDateValue(LocalDate.of(2016, Month.AUGUST, 6));
     value.getTypeName should equal ("date");
-    value.getDoubleValue.get should equal (6.0)
+    value.getFloatingValue.get should equal (6.0)
     value.getIntValue.get should equal (6)
     value.getStringValue.get should equal ("2016-Aug-06")
     value.getDateValue.get should equal (LocalDate.of(2016, Month.AUGUST, 6))
@@ -69,7 +69,7 @@ class DataTypesTests extends FlatSpec with Matchers {
   "An BooleanValue" should "return values of all basic types" in {
     val trueValue = CPBooleanValue(true);
     trueValue.getTypeName should equal ("boolean");
-    trueValue.getDoubleValue.get should equal (1)
+    trueValue.getFloatingValue.get should equal (1)
     trueValue.getIntValue.get should equal (1)
     trueValue.getStringValue.get should equal ("true")
     trueValue.getDateValue should equal (None)
@@ -77,7 +77,7 @@ class DataTypesTests extends FlatSpec with Matchers {
 
     val falseValue = CPBooleanValue(false);
     falseValue.getTypeName should equal ("boolean");
-    falseValue.getDoubleValue.get should equal (0)
+    falseValue.getFloatingValue.get should equal (0)
     falseValue.getIntValue.get should equal (0)
     falseValue.getStringValue.get should equal ("false")
     falseValue.getDateValue should equal (None)
@@ -87,7 +87,7 @@ class DataTypesTests extends FlatSpec with Matchers {
   "Values" should "be compared correctly" in {
     val intVal = CPIntValue(6)
     val stringVal = CPStringValue("6")
-    val doubleVal = CPDoubleValue(6)
+    val doubleVal = CPFloatingValue(6)
     val dateVal = CPDateValue(2016, Month.AUGUST, 6);
     val boolVal = CPBooleanValue(true);
 
@@ -109,14 +109,14 @@ class DataTypesTests extends FlatSpec with Matchers {
     (CPIntValue(6) ?= CPIntValue(6)) should be (true)
     (CPIntValue(6) !?= CPIntValue(7)) should be (true)
 
-    (CPDoubleValue(6) > CPDoubleValue(5)).get should be (true)
-    (CPDoubleValue(6) < CPDoubleValue(7)).get should be (true)
-    (CPDoubleValue(6) >= CPDoubleValue(6)).get should be (true)
-    (CPDoubleValue(6) >= CPDoubleValue(5)).get should be (true)
-    (CPDoubleValue(6) <= CPDoubleValue(6)).get should be (true)
-    (CPDoubleValue(6) <= CPDoubleValue(7)).get should be (true)
-    (CPDoubleValue(6) ?= CPDoubleValue(6)) should be (true)
-    (CPDoubleValue(6) !?= CPDoubleValue(7)) should be (true)
+    (CPFloatingValue(6) > CPFloatingValue(5)).get should be (true)
+    (CPFloatingValue(6) < CPFloatingValue(7)).get should be (true)
+    (CPFloatingValue(6) >= CPFloatingValue(6)).get should be (true)
+    (CPFloatingValue(6) >= CPFloatingValue(5)).get should be (true)
+    (CPFloatingValue(6) <= CPFloatingValue(6)).get should be (true)
+    (CPFloatingValue(6) <= CPFloatingValue(7)).get should be (true)
+    (CPFloatingValue(6) ?= CPFloatingValue(6)) should be (true)
+    (CPFloatingValue(6) !?= CPFloatingValue(7)) should be (true)
 
     (CPStringValue("abc") > CPStringValue("aba")).get should be (true)
     (CPStringValue("abc") < CPStringValue("abcd")).get should be (true)
@@ -148,7 +148,7 @@ class DataTypesTests extends FlatSpec with Matchers {
 
   "arithmetical operations" should "be performed correctly" in {
     (CPIntValue(1) + CPIntValue(2)).get.getIntValue.get should equal (3)
-    (CPDoubleValue(1.1) + CPIntValue(2)).get.getDoubleValue.get should equal (3.1)
+    (CPFloatingValue(1.1) + CPIntValue(2)).get.getFloatingValue.get should equal (3.1)
     (CPStringValue("abc") + CPStringValue("def")).get.getStringValue.get should equal ("abcdef")
 
     (CPBooleanValue(true) + CPBooleanValue(false)).get.getBooleanValue.get should equal (true)

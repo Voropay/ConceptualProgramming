@@ -5,11 +5,11 @@ import java.time.LocalDate
 /**
  * Created by oleksii.voropai on 8/6/2016.
  */
-class CPDoubleValue(value: Double) extends CPValue with CPPrimitiveType {
+class CPFloatingValue(value: Double) extends CPValue with CPPrimitiveType {
 
   override def getTypeName: String = CPDataTypes.double.toString
 
-  override def getDoubleValue: Option[Double] = Some(value)
+  override def getFloatingValue: Option[Double] = Some(value)
 
   override def getStringValue: Option[String] = Some(value.toString())
 
@@ -22,48 +22,48 @@ class CPDoubleValue(value: Double) extends CPValue with CPPrimitiveType {
   def getValue: Double = value
 
   override def +(other: CPValue): Option[CPValue] = {
-    val otherVal = other.getDoubleValue
+    val otherVal = other.getFloatingValue
     if(otherVal.isEmpty) {
       None
     } else {
-      Some(CPDoubleValue(value + otherVal.get))
+      Some(CPFloatingValue(value + otherVal.get))
     }
   }
 
   override def -(other: CPValue): Option[CPValue] = {
-    val otherVal = other.getDoubleValue
+    val otherVal = other.getFloatingValue
     if(otherVal.isEmpty) {
       None
     } else {
-      Some(CPDoubleValue(value - otherVal.get))
+      Some(CPFloatingValue(value - otherVal.get))
     }
   }
 
   override def *(other: CPValue): Option[CPValue] = {
-    val otherVal = other.getDoubleValue
+    val otherVal = other.getFloatingValue
     if(otherVal.isEmpty) {
       None
     } else {
-      Some(CPDoubleValue(value * otherVal.get))
+      Some(CPFloatingValue(value * otherVal.get))
     }
   }
 
   override def /(other: CPValue): Option[CPValue] = {
-    val otherVal = other.getDoubleValue
+    val otherVal = other.getFloatingValue
     if(otherVal.isEmpty || otherVal.get == 0) {
       None
     } else {
-      Some(CPDoubleValue(value / otherVal.get))
+      Some(CPFloatingValue(value / otherVal.get))
     }
   }
 
   override def equals(other: Any): Boolean = other match {
-    case other: CPDoubleValue => other.getDoubleValue.get == value
+    case other: CPFloatingValue => other.getFloatingValue.get == value
     case _ => false
   }
 
   override def similar(other: Any): Boolean = other match {
-    case other: CPValue => other.getDoubleValue.isDefined && other.getDoubleValue.get == value
+    case other: CPValue => other.getFloatingValue.isDefined && other.getFloatingValue.get == value
     case other: String => other == getStringValue.get
     case other: Int => getIntValue.isDefined && getIntValue.get == other
     case other: Double => value == other
@@ -81,7 +81,7 @@ class CPDoubleValue(value: Double) extends CPValue with CPPrimitiveType {
   }
 
   override def >(other: CPValue): Option[Boolean] = {
-    val otherVal = other.getDoubleValue
+    val otherVal = other.getFloatingValue
     if(otherVal.isEmpty) {
       None
     } else {
@@ -94,7 +94,7 @@ class CPDoubleValue(value: Double) extends CPValue with CPPrimitiveType {
   override def ?=(other: CPValue): Boolean = similar(other)
 
   override def <=(other: CPValue): Option[Boolean] = {
-    val otherVal = other.getDoubleValue
+    val otherVal = other.getFloatingValue
     if(otherVal.isEmpty) {
       None
     } else {
@@ -103,7 +103,7 @@ class CPDoubleValue(value: Double) extends CPValue with CPPrimitiveType {
   }
 
   override def <(other: CPValue): Option[Boolean] = {
-    val otherVal = other.getDoubleValue
+    val otherVal = other.getFloatingValue
     if(otherVal.isEmpty) {
       None
     } else {
@@ -112,7 +112,7 @@ class CPDoubleValue(value: Double) extends CPValue with CPPrimitiveType {
   }
 
   override def >=(other: CPValue): Option[Boolean] = {
-    val otherVal = other.getDoubleValue
+    val otherVal = other.getFloatingValue
     if(otherVal.isEmpty) {
       None
     } else {
@@ -121,6 +121,6 @@ class CPDoubleValue(value: Double) extends CPValue with CPPrimitiveType {
   }
 }
 
-object CPDoubleValue {
-  def apply(value: Double) = new CPDoubleValue(value)
+object CPFloatingValue {
+  def apply(value: Double) = new CPFloatingValue(value)
 }

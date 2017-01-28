@@ -4,7 +4,7 @@ import org.concepualprogramming.core.statements.ConceptResolvingStatement
 import org.concepualprogramming.core.statements.expressions.{CPVariable, CPConstant, CPAttribute}
 import org.concepualprogramming.core.statements.expressions.operations.{CPMul, CPDiv}
 import org.concepualprogramming.core._
-import org.concepualprogramming.core.datatypes.{CPDoubleValue, CPIntValue}
+import org.concepualprogramming.core.datatypes.{CPFloatingValue, CPIntValue}
 import org.concepualprogramming.core.dependencies._
 import org.scalatest.{Matchers, FlatSpec}
 
@@ -106,7 +106,7 @@ class DependenciesTests extends FlatSpec with Matchers {
     d5.check(context) should be (true)
 
     val d6 = CPDependency(new CPAttribute(CPAttributeName("p", "val")), new CPConstant(CPIntValue(0)), "<")
-    val s16 = new CPSubstitutions(Map(CPAttributeName("p", "val") -> CPDoubleValue(-2)), Map())
+    val s16 = new CPSubstitutions(Map(CPAttributeName("p", "val") -> CPFloatingValue(-2)), Map())
     context.setSubstitutions(Some(s16))
     d6.check(context) should be (true)
   }
