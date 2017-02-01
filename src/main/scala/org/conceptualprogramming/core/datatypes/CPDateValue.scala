@@ -1,6 +1,5 @@
 package org.concepualprogramming.core.datatypes
 
-import java.time
 import java.time.{Month, LocalDate}
 import java.time.format.DateTimeFormatter
 ;
@@ -115,4 +114,7 @@ class CPDateValue(value: LocalDate) extends CPValue with CPPrimitiveType{
 object CPDateValue {
   def apply(value: LocalDate) = new CPDateValue(value)
   def apply(year: Int, month: Month, day: Int) = new CPDateValue(LocalDate.of(year, month, day))
+  def apply(value: String, format: String) = {
+    new CPDateValue(LocalDate.parse(value, DateTimeFormatter.ofPattern(format)))
+  }
 }

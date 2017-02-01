@@ -1,8 +1,12 @@
 package org.concepualprogramming.core.datatypes.composite
 
+import org.conceptualprogramming.core.datatypes.composite.CPMap
 import org.concepualprogramming.core.datatypes.CPValue
 
 /**
  * Created by oleksii.voropai on 12/30/2016.
  */
-trait CPCompositeType extends CPValue{}
+abstract trait CPCompositeType extends CPValue {
+  def getListValues: Option[CPList]
+  def getMapValues: Option[CPMap]
+}

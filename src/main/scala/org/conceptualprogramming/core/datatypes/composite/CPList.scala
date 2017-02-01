@@ -2,6 +2,7 @@ package org.concepualprogramming.core.datatypes.composite
 
 import java.time.LocalDate
 
+import org.conceptualprogramming.core.datatypes.composite.CPMap
 import org.concepualprogramming.core.CPExecutionContext
 import org.concepualprogramming.core.datatypes.{CPIntValue, CPBooleanValue, CPPrimitiveType, CPValue}
 import org.concepualprogramming.core.statements.expressions.functions.BuiltInFunctionDefinition
@@ -53,8 +54,17 @@ case class CPList(values: List[CPValue]) extends CPCompositeType {
     }
   }
 
+  override def getMapValues: Option[CPMap] = {
+    val indexed = values.zipWithIndex
+    val mapValues = indexed.map(entry => (CPIntValue(entry._2) -> entry._1))
+    Some(CPMap(mapValues))
+  }
+
+  override def getListValues: Option[CPList] = Some(this)
+
   override def similar(other: Any): Boolean = other match {
     case other: CPList => other.values.corresponds(values)(_.similar(_))
+    case other: CPCompositeType => {val otherList = other.getListValues; otherList.isDefined && otherList.get.values.corresponds(values)(_.similar(_))}
     case other: CPPrimitiveType => values.size <= 1 && other.similar(this)
     case other: String => values.size <= 1 && getStringValue.isDefined && getStringValue.get == other
     case other: Int => values.size <= 1 && getIntValue.isDefined && getIntValue.get == other
@@ -138,7 +148,11 @@ object CPList {
       }
       val empty = list.get match {
         case other: CPList => other.values.isEmpty
-        case _ => true
+        case other: CPMap => {
+          val otherList = other.getListValues
+          otherList.isDefined && otherList.get.values.isEmpty
+        }
+        case _ => false
       }
       return Some(CPBooleanValue(empty))
     }
@@ -162,6 +176,14 @@ object CPList {
       }
       val size = list.get match {
         case other: CPList => other.values.size
+        case other: CPMap => {
+          val otherList = other.getListValues
+          if(otherList.isEmpty) {
+            0
+          } else {
+            otherList.get.values.size
+          }
+        }
         case _ => 1
       }
       return Some(CPIntValue(size))

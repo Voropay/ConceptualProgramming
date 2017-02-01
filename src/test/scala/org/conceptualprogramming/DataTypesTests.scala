@@ -3,6 +3,7 @@ package org.conceptualprogramming
 
 import java.time.{LocalDate, Month}
 
+import org.conceptualprogramming.core.datatypes.composite.CPMap
 import org.concepualprogramming.core.CPExecutionContext
 import org.concepualprogramming.core.datatypes._
 import org.concepualprogramming.core.datatypes.composite.CPList
@@ -218,5 +219,162 @@ class DataTypesTests extends FlatSpec with Matchers {
 
   }
 
+  "Map" should "work correctly" in {
+    val context = new CPExecutionContext
+    val m1 = new CPMap(Map(CPStringValue("name") -> CPStringValue("abcd"), CPStringValue("value") -> CPIntValue(1)))
+    val m2 = new CPMap(Map(CPStringValue("value") -> CPIntValue(1), CPStringValue("name") -> CPStringValue("abcd")))
+    (m1 == m2) should be (true)
+
+    CPMap.register(context)
+
+    val m3 = new CPMap(Map())
+    val size = new CPFunctionCall("Map.size", Map("map" -> CPConstant(m1)))
+    size.calculate(context).get.getIntValue.get should equal (2)
+    val size1 = new CPFunctionCall("Map.size", Map("map" -> CPConstant(m3)))
+    size1.calculate(context).get.getIntValue.get should equal (0)
+    val empty = new CPFunctionCall("Map.isEmpty", Map("map" -> CPConstant(m1)))
+    empty.calculate(context).get.getBooleanValue.get should equal (false)
+    val empty1 = new CPFunctionCall("Map.isEmpty", Map("map" -> CPConstant(m3)))
+    empty1.calculate(context).get.getBooleanValue.get should equal (true)
+    val contains = new CPFunctionCall("Map.contains", Map("map" -> CPConstant(m1), "key" -> CPConstant(CPStringValue("name"))))
+    contains.calculate(context).get.getBooleanValue.get should equal (true)
+    val contains1 = new CPFunctionCall("Map.size", Map("map" -> CPConstant(m3), "key" -> CPConstant(CPStringValue("abcd"))))
+    contains1.calculate(context).get.getBooleanValue.get should equal (false)
+    val get = new CPFunctionCall("Map.get", Map("map" -> CPConstant(m1), "key" -> CPConstant(CPStringValue("name"))))
+    get.calculate(context).get.getStringValue.get should equal ("abcd")
+    val get1 = new CPFunctionCall("Map.get", Map("map" -> CPConstant(m3), "key" -> CPConstant(CPStringValue("abcd"))))
+    get1.calculate(context).isEmpty should equal (true)
+    val put = new CPFunctionCall("Map.put", Map("map" -> CPConstant(m1), "key" -> CPConstant(CPStringValue("status")), "value" -> CPConstant(CPStringValue("success"))))
+    val putOutput = put.calculate(context).get
+    val putOutputCheck = putOutput match {
+      case other: CPMap => {
+        other.values.size == 3 && other.values.get(CPStringValue("status")).isDefined && other.values.get(CPStringValue("status")).get.getStringValue.get == "success"
+      }
+      case _ => false
+    }
+    putOutputCheck should equal (true)
+    val put1 = new CPFunctionCall("Map.put", Map("map" -> CPConstant(m1), "key" -> CPConstant(CPStringValue("value")), "value" -> CPConstant(CPIntValue(2))))
+    val putOutput1 = put1.calculate(context).get
+    val putOutputCheck1 = putOutput1 match {
+      case other: CPMap => {
+        other.values.size == 2 && other.values.get(CPStringValue("value")).isDefined && other.values.get(CPStringValue("value")).get.getIntValue.get == 2
+      }
+      case _ => false
+    }
+    putOutputCheck1 should equal (true)
+    val remove = new CPFunctionCall("Map.remove", Map("map" -> CPConstant(putOutput), "key" -> CPConstant(CPStringValue("status"))))
+    val removeOutput = remove.calculate(context).get
+    val removeOutputCheck = removeOutput match {
+      case other: CPMap => {
+        other.values.size == 2 && !other.values.contains(CPStringValue("status"))
+      }
+      case _ => false
+    }
+    removeOutputCheck should equal (true)
+    val values = new CPFunctionCall("Map.values", Map("map" -> CPConstant(m1)))
+    val valuesOutput = values.calculate(context).get
+    val valuesOutputCheck = valuesOutput match {
+      case other: CPList => {
+        other.values.size == 2 && other.values.contains(CPStringValue("abcd")) && other.values.contains(CPIntValue(1))
+      }
+      case _ => false
+    }
+    valuesOutputCheck should equal (true)
+    val keys = new CPFunctionCall("Map.keys", Map("map" -> CPConstant(m1)))
+    val keysOutput = keys.calculate(context).get
+    val keysOutputCheck = keysOutput match {
+      case other: CPList => {
+        other.values.size == 2 && other.values.contains(CPStringValue("name")) && other.values.contains(CPStringValue("value"))
+      }
+      case _ => false
+    }
+    keysOutputCheck should equal (true)
+
+    (new CPMap(Map(CPIntValue(0) -> CPIntValue(1))) ?= CPIntValue(1)) should be (true)
+    (new CPMap(Map(CPIntValue(0) -> CPIntValue(1))) ?= CPIntValue(2)) should be (false)
+    (new CPMap(Map(CPIntValue(1) -> CPIntValue(1))) ?= CPIntValue(1)) should be (false)
+    (new CPMap(Map(CPIntValue(0) -> CPIntValue(1), CPIntValue(1) -> CPIntValue(2))) ?= CPIntValue(1)) should be (false)
+    (new CPMap(Map()) ?= CPIntValue(0)) should be (false)
+
+    val united1 = m1 + new CPMap(Map(CPStringValue("status") -> CPStringValue("success")))
+    val unitedRes1 = united1.get match {
+      case res: CPMap => res.values.size == 3 && res.values.get(CPStringValue("status")).get.getStringValue.get == "success"
+      case _ => false
+    }
+    unitedRes1 should equal (true)
+    val united2 = m1 + new CPList(List(CPStringValue("a"), CPStringValue("b")))
+    val unitedRes2 = united2.get match {
+      case res: CPMap => res.values.size == 4 && res.values.get(CPIntValue(0)).get.getStringValue.get == "a" && res.values.get(CPIntValue(1)).get.getStringValue.get == "b"
+      case _ => false
+    }
+    unitedRes2 should equal (true)
+
+    val m4 = new CPMap(Map(CPIntValue(0) -> CPStringValue("a"), CPIntValue(1) -> CPStringValue("b"), CPIntValue(2) -> CPStringValue("c")))
+    val m5 = new CPMap(Map(CPIntValue(0) -> CPStringValue("a"), CPIntValue(1) -> CPStringValue("b")))
+    val diff1 = m4 - m5
+    val diffRes1 = diff1.get match {
+      case res: CPMap => res.values.size == 1 && res.values.get(CPIntValue(2)).get.getStringValue.get == "c"
+      case _ => false
+    }
+    diffRes1 should equal (true)
+    val diff2 = m4 - new CPList(List(CPStringValue("a"), CPStringValue("c")))
+    val diffRes2 = diff2.get match {
+      case res: CPMap => res.values.size == 2 && res.values.get(CPIntValue(1)).get.getStringValue.get == "b" && res.values.get(CPIntValue(2)).get.getStringValue.get == "c"
+      case _ => false
+    }
+    diffRes2 should equal (true)
+    val diff3 = m4 - new CPIntValue(1)
+    val diffRes3 = diff3.get match {
+      case res: CPMap => res.values.size == 2 && res.values.get(CPIntValue(0)).get.getStringValue.get == "a" && res.values.get(CPIntValue(2)).get.getStringValue.get == "c"
+      case _ => false
+    }
+    diffRes3 should equal (true)
+
+    val intersect1 = m4 / m5
+    val intersectRes1 = intersect1.get match {
+      case res: CPMap => res.values.size == 2 && res.values.get(CPIntValue(0)).get.getStringValue.get == "a" && res.values.get(CPIntValue(1)).get.getStringValue.get == "b"
+      case _ => false
+    }
+    intersectRes1 should equal (true)
+    val intersect2 = m4 / new CPList(List(CPStringValue("a"), CPStringValue("c")))
+    val intersectRes2 = intersect2.get match {
+      case res: CPMap => res.values.size == 1 && res.values.get(CPIntValue(0)).get.getStringValue.get == "a"
+      case _ => false
+    }
+    intersectRes2 should equal (true)
+  }
+
+  "Maps and lists" should "be casted correctly" in {
+    val m1 = new CPMap(Map(CPStringValue("name") -> CPStringValue("abcd"), CPStringValue("value") -> CPIntValue(1)))
+    val m2 = new CPMap(Map(CPIntValue(0) -> CPStringValue("a"), CPIntValue(1) -> CPStringValue("b"), CPIntValue(2) -> CPStringValue("c")))
+    val l1 = new CPList(List(CPIntValue(1), CPIntValue(2), CPIntValue(3)))
+    val context = new CPExecutionContext
+    CPList.register(context)
+    CPMap.register(context)
+
+    m1.getListValues.isDefined should equal (false)
+    val m2list = m2.getListValues
+    m2list.isDefined should equal (true)
+    val m2listRes = m2list.get match {
+      case res: CPList => res.values.size == 3 && res.values.contains(CPStringValue("a")) && res.values.contains(CPStringValue("b")) && res.values.contains(CPStringValue("b"))
+      case _ => false
+    }
+    m2listRes should equal (true)
+
+    val l1map = l1.getMapValues
+    l1map.isDefined should equal (true)
+    val l1mapRes = l1map.get match {
+      case res: CPMap => res.values.size == 3 && res.values.get(CPIntValue(0)).get.getIntValue.get == 1 && res.values.get(CPIntValue(1)).get.getIntValue.get == 2 && res.values.get(CPIntValue(2)).get.getIntValue.get == 3
+      case _ => false
+    }
+    l1mapRes should equal (true)
+
+    val lsize = new CPFunctionCall("List.size", Map("list" -> CPConstant(m1)))
+    lsize.calculate(context).get.getIntValue.get should equal (0)
+    val lsize1 = new CPFunctionCall("List.size", Map("list" -> CPConstant(m2)))
+    lsize1.calculate(context).get.getIntValue.get should equal (3)
+    val msize = new CPFunctionCall("Map.size", Map("map" -> CPConstant(l1)))
+    msize.calculate(context).get.getIntValue.get should equal (3)
+  }
 }
 
