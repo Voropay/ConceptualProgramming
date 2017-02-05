@@ -8,6 +8,7 @@ import org.concepualprogramming.core.statements.expressions.CPExpression
  * Created by oleksii.voropai on 10/31/2016.
  */
 case class CPNot(operand: CPExpression) extends CPExpression {
+  val name = "!"
   override def calculate(context: CPExecutionContext): Option[CPValue] = {
     val value = operand.calculate(context)
     if(value.isEmpty) {
@@ -36,4 +37,5 @@ case class CPNot(operand: CPExpression) extends CPExpression {
       operand.infer(CPBooleanValue(true), context)
     }
   }
+  override def toString: String = name + " " + operand.toString
 }

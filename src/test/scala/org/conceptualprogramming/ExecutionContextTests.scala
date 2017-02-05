@@ -183,9 +183,9 @@ class ExecutionContextTests extends FlatSpec with Matchers {
       context.knowledgeBase.add(new CPObject("Var", Map("val" -> CPIntValue(1)), "val"))
       context.knowledgeBase.add(new CPObject("Var", Map("val" -> CPIntValue(-1)), "val"))
       ObjectsFunctions.register(context)
-      val empty = new CPFunctionCall("Objects.isEmpty", Map("name" -> CPConstant(CPStringValue("Var"))))
+      val empty = new CPFunctionCall("Objects.isEmpty", List(CPConstant(CPStringValue("Var"))))
       empty.calculate(context).get.getBooleanValue.get should be (false)
-      val size = new CPFunctionCall("Objects.size", Map("name" -> CPConstant(CPStringValue("Var"))))
+      val size = new CPFunctionCall("Objects.size", List(CPConstant(CPStringValue("Var"))))
       size.calculate(context).get.getIntValue.get should be (2)
 
       val positiveValueStep = new ConceptResolvingStatement(
@@ -203,14 +203,14 @@ class ExecutionContextTests extends FlatSpec with Matchers {
         ),
         Map()
       )
-      val variableStep = new VariableStatement("res", new CPFunctionCall("Objects.size", Map("name" -> CPConstant(CPStringValue("PosRes")))))
+      val variableStep = new VariableStatement("res", new CPFunctionCall("Objects.size", List(CPConstant(CPStringValue("PosRes")))))
       val returnStep = new ReturnValueStatement(new CPVariable(("res")))
       val body = new CompositeStatement(positiveValueStep :: variableStep :: returnStep :: Nil)
       val positiveValuesCount = new CPCompositeFunctionDefinition("positiveValuesCount", Nil, body)
 
       val positiveValuesCountDefinition = new FunctionDefinitionStatement(positiveValuesCount)
       positiveValuesCountDefinition.execute(context)
-      val positive =  new CPFunctionCall("positiveValuesCount", Map())
+      val positive =  new CPFunctionCall("positiveValuesCount", List())
       positive.calculate(context).get.getIntValue.get should be (1)
 
       GroupingFunctions.register(context)
@@ -228,11 +228,11 @@ class ExecutionContextTests extends FlatSpec with Matchers {
       )
       context.setSubstitutionsList(subst1 :: subst2 :: subst3 :: Nil)
       val expr = new CPAttribute(new CPAttributeName("c1", "val"))
-      val sum = new CPFunctionCall("Grouping.sum", Map("operand" -> expr))
+      val sum = new CPFunctionCall("Grouping.sum", List(expr))
       sum.calculate(context).get.getIntValue.get should be (36)
-      val count = new CPFunctionCall("Grouping.count", Map())
+      val count = new CPFunctionCall("Grouping.count", List())
       count.calculate(context).get.getIntValue.get should be (3)
-      val avg = new CPFunctionCall("Grouping.avg", Map("operand" -> expr))
+      val avg = new CPFunctionCall("Grouping.avg", List(expr))
       avg.calculate(context).get.getIntValue.get should be (12)
     }
 
@@ -240,7 +240,7 @@ class ExecutionContextTests extends FlatSpec with Matchers {
       val iInit = new VariableStatement("i", CPConstant(CPIntValue(0)))
       val iInc = new VariableStatement("i", new CPAdd(new CPVariable("i"), CPConstant(CPIntValue(1))))
       val exitCond = new org.concepualprogramming.core.statements.expressions.operations.CPLess(
-        new CPFunctionCall("Objects.size", Map("name" -> CPConstant(CPStringValue("Var")))),
+        new CPFunctionCall("Objects.size", List(CPConstant(CPStringValue("Var")))),
         new CPConstant(CPIntValue(5))
       )
       val addObject = new AddObjectStatement("Var", Map("val" -> CPVariable("i")), "val")
@@ -266,7 +266,7 @@ class ExecutionContextTests extends FlatSpec with Matchers {
       val iInit = new VariableStatement("i", CPConstant(CPIntValue(0)))
       val iInc = new VariableStatement("i", new CPAdd(new CPVariable("i"), CPConstant(CPIntValue(1))))
       val exitCond = new org.concepualprogramming.core.statements.expressions.operations.CPLess(
-        new CPFunctionCall("Objects.size", Map("name" -> CPConstant(CPStringValue("Var")))),
+        new CPFunctionCall("Objects.size", List(CPConstant(CPStringValue("Var")))),
         new CPConstant(CPIntValue(5))
       )
       val body = new AddObjectStatement("Var", Map("val" -> CPVariable("i")), "val")

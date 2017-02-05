@@ -161,29 +161,29 @@ class DataTypesTests extends FlatSpec with Matchers {
     val l2 = new CPList(List(CPIntValue(1), CPIntValue(2), CPIntValue(3)))
     (l1 == l2) should be (true)
     CPList.register(context)
-    val size = new CPFunctionCall("List.size", Map("list" -> CPConstant(l1)))
+    val size = new CPFunctionCall("List.size", List(CPConstant(l1)))
     size.calculate(context).get.getIntValue.get should equal (3)
-    val elementAt = new CPFunctionCall("List.elementAt", Map("list" -> CPConstant(l1), "pos" -> CPConstant(CPIntValue(1))))
+    val elementAt = new CPFunctionCall("List.elementAt", List(CPConstant(l1), CPConstant(CPIntValue(1))))
     elementAt.calculate(context).get.getIntValue.get should equal (2)
-    val empty1 = new CPFunctionCall("List.isEmpty", Map("list" -> CPConstant(l1)))
+    val empty1 = new CPFunctionCall("List.isEmpty", List(CPConstant(l1)))
     empty1.calculate(context).get.getBooleanValue.get should equal (false)
-    val head1 = new CPFunctionCall("List.head", Map("list" -> CPConstant(l1)))
+    val head1 = new CPFunctionCall("List.head", List(CPConstant(l1)))
     head1.calculate(context).get.getIntValue.get should equal (1)
-    val tail1 = new CPFunctionCall("List.tail", Map("list" -> CPConstant(l1)))
+    val tail1 = new CPFunctionCall("List.tail", List(CPConstant(l1)))
     val t1 = tail1.calculate(context)
-    val head2 = new CPFunctionCall("List.head", Map("list" -> CPConstant(t1.get)))
+    val head2 = new CPFunctionCall("List.head", List(CPConstant(t1.get)))
     head2.calculate(context).get.getIntValue.get should equal (2)
-    val tail2 = new CPFunctionCall("List.tail", Map("list" -> CPConstant(t1.get)))
+    val tail2 = new CPFunctionCall("List.tail", List(CPConstant(t1.get)))
     val t2 = tail2.calculate(context)
-    val head3 = new CPFunctionCall("List.head", Map("list" -> CPConstant(t2.get)))
+    val head3 = new CPFunctionCall("List.head", List(CPConstant(t2.get)))
     head3.calculate(context).get.getIntValue.get should equal (3)
-    val tail3 = new CPFunctionCall("List.tail", Map("list" -> CPConstant(t2.get)))
+    val tail3 = new CPFunctionCall("List.tail", List(CPConstant(t2.get)))
     val t3 = tail3.calculate(context)
-    val empty3 = new CPFunctionCall("List.isEmpty", Map("list" -> CPConstant(t3.get)))
+    val empty3 = new CPFunctionCall("List.isEmpty", List(CPConstant(t3.get)))
     empty3.calculate(context).get.getBooleanValue.get should equal (true)
 
-    new CPFunctionCall("List.contains", Map("list" -> CPConstant(l1), "element" -> CPConstant(CPIntValue(1)))).calculate(context).get should equal (CPBooleanValue(true))
-    new CPFunctionCall("List.contains", Map("list" -> CPConstant(l2), "element" -> CPConstant(CPIntValue(5)))).calculate(context).get should equal (CPBooleanValue(false))
+    new CPFunctionCall("List.contains", List(CPConstant(l1), CPConstant(CPIntValue(1)))).calculate(context).get should equal (CPBooleanValue(true))
+    new CPFunctionCall("List.contains", List(CPConstant(l2), CPConstant(CPIntValue(5)))).calculate(context).get should equal (CPBooleanValue(false))
 
     (new CPList(CPIntValue(1) :: Nil) ?= CPIntValue(1)) should be (true)
     (new CPList(CPIntValue(1) :: Nil) ?= CPIntValue(2)) should be (false)
@@ -199,23 +199,23 @@ class DataTypesTests extends FlatSpec with Matchers {
     (new CPList(Nil) ?= CPBooleanValue(false)) should be (true)
 
     val united = l1 + new CPList(List(CPIntValue(4), CPIntValue(5)))
-    val size1 = new CPFunctionCall("List.size", Map("list" -> CPConstant(united.get)))
+    val size1 = new CPFunctionCall("List.size", List(CPConstant(united.get)))
     size1.calculate(context).get.getIntValue.get should equal (5)
-    new CPFunctionCall("List.contains", Map("list" -> CPConstant(united.get), "element" -> CPConstant(CPIntValue(1)))).calculate(context).get should equal (CPBooleanValue(true))
-    new CPFunctionCall("List.contains", Map("list" -> CPConstant(united.get), "element" -> CPConstant(CPIntValue(5)))).calculate(context).get should equal (CPBooleanValue(true))
+    new CPFunctionCall("List.contains", List(CPConstant(united.get), CPConstant(CPIntValue(1)))).calculate(context).get should equal (CPBooleanValue(true))
+    new CPFunctionCall("List.contains", List(CPConstant(united.get), CPConstant(CPIntValue(5)))).calculate(context).get should equal (CPBooleanValue(true))
 
     val intersected = united.get - l1
-    val size2 = new CPFunctionCall("List.size", Map("list" -> CPConstant(intersected.get)))
+    val size2 = new CPFunctionCall("List.size", List(CPConstant(intersected.get)))
     size2.calculate(context).get.getIntValue.get should equal (2)
-    new CPFunctionCall("List.contains", Map("list" -> CPConstant(intersected.get), "element" -> CPConstant(CPIntValue(4)))).calculate(context).get should equal (CPBooleanValue(true))
-    new CPFunctionCall("List.contains", Map("list" -> CPConstant(intersected.get), "element" -> CPConstant(CPIntValue(5)))).calculate(context).get should equal (CPBooleanValue(true))
+    new CPFunctionCall("List.contains", List(CPConstant(intersected.get), CPConstant(CPIntValue(4)))).calculate(context).get should equal (CPBooleanValue(true))
+    new CPFunctionCall("List.contains", List(CPConstant(intersected.get), CPConstant(CPIntValue(5)))).calculate(context).get should equal (CPBooleanValue(true))
 
     val diff = united.get / l1
-    val size3 = new CPFunctionCall("List.size", Map("list" -> CPConstant(diff.get)))
+    val size3 = new CPFunctionCall("List.size", List(CPConstant(diff.get)))
     size3.calculate(context).get.getIntValue.get should equal (3)
-    new CPFunctionCall("List.contains", Map("list" -> CPConstant(diff.get), "element" -> CPConstant(CPIntValue(1)))).calculate(context).get should equal (CPBooleanValue(true))
-    new CPFunctionCall("List.contains", Map("list" -> CPConstant(diff.get), "element" -> CPConstant(CPIntValue(2)))).calculate(context).get should equal (CPBooleanValue(true))
-    new CPFunctionCall("List.contains", Map("list" -> CPConstant(diff.get), "element" -> CPConstant(CPIntValue(3)))).calculate(context).get should equal (CPBooleanValue(true))
+    new CPFunctionCall("List.contains", List(CPConstant(diff.get), CPConstant(CPIntValue(1)))).calculate(context).get should equal (CPBooleanValue(true))
+    new CPFunctionCall("List.contains", List(CPConstant(diff.get), CPConstant(CPIntValue(2)))).calculate(context).get should equal (CPBooleanValue(true))
+    new CPFunctionCall("List.contains", List(CPConstant(diff.get), CPConstant(CPIntValue(3)))).calculate(context).get should equal (CPBooleanValue(true))
 
   }
 
@@ -228,23 +228,23 @@ class DataTypesTests extends FlatSpec with Matchers {
     CPMap.register(context)
 
     val m3 = new CPMap(Map())
-    val size = new CPFunctionCall("Map.size", Map("map" -> CPConstant(m1)))
+    val size = new CPFunctionCall("Map.size", List(CPConstant(m1)))
     size.calculate(context).get.getIntValue.get should equal (2)
-    val size1 = new CPFunctionCall("Map.size", Map("map" -> CPConstant(m3)))
+    val size1 = new CPFunctionCall("Map.size", List(CPConstant(m3)))
     size1.calculate(context).get.getIntValue.get should equal (0)
-    val empty = new CPFunctionCall("Map.isEmpty", Map("map" -> CPConstant(m1)))
+    val empty = new CPFunctionCall("Map.isEmpty", List(CPConstant(m1)))
     empty.calculate(context).get.getBooleanValue.get should equal (false)
-    val empty1 = new CPFunctionCall("Map.isEmpty", Map("map" -> CPConstant(m3)))
+    val empty1 = new CPFunctionCall("Map.isEmpty", List(CPConstant(m3)))
     empty1.calculate(context).get.getBooleanValue.get should equal (true)
-    val contains = new CPFunctionCall("Map.contains", Map("map" -> CPConstant(m1), "key" -> CPConstant(CPStringValue("name"))))
+    val contains = new CPFunctionCall("Map.contains", List(CPConstant(m1), CPConstant(CPStringValue("name"))))
     contains.calculate(context).get.getBooleanValue.get should equal (true)
-    val contains1 = new CPFunctionCall("Map.size", Map("map" -> CPConstant(m3), "key" -> CPConstant(CPStringValue("abcd"))))
+    val contains1 = new CPFunctionCall("Map.size", List(CPConstant(m3), CPConstant(CPStringValue("abcd"))))
     contains1.calculate(context).get.getBooleanValue.get should equal (false)
-    val get = new CPFunctionCall("Map.get", Map("map" -> CPConstant(m1), "key" -> CPConstant(CPStringValue("name"))))
+    val get = new CPFunctionCall("Map.get", List(CPConstant(m1), CPConstant(CPStringValue("name"))))
     get.calculate(context).get.getStringValue.get should equal ("abcd")
-    val get1 = new CPFunctionCall("Map.get", Map("map" -> CPConstant(m3), "key" -> CPConstant(CPStringValue("abcd"))))
+    val get1 = new CPFunctionCall("Map.get", List(CPConstant(m3), CPConstant(CPStringValue("abcd"))))
     get1.calculate(context).isEmpty should equal (true)
-    val put = new CPFunctionCall("Map.put", Map("map" -> CPConstant(m1), "key" -> CPConstant(CPStringValue("status")), "value" -> CPConstant(CPStringValue("success"))))
+    val put = new CPFunctionCall("Map.put", List(CPConstant(m1), CPConstant(CPStringValue("status")), CPConstant(CPStringValue("success"))))
     val putOutput = put.calculate(context).get
     val putOutputCheck = putOutput match {
       case other: CPMap => {
@@ -253,7 +253,7 @@ class DataTypesTests extends FlatSpec with Matchers {
       case _ => false
     }
     putOutputCheck should equal (true)
-    val put1 = new CPFunctionCall("Map.put", Map("map" -> CPConstant(m1), "key" -> CPConstant(CPStringValue("value")), "value" -> CPConstant(CPIntValue(2))))
+    val put1 = new CPFunctionCall("Map.put", List(CPConstant(m1), CPConstant(CPStringValue("value")), CPConstant(CPIntValue(2))))
     val putOutput1 = put1.calculate(context).get
     val putOutputCheck1 = putOutput1 match {
       case other: CPMap => {
@@ -262,7 +262,7 @@ class DataTypesTests extends FlatSpec with Matchers {
       case _ => false
     }
     putOutputCheck1 should equal (true)
-    val remove = new CPFunctionCall("Map.remove", Map("map" -> CPConstant(putOutput), "key" -> CPConstant(CPStringValue("status"))))
+    val remove = new CPFunctionCall("Map.remove", List(CPConstant(putOutput), CPConstant(CPStringValue("status"))))
     val removeOutput = remove.calculate(context).get
     val removeOutputCheck = removeOutput match {
       case other: CPMap => {
@@ -271,7 +271,7 @@ class DataTypesTests extends FlatSpec with Matchers {
       case _ => false
     }
     removeOutputCheck should equal (true)
-    val values = new CPFunctionCall("Map.values", Map("map" -> CPConstant(m1)))
+    val values = new CPFunctionCall("Map.values", List(CPConstant(m1)))
     val valuesOutput = values.calculate(context).get
     val valuesOutputCheck = valuesOutput match {
       case other: CPList => {
@@ -280,7 +280,7 @@ class DataTypesTests extends FlatSpec with Matchers {
       case _ => false
     }
     valuesOutputCheck should equal (true)
-    val keys = new CPFunctionCall("Map.keys", Map("map" -> CPConstant(m1)))
+    val keys = new CPFunctionCall("Map.keys", List(CPConstant(m1)))
     val keysOutput = keys.calculate(context).get
     val keysOutputCheck = keysOutput match {
       case other: CPList => {
@@ -369,11 +369,11 @@ class DataTypesTests extends FlatSpec with Matchers {
     }
     l1mapRes should equal (true)
 
-    val lsize = new CPFunctionCall("List.size", Map("list" -> CPConstant(m1)))
+    val lsize = new CPFunctionCall("List.size", List(CPConstant(m1)))
     lsize.calculate(context).get.getIntValue.get should equal (0)
-    val lsize1 = new CPFunctionCall("List.size", Map("list" -> CPConstant(m2)))
+    val lsize1 = new CPFunctionCall("List.size", List(CPConstant(m2)))
     lsize1.calculate(context).get.getIntValue.get should equal (3)
-    val msize = new CPFunctionCall("Map.size", Map("map" -> CPConstant(l1)))
+    val msize = new CPFunctionCall("Map.size", List(CPConstant(l1)))
     msize.calculate(context).get.getIntValue.get should equal (3)
   }
 }

@@ -8,6 +8,7 @@ import org.concepualprogramming.core.statements.expressions.CPExpression
  * Created by oleksii.voropai on 10/31/2016.
  */
 case class CPOr(operand1: CPExpression, operand2: CPExpression) extends CPExpression {
+  val name = "||"
   override def calculate(context: CPExecutionContext): Option[CPValue] = {
     val value1 = operand1.calculate(context)
     val value2 = operand2.calculate(context)
@@ -64,4 +65,6 @@ case class CPOr(operand1: CPExpression, operand2: CPExpression) extends CPExpres
 
     return Map()
   }
+
+  override def toString: String = operand1.toString + " " + name + " " + operand2.toString
 }

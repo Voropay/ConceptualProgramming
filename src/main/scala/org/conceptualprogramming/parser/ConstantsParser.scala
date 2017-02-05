@@ -13,7 +13,7 @@ import scala.util.parsing.combinator.JavaTokenParsers
 /**
  * Created by oleksii.voropai on 1/28/2017.
  */
-object ConstantsParser extends JavaTokenParsers {
+trait ConstantsParser extends JavaTokenParsers {
   def constant: Parser[CPValue] = dateConstant | booleanConstant | floatingConstant | intConstant | stringConstant | compositeConstant
   def booleanConstant: Parser[CPValue] = ("true" | "false") ^^ {value => CPBooleanValue(value == "true")}
   def intConstant: Parser[CPValue] = wholeNumber ^^  {value => CPIntValue(value.toInt)}
@@ -24,11 +24,4 @@ object ConstantsParser extends JavaTokenParsers {
   def mapConstant: Parser[CPValue] = "{" ~> repsep(nameValuePair, ",") <~ "}" ^^ {value => CPMap(value)}
   def nameValuePair = (constant ~ ":" ~ constant) ^^ {case name~":"~value => (name, value)}
   def compositeConstant: Parser[CPValue] = listConstant | mapConstant
-
-  def apply(code: String): Option[CPValue] = {
-    parse(constant, code) match {
-      case Success(res, _) => Some(res)
-      case _ => None
-    }
-  }
 }

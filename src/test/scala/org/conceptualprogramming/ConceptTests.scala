@@ -118,7 +118,7 @@ class ConceptTests extends FlatSpec with Matchers {
       "sum",
       Nil,
       Nil,
-      Map("sum" -> new CPFunctionCall("Grouping.sum", Map("operand" -> new CPAttribute(new CPAttributeName("t", "val"))))),
+      Map("sum" -> new CPFunctionCall("Grouping.sum", List(new CPAttribute(new CPAttributeName("t", "val"))))),
       CPDependency(new CPConstant(CPIntValue(5)), new CPAttribute(CPAttributeName("", "sum")), ">") :: Nil)
     val subst1 = new CPSubstitutions(
       Map(new CPAttributeName("", "table") -> CPStringValue("A1"), new CPAttributeName("", "row") -> CPStringValue("1"), new CPAttributeName("t", "cell") -> CPStringValue("1"), new CPAttributeName("t", "val") -> CPIntValue(1)),

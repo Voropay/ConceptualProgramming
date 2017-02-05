@@ -124,6 +124,8 @@ case class CPList(values: List[CPValue]) extends CPCompositeType {
     result = prime * result + getTypeName.hashCode
     return result
   }
+
+  override def toString: String = values.toString
 }
 
 object CPList {

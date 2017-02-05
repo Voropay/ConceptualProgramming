@@ -546,9 +546,9 @@ class TestExamples extends FlatSpec with Matchers {
       "totalProfit",
       ("Profit" , "p") :: ("Income" , "i") :: ("Outcome" , "o") :: Nil,
       CPDependency(CPAttributeName("i", "row") :: CPAttributeName("o", "row") :: CPAttributeName("p", "row") :: Nil) :: Nil,
-      Map("totalIncome" -> new CPFunctionCall("Grouping.sum", Map("operand" -> new CPAttribute(new CPAttributeName("i", "val")))),
-        "totalOutcome" -> new CPFunctionCall("Grouping.sum", Map("operand" -> new CPAttribute(new CPAttributeName("o", "val")))),
-        "totalProfit" -> new CPFunctionCall("Grouping.sum", Map("operand" -> new CPAttribute(new CPAttributeName("p", "val"))))),
+      Map("totalIncome" -> new CPFunctionCall("Grouping.sum", List(new CPAttribute(new CPAttributeName("i", "val")))),
+        "totalOutcome" -> new CPFunctionCall("Grouping.sum", List(new CPAttribute(new CPAttributeName("o", "val")))),
+        "totalProfit" -> new CPFunctionCall("Grouping.sum", List(new CPAttribute(new CPAttributeName("p", "val"))))),
       Nil
     )
 

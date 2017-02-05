@@ -172,6 +172,8 @@ case class CPMap(values: Map[CPValue, CPValue]) extends CPCompositeType {
     result = prime * result + getTypeName.hashCode
     return result
   }
+
+  override def toString: String = values.toString
 }
 
 object CPMap {
