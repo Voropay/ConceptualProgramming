@@ -7,7 +7,7 @@ import org.concepualprogramming.core.{CPDecisionNode, CPExecutionContext, CPObje
 /**
  * Created by oleksii.voropai on 11/28/2016.
  */
-class ForStatement(startOperator: CPStatement, condition: CPExpression, endOperator: CPStatement, body: CPStatement) extends CPStatement {
+case class ForStatement(startOperator: CPStatement, condition: CPExpression, endOperator: CPStatement, body: CPStatement) extends CPStatement {
 
   override def execute(context: CPExecutionContext): Unit = {
     context.addTransparentFrame

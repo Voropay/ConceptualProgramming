@@ -9,7 +9,7 @@ import scala.collection.mutable
  * Created by oleksii.voropai on 2/5/2017.
  */
 object CPOperation {
-  val priorities = Map("!" -> 0, "*" -> 1, "/" -> 1, "+" -> 2, "-" -> 2, ">" -> 3, "<" -> 3, ">=" -> 3, "<=" -> 3, "==" -> 4, "!=" -> 4)
+  val priorities = Map("!" -> 0, "*" -> 1, "/" -> 1, "+" -> 2, "-" -> 2, ">" -> 3, "<" -> 3, ">=" -> 3, "<=" -> 3, "==" -> 4, "!=" -> 4, "&&" -> 5, "||" -> 5)
   def createArithmeticExpression(terms: List[CPExpression], operations: List[String]): CPExpression = {
     val indices = operations.zipWithIndex
     val ordered = indices.sortWith(

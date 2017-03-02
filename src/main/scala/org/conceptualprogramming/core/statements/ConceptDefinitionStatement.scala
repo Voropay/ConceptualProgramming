@@ -5,7 +5,7 @@ import org.concepualprogramming.core.{CPDecisionNode, CPExecutionContext, CPObje
 /**
  * Created by oleksii.voropai on 1/22/2017.
  */
-class ConceptDefinitionStatement(definition: CPConcept) extends CPStatement {
+case class ConceptDefinitionStatement(definition: CPConcept) extends CPStatement {
   override def execute(context: CPExecutionContext): Unit = {
     context.knowledgeBase.add(definition)
     context.nextStep

@@ -7,7 +7,7 @@ import org.concepualprogramming.core.{CPDecisionNode, CPExecutionContext, CPObje
 /**
  * Created by oleksii.voropai on 11/1/2016.
  */
-class VariableStatement(variableName: String, operand: CPExpression) extends CPStatement {
+case class VariableStatement(variableName: String, operand: CPExpression) extends CPStatement {
 
   override def execute(context: CPExecutionContext): Unit = {
     val value = operand.calculate(context)

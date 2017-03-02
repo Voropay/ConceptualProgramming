@@ -6,7 +6,7 @@ import org.concepualprogramming.core.statements.expressions.functions.CPComposit
 /**
  * Created by oleksii.voropai on 1/26/2017.
  */
-class FunctionDefinitionStatement (definition: CPCompositeFunctionDefinition) extends CPStatement {
+case class FunctionDefinitionStatement (definition: CPCompositeFunctionDefinition) extends CPStatement {
 
   override def execute(context: CPExecutionContext): Unit = {
     context.addFunctionDefinition(definition)

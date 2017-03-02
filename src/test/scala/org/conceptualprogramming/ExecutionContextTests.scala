@@ -245,7 +245,7 @@ class ExecutionContextTests extends FlatSpec with Matchers {
       )
       val addObject = new AddObjectStatement("Var", Map("val" -> CPVariable("i")), "val")
       val body = new CompositeStatement(iInc :: addObject :: Nil)
-      val whileStep = new WhileSatement(exitCond, body)
+      val whileStep = new WhileStatement(exitCond, body)
       val returnStep = new ReturnObjectsStatement(CPConstant(CPStringValue("Var")), Map())
 
       val context = new CPExecutionContext

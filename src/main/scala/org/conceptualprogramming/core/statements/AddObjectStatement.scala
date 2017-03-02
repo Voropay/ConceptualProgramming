@@ -7,7 +7,7 @@ import org.concepualprogramming.core.{CPDecisionNode, CPExecutionContext, CPObje
 /**
  * Created by oleksii.voropai on 11/27/2016.
  */
-class AddObjectStatement(name: String, attributes: Map[String, CPExpression], defaultAttribute: String) extends CPStatement {
+case class AddObjectStatement(name: String, attributes: Map[String, CPExpression], defaultAttribute: String) extends CPStatement {
 
   override def execute(context: CPExecutionContext): Unit = {
     val attrsOpt: Map[String, Option[CPValue]] = attributes.mapValues(_.calculate(context))

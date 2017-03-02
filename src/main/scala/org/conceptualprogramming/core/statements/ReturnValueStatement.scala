@@ -7,7 +7,7 @@ import org.concepualprogramming.core.statements.expressions.CPExpression
 /**
  * Created by oleksii.voropai on 11/1/2016.
  */
-class ReturnValueStatement(expr: CPExpression) extends CPStatement {
+case class ReturnValueStatement(expr: CPExpression) extends CPStatement {
 
   override def execute(context: CPExecutionContext): Unit = {
     val value = expr.calculate(context)

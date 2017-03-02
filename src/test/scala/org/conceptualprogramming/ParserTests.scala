@@ -3,9 +3,21 @@ package org.conceptualprogramming
 import java.time.LocalDate
 
 import org.conceptualprogramming.core.datatypes.composite.CPMap
-import org.conceptualprogramming.parser.{ExpressionsParser, ConstantsParser}
-import org.concepualprogramming.core.datatypes.{CPBooleanValue, CPIntValue, CPStringValue, CPValue}
+import org.conceptualprogramming.core.statements.expressions.operations.CPOperation
+import org.conceptualprogramming.parser.{StatementsParser, ExpressionsParser, ConstantsParser}
+import org.concepualprogramming.core.{CPAttributeName, CPStrictConcept}
+import org.concepualprogramming.core.datatypes.CPBooleanValue
+import org.concepualprogramming.core.datatypes.CPIntValue
+import org.concepualprogramming.core.datatypes.CPStringValue
+import org.concepualprogramming.core.datatypes.CPValue
+import org.concepualprogramming.core.datatypes._
 import org.concepualprogramming.core.datatypes.composite.CPList
+import org.concepualprogramming.core.dependencies.{CPAttributesLinkDependency, CPDependency, CPExpressionDependency}
+import org.concepualprogramming.core.statements.CPStatement
+import org.concepualprogramming.core.statements.ReturnObjectsStatement
+import org.concepualprogramming.core.statements.ReturnValueStatement
+import org.concepualprogramming.core.statements.VariableStatement
+import org.concepualprogramming.core.statements._
 import org.concepualprogramming.core.statements.expressions.CPAttribute
 import org.concepualprogramming.core.statements.expressions.CPConstant
 import org.concepualprogramming.core.statements.expressions.CPExpression
@@ -13,6 +25,8 @@ import org.concepualprogramming.core.statements.expressions.CPVariable
 import org.concepualprogramming.core.statements.expressions._
 import org.concepualprogramming.core.statements.expressions.operations._
 import org.scalatest.{Matchers, FlatSpec}
+
+import scala.util.Success
 
 /**
  * Created by oleksii.voropai on 1/28/2017.
@@ -113,6 +127,173 @@ class ParserTests  extends FlatSpec with Matchers {
       new CPSub(new CPVariable("a"), new CPVariable("b"))
     )
     arithm2 should equal (arithm2compare)
+
+    val comparison = exprParser("a >= 10").get.asInstanceOf[CPEqualsOrGreater]
+    comparison.operand1.asInstanceOf[CPVariable].name should equal ("a")
+    comparison.operand2.asInstanceOf[CPConstant].value.getIntValue.get should equal (10)
+  }
+
+  "Statements" should "be parsed correctly" in {
+    val stmtParser = new StatementsParser {
+      def apply(code: String): Option[CPStatement] = {
+        parse(statement, code) match {
+          case Success(res, _) => Some(res)
+          case _ => None
+        }
+      }
+    }
+
+    val varAssignment = stmtParser("x = 10").get.asInstanceOf[VariableStatement]
+    varAssignment.variableName should equal ("x")
+    varAssignment.operand.asInstanceOf[CPConstant].value.getIntValue.get should equal (10)
+
+    val returnVal = stmtParser("return x").get.asInstanceOf[ReturnValueStatement]
+    returnVal.expr.asInstanceOf[CPVariable].name should equal ("x")
+
+    val returnObj = stmtParser("return x {name: \"abc\"}").get.asInstanceOf[ReturnObjectsStatement]
+    returnObj.returnObjectsName.asInstanceOf[CPConstant].value.getStringValue.get should equal ("x")
+    var returnObjQuery = returnObj.queryExpr
+    returnObjQuery.size should equal (1)
+    returnObjQuery.get("name").get.asInstanceOf[CPConstant].value.getStringValue.get should equal ("abc")
+
+    val returnObj1 = stmtParser("return (x) {name: \"abc\"}").get.asInstanceOf[ReturnObjectsStatement]
+    returnObj1.returnObjectsName.asInstanceOf[CPVariable].name should equal ("x")
+    var returnObjQuery1 = returnObj1.queryExpr
+    returnObjQuery1.size should equal (1)
+    returnObjQuery1.get("name").get.asInstanceOf[CPConstant].value.getStringValue.get should equal ("abc")
+
+    val composite = stmtParser("{i = i + 1}").get.asInstanceOf[CompositeStatement]
+    val compositeBody = composite.body.head.asInstanceOf[VariableStatement]
+    compositeBody.variableName should equal ("i")
+    compositeBody.operand.asInstanceOf[CPAdd].operand1.asInstanceOf[CPVariable].name should equal ("i")
+    compositeBody.operand.asInstanceOf[CPAdd].operand2.asInstanceOf[CPConstant].value.getIntValue.get should equal (1)
+
+    val ifStmt = stmtParser("if (i >= 0) {i = i + 1} else {return x}").get.asInstanceOf[IfStatement]
+    val ifCond = ifStmt.condition.asInstanceOf[CPEqualsOrGreater]
+    ifCond.operand1.asInstanceOf[CPVariable].name should equal ("i")
+    ifCond.operand2.asInstanceOf[CPConstant].value.getIntValue.get should equal (0)
+    val thenBlock = ifStmt.thenBlock.asInstanceOf[CompositeStatement].body.head.asInstanceOf[VariableStatement]
+    thenBlock.variableName should equal ("i")
+    thenBlock.operand.asInstanceOf[CPAdd].operand1.asInstanceOf[CPVariable].name should equal ("i")
+    thenBlock.operand.asInstanceOf[CPAdd].operand2.asInstanceOf[CPConstant].value.getIntValue.get should equal (1)
+    val elseBlock = ifStmt.elseBlock.asInstanceOf[CompositeStatement].body.head.asInstanceOf[ReturnValueStatement]
+    elseBlock.expr.asInstanceOf[CPVariable].name should equal ("x")
+
+    val ifStmt1 = stmtParser("if (a < 0) a = 0").get.asInstanceOf[IfStatement]
+    val ifCond1 = ifStmt1.condition.asInstanceOf[CPLess]
+    ifCond1.operand1.asInstanceOf[CPVariable].name should equal ("a")
+    ifCond1.operand2.asInstanceOf[CPConstant].value.getIntValue.get should equal (0)
+    val thenBlock1 = ifStmt1.thenBlock.asInstanceOf[VariableStatement]
+    thenBlock1.variableName should equal ("a")
+    thenBlock1.operand.asInstanceOf[CPConstant].value.getIntValue.get should equal (0)
+
+    val forStmt = stmtParser("for(i=0;i<10;i=i+1){sum=sum+i}").get.asInstanceOf[ForStatement]
+    val forStart = forStmt.startOperator.asInstanceOf[VariableStatement]
+    forStart.variableName should equal ("i")
+    forStart.operand.asInstanceOf[CPConstant].value.getIntValue.get should equal (0)
+    val forCond = forStmt.condition.asInstanceOf[CPLess]
+    forCond.operand1.asInstanceOf[CPVariable].name should equal ("i")
+    forCond.operand2.asInstanceOf[CPConstant].value.getIntValue.get should equal (10)
+    var forEnd = forStmt.endOperator.asInstanceOf[VariableStatement]
+    forEnd.variableName should equal ("i")
+    forEnd.operand.asInstanceOf[CPAdd].operand1.asInstanceOf[CPVariable].name should equal ("i")
+    forEnd.operand.asInstanceOf[CPAdd].operand2.asInstanceOf[CPConstant].value.getIntValue.get should equal (1)
+    val forBody = forStmt.body.asInstanceOf[CompositeStatement].body.head.asInstanceOf[VariableStatement]
+    forBody.variableName should equal ("sum")
+    forBody.operand.asInstanceOf[CPAdd].operand1.asInstanceOf[CPVariable].name should equal ("sum")
+    forBody.operand.asInstanceOf[CPAdd].operand2.asInstanceOf[CPVariable].name should equal ("i")
+
+    val whileStmt = stmtParser("while(a < 1000) {a = a * a}").get.asInstanceOf[WhileStatement]
+    val whileCond = whileStmt.condition.asInstanceOf[CPLess]
+    whileCond.operand1.asInstanceOf[CPVariable].name should equal ("a")
+    whileCond.operand2.asInstanceOf[CPConstant].value.getIntValue.get should equal (1000)
+    val whileBody = whileStmt.body.asInstanceOf[CompositeStatement].body.head.asInstanceOf[VariableStatement]
+    whileBody.variableName should equal ("a")
+    whileBody.operand.asInstanceOf[CPMul].operand1.asInstanceOf[CPVariable].name should equal ("a")
+    whileBody.operand.asInstanceOf[CPMul].operand2.asInstanceOf[CPVariable].name should equal ("a")
+
+    val funcStmt = stmtParser("def square(a) {return a*a}").get.asInstanceOf[FunctionDefinitionStatement].definition
+    funcStmt.name should equal ("square")
+    val funcArgs = funcStmt.argsNames
+    funcArgs.size should equal (1)
+    funcArgs.head should equal ("a")
+    val funcBody = funcStmt.body.asInstanceOf[CompositeStatement].body.head.asInstanceOf[ReturnValueStatement].expr.asInstanceOf[CPMul]
+    funcBody.operand1.asInstanceOf[CPVariable].name should equal ("a")
+    funcBody.operand2.asInstanceOf[CPVariable].name should equal ("a")
+
+    val objStmt = stmtParser("object cell {row: 1, col: 2, val: 10}").get.asInstanceOf[AddObjectStatement]
+    objStmt.name should equal ("cell")
+    val objAttrs = objStmt.attributes
+    objAttrs.size should equal (3)
+    objAttrs.get("row").get.asInstanceOf[CPConstant].value.getIntValue.get should equal (1)
+    objAttrs.get("col").get.asInstanceOf[CPConstant].value.getIntValue.get should equal (2)
+    objAttrs.get("val").get.asInstanceOf[CPConstant].value.getIntValue.get should equal (10)
+
+    val childConceptParser = new StatementsParser {
+      def apply(code: String): Option[List[(String, String, CPExpression)]] = {
+        parse(conceptAttrDependencies, code) match {
+          case Success(res, _) => Some(res)
+          case _ => None
+        }
+      }
+    }
+
+    val d = childConceptParser("(col == 2)").get
+    d.size should equal (1)
+    d.head._1 should equal ("col")
+    d.head._2 should equal ("==")
+    d.head._3.asInstanceOf[CPConstant].value.getIntValue.get should equal (2)
+
+    val dependenciesParser = new StatementsParser {
+      def apply(code: String): Option[CPDependency] = {
+        parse(attrDependency, code) match {
+          case Success(res, _) => Some(res)
+          case _ => None
+        }
+      }
+    }
+    val dep1 = dependenciesParser("_.val == i.val - o.val").get.asInstanceOf[CPExpressionDependency].expr.asInstanceOf[CPEquals]
+    dep1.operand1.asInstanceOf[CPAttribute].attrName should equal (CPAttributeName("_", "val"))
+    dep1.operand2.asInstanceOf[CPSub].operand1.asInstanceOf[CPAttribute].attrName should equal (CPAttributeName("i", "val"))
+    dep1.operand2.asInstanceOf[CPSub].operand2.asInstanceOf[CPAttribute].attrName should equal (CPAttributeName("o", "val"))
+
+    val dep2 = dependenciesParser("_.row ~ i.row ~ o.row").get.asInstanceOf[CPAttributesLinkDependency].attributesNames
+    dep2.size should equal (3)
+    dep2.contains(CPAttributeName("_", "row")) should be (true)
+    dep2.contains(CPAttributeName("i", "row")) should be (true)
+    dep2.contains(CPAttributeName("o", "row")) should be (true)
+
+    val strictConceptStmt1 = stmtParser("concept income (row, val) := cell: c (col == 2), _.row == c.row").get.asInstanceOf[ConceptDefinitionStatement].definition.asInstanceOf[CPStrictConcept]
+    strictConceptStmt1.name should equal ("income")
+    var strictConceptAttrs1 = strictConceptStmt1.attributes
+    strictConceptAttrs1.size should equal (2)
+    strictConceptAttrs1.contains("row") should be (true)
+    strictConceptAttrs1.contains("val") should be (true)
+    val strictConceptsChild1 = strictConceptStmt1.childConcepts
+    strictConceptsChild1.size should equal (1)
+    strictConceptsChild1.head should equal (("cell", "c"))
+    val strictConceptsDependencies1 = strictConceptStmt1.attributesDependencies
+    strictConceptsDependencies1.size should equal (2)
+    strictConceptsDependencies1.contains(new CPExpressionDependency(CPOperation.createBinaryArithmeticExpression(CPAttribute("_", "row"), CPAttribute("c", "row"), "=="), CPBooleanValue(true))) should be (true)
+    strictConceptsDependencies1.contains(new CPExpressionDependency(CPOperation.createBinaryArithmeticExpression(CPAttribute("c", "col"), CPConstant(CPFloatingValue(2)), "=="), CPBooleanValue(true))) should be (true)
+
+    val strictConceptStmt2 = stmtParser("concept profit (row, val == i.val - o.val) := income: i(), outcome: o(), _.row ~ i.row ~ o.row").get.asInstanceOf[ConceptDefinitionStatement].definition.asInstanceOf[CPStrictConcept]
+    strictConceptStmt2.name should equal ("profit")
+    var strictConceptAttrs2 = strictConceptStmt2.attributes
+    strictConceptAttrs2.size should equal (2)
+    strictConceptAttrs2.contains("row") should be (true)
+    strictConceptAttrs2.contains("val") should be (true)
+    val strictConceptsChild2 = strictConceptStmt2.childConcepts
+    strictConceptsChild2.size should equal (2)
+    strictConceptsChild2.contains(("income", "i")) should be (true)
+    strictConceptsChild2.contains(("outcome", "o")) should be (true)
+    val strictConceptsDependencies2 = strictConceptStmt2.attributesDependencies
+    strictConceptsDependencies2.size should equal (2)
+    strictConceptsDependencies2.contains(new CPAttributesLinkDependency(CPAttributeName("_", "row") :: CPAttributeName("o", "row") :: CPAttributeName("i", "row") :: Nil)) should be (true)
+    strictConceptsDependencies2.contains(new CPExpressionDependency(CPOperation.createBinaryArithmeticExpression(CPAttribute("_", "val"), new CPSub(CPAttribute("i", "val"), CPAttribute("o", "val")), "=="), CPBooleanValue(true))) should be (true)
+
+    val strictConceptStmt3 = stmtParser("concept profit (row ~ i.row ~ o.row, val == i.val - o.val) := income: i(), outcome: o()").get.asInstanceOf[ConceptDefinitionStatement].definition.asInstanceOf[CPStrictConcept]
+    strictConceptStmt2 should equal (strictConceptStmt3)
   }
 
 }

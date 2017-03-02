@@ -8,11 +8,9 @@ import org.concepualprogramming.core.statements.CPStatement
 /**
  * Created by oleksii.voropai on 11/1/2016.
  */
-class CPCompositeFunctionDefinition (_name: String, _argsNames: List[String], body: CPStatement) extends CPFunctionDefinition {
-  def name = _name
-  def argsNames = _argsNames
+case class CPCompositeFunctionDefinition (name: String, argsNames: List[String], body: CPStatement) extends CPFunctionDefinition {
   def calculate(args: Map[String, CPExpression], context: CPExecutionContext): Option[CPValue] = {
-    if(_argsNames.find(!args.contains(_)).isDefined) {
+    if(argsNames.find(!args.contains(_)).isDefined) {
       return None
     }
     context.addFrame

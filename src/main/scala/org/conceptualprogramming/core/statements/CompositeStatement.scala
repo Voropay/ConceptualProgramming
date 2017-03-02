@@ -8,7 +8,7 @@ import scala.collection.mutable.ArrayBuffer
 /**
  * Created by oleksii.voropai on 11/1/2016.
  */
-class CompositeStatement(body: List[CPStatement]) extends CPStatement{
+case class CompositeStatement(body: List[CPStatement]) extends CPStatement{
 
   val steps = ArrayBuffer[CPStatement]() ++ body
 

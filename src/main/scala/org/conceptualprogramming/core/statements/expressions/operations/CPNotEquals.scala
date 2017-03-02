@@ -49,5 +49,5 @@ case class CPNotEquals(operand1: CPExpression, operand2: CPExpression) extends C
     Map()
   }
 
-  override def toString: String = operand1.toString + " " + name + " " + operand2.toString
+  override def toString: String =  "(" + operand1.toString + ") " + name + " (" + operand2.toString + ")"
 }

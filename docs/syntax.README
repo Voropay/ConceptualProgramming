@@ -3,20 +3,21 @@ The basics of syntax
 Expression is the part of almost any language elements and can be used for value calculations.
 Expression may consists of constants, variables, object attributes operators and functions, they also may include sub expressions wrapped with parentheses.
 ```
-<expr> ::= <constant> |
+<expr> ::= <unaryOperator> |
+           <binaryOperator> |
+           <constant> |
            <attribute> |
-           <variable> |
            <functionCall> |
-           <operator> |
+           <variable> |
            <subExpr>
 ```
 
 Constant is a literal that represents fixed value of one of basic or composite types.
 ```
-<constant> ::= <boolean> |
-               <int> |
+<constant> ::= <date> |
+               <boolean> |
                <float> |
-               <date> |
+               <int> |
                <string> |
                <composite>
 <boolean>   ::= true | false
@@ -45,32 +46,15 @@ Function call can also be a part of expression. It consists of function name ide
 ```
 Operator represents one of the builtin arithmetic, logical and comparison operations.
 ```
-<operator> ::= <add> |
-               <sub> |
-               <mul> |
-               <div> |
-               <and> |
-               <or> |
-               <not> |
-               <equals> |
-               <notEquals> |
-               <greater> |
-               <greaterOrEquals> |
-               <less> |
-               <lessOrEquals>
-<add> ::= <expr> + <expr>
-<sub> ::= <expr> - <expr>
-<mul> ::= <expr> * <expr>
-<div> ::= <expr> / <expr>
-<and> ::= <expr> && <expr>
-<or> ::= <expr> \|\| <expr>
-<not> ::= ! <expr>
-<equals> ::= <expr> == <expr>
-<notEquals> ::= <expr> != <expr>
-<greater> ::= <expr> \> <expr>
-<greaterOrEquals> ::= <expr> \>= <expr>
-<less> ::= <expr> \< <expr>
-<lessOrEquals> ::= <expr> \<= <expr>
+<unaryOperator> ::= ! <exp>
+<binaryOperator> ::= <term> <operatorSign> <term> { <operatorSign> <term> }
+<term> ::= <constant> |
+           <attribute> |
+           <variable> |
+           <functionCall> |
+           <unaryOperator> |
+           <subExpr>
+<operatorSign> := + | - | * | / | > | < | >= | <= | == | != | && | \|\|
 ```
 Sub expression is a nested expression wrapped with parentheses. It signifies an order in which expression elements will be calculated.
 ```
@@ -101,7 +85,7 @@ Return value statement can be used to stop function execution and allow to speci
 ```
 Return object statement can be used to stop free concept resolving routine execution and allow to specify a object to be passed back to the code that called it.
 ```
-<returnValue> ::= return <identifier> [ ( [<identifier> : <expr> {, <identifier> : <expr>}] ) ]
+<returnObject> ::= return <identifier> [ \{ [<identifier> : <expr> {, <identifier> : <expr>}] \} ]
 ```
 If is a standard conditional statement.
 ```
@@ -121,7 +105,7 @@ Function definition allows to create a function.
 ```
 Object definition is a statement that allows to create an object and add it to a knowledge base.
 ```
-<objectDefinition> ::= object <identifier> ( <identifier> : <expr> {, <identifier> : <expr>})
+<objectDefinition> ::= object <identifier> \{ <identifier> : <expr> {, <identifier> : <expr>}\}
 ```
 Concept definition is a statement that allows to create child concept based on relations between child concepts and objects. Relations are based on dependencies of their attributes.
 ```
@@ -148,14 +132,14 @@ Strict concept is a Prolog-style concept where all attribute dependencies are de
 ```
 Inherited concept is a concept which attributes are implicitly derived from parent concepts.
 ```
-<inheritedConcept> ::= <identifier> [( <identifier> [<comparison> <expr>] {, <identifier> [<comparison> <expr>]})] :=>
+<inheritedConcept> ::= <identifier> [( <identifier> [<comparison> <expr>] {, <identifier> [<comparison> <expr>]})] :>
                        <identifier> [ : <identifier>] ( <identifier> [<comparison> <expr>] {, <identifier> [<comparison> <expr>]})
                        {, <identifier> [ : <identifier>] ( <identifier> [<comparison> <expr>] {, <identifier> [<comparison> <expr>]})}
                        {, <expr>}
 ```
 Grouping concept is a concept which attributes are calculated as aggregation of parent concept attributes.
 ```
-<groupingConcept> ::= <identifier> ( <identifier> [<groupingComparison> <expr>] {, <identifier> [<groupingComparison> <expr>]}) :=<
+<groupingConcept> ::= <identifier> ( <identifier> [<groupingComparison> <expr>] {, <identifier> [<groupingComparison> <expr>]}) :<
                       <identifier> [ : <identifier>] ( <identifier> [<comparison> <expr>] {, <identifier> [<comparison> <expr>]})
                       {, <identifier> [ : <identifier>] ( <identifier> [<comparison> <expr>] {, <identifier> [<comparison> <expr>]})}
                       {, <expr>}

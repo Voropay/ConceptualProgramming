@@ -7,7 +7,7 @@ import org.concepualprogramming.core.{CPDecisionNode, CPExecutionContext, CPObje
 /**
  * Created by oleksii.voropai on 10/27/2016.
  */
-class IfStatement(condition: CPExpression, thenBlock: CPStatement, elseBlock: CPStatement) extends CPStatement {
+case class IfStatement(condition: CPExpression, thenBlock: CPStatement, elseBlock: CPStatement) extends CPStatement {
 
   override def execute(context: CPExecutionContext): Unit = {
     val res = condition.calculate(context)

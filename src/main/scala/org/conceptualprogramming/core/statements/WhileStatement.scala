@@ -7,7 +7,7 @@ import org.concepualprogramming.core.{CPDecisionNode, CPExecutionContext, CPObje
 /**
  * Created by oleksii.voropai on 11/21/2016.
  */
-class WhileSatement(condition: CPExpression, body: CPStatement) extends CPStatement {
+case class WhileStatement(condition: CPExpression, body: CPStatement) extends CPStatement {
 
   override def execute(context: CPExecutionContext): Unit = {
     var res = condition.calculate(context)

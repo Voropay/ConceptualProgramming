@@ -7,8 +7,8 @@ import org.concepualprogramming.core.datatypes.CPValue
 /**
  * Created by oleksii.voropai on 10/3/2016.
  */
-//TODO: return an expression evaluation result instead of simple objects
-class ReturnObjectsStatement(returnObjectsName: CPExpression, queryExpr: Map[String, CPExpression]) extends CPStatement{
+//TODO: replace queryExpr attribute name with expression, take this into account in statement parser
+case class ReturnObjectsStatement(returnObjectsName: CPExpression, queryExpr: Map[String, CPExpression]) extends CPStatement{
   override def execute(context: CPExecutionContext): Unit = {
     val queryOpt = queryExpr.mapValues(_.calculate(context))
     val objName = returnObjectsName.calculate(context)
@@ -27,7 +27,6 @@ class ReturnObjectsStatement(returnObjectsName: CPExpression, queryExpr: Map[Str
   override def setCurrentNodeResolvingResult(res: List[CPObject], context: CPExecutionContext): Unit = {
   }
 
-  //TODO: replace returnObjectsName with expression and check that it's defined
   override def isDefined(context: CPExecutionContext): Boolean = {
     queryExpr.find(!_._2.isDefined(context)).isEmpty && returnObjectsName.isDefined(context)
   }

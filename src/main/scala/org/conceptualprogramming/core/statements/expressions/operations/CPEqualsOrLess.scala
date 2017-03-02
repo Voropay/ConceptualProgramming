@@ -35,5 +35,5 @@ case class CPEqualsOrLess(operand1: CPExpression, operand2: CPExpression) extend
 
   override def infer(result: CPValue, context: CPExecutionContext): Map[CPAttributeName, CPValue] = Map()
 
-  override def toString: String = operand1.toString + " " + name + " " + operand2.toString
+  override def toString: String =  "(" + operand1.toString + ") " + name + " (" + operand2.toString + ")"
 }
