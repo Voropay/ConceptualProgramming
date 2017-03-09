@@ -5,7 +5,7 @@ import java.time.LocalDate
 import org.conceptualprogramming.core.datatypes.composite.CPMap
 import org.conceptualprogramming.core.statements.expressions.operations.CPOperation
 import org.conceptualprogramming.parser.{StatementsParser, ExpressionsParser, ConstantsParser}
-import org.concepualprogramming.core.{CPAttributeName, CPStrictConcept}
+import org.concepualprogramming.core.{CPInheritedConcept, CPAttributeName, CPStrictConcept}
 import org.concepualprogramming.core.datatypes.CPBooleanValue
 import org.concepualprogramming.core.datatypes.CPIntValue
 import org.concepualprogramming.core.datatypes.CPStringValue
@@ -294,6 +294,45 @@ class ParserTests  extends FlatSpec with Matchers {
 
     val strictConceptStmt3 = stmtParser("concept profit (row ~ i.row ~ o.row, val == i.val - o.val) := income: i(), outcome: o()").get.asInstanceOf[ConceptDefinitionStatement].definition.asInstanceOf[CPStrictConcept]
     strictConceptStmt2 should equal (strictConceptStmt3)
+
+    val inhConceptStmt1 = stmtParser("concept Income() :> Cell(*col == 2)").get.asInstanceOf[ConceptDefinitionStatement].definition.asInstanceOf[CPInheritedConcept]
+    inhConceptStmt1.name should equal ("Income")
+    inhConceptStmt1.childConcepts.size should equal (1)
+    inhConceptStmt1.childConcepts.head should equal (("Cell", "Cell"))
+    inhConceptStmt1.overriddenAttributes.isEmpty should be (true)
+    inhConceptStmt1.specifiedAttributes.size should equal (1)
+    inhConceptStmt1.specifiedAttributes.get(CPAttributeName("Cell", "col")).get.asInstanceOf[CPConstant].value.getIntValue.get should equal (2)
+    inhConceptStmt1.filterDependencies.isEmpty should be (true)
+
+    val inhConceptStmt2 = stmtParser("concept Profit(val == i.val - o.val) :> Income: i(), Outcome: o()").get.asInstanceOf[ConceptDefinitionStatement].definition.asInstanceOf[CPInheritedConcept]
+    inhConceptStmt2.name should equal ("Profit")
+    inhConceptStmt2.childConcepts.size should equal (2)
+    inhConceptStmt2.childConcepts.contains(("Income", "i")) should be (true)
+    inhConceptStmt2.childConcepts.contains(("Outcome", "o")) should be (true)
+    inhConceptStmt2.overriddenAttributes.size should equal (1)
+    val inhConceptArgs2 = inhConceptStmt2.overriddenAttributes.get("val").get.asInstanceOf[CPSub]
+    inhConceptArgs2.operand1.asInstanceOf[CPAttribute].attrName should equal (CPAttributeName("i", "val"))
+    inhConceptArgs2.operand2.asInstanceOf[CPAttribute].attrName should equal (CPAttributeName("o", "val"))
+    inhConceptStmt2.specifiedAttributes.isEmpty should be (true)
+    inhConceptStmt2.filterDependencies.isEmpty should be (true)
+
+    val inhConceptStmt3 = stmtParser("concept Unprofitable() :> Profit(), Profit.val < 0").get.asInstanceOf[ConceptDefinitionStatement].definition.asInstanceOf[CPInheritedConcept]
+    inhConceptStmt3.name should equal ("Unprofitable")
+    inhConceptStmt3.childConcepts.size should equal (1)
+    inhConceptStmt3.childConcepts.contains(("Profit", "Profit")) should be (true)
+    inhConceptStmt3.overriddenAttributes.isEmpty should be (true)
+    inhConceptStmt3.specifiedAttributes.isEmpty should be (true)
+    inhConceptStmt3.filterDependencies.size should equal (1)
+    val inhDependency3 = inhConceptStmt3.filterDependencies.head.asInstanceOf[CPExpressionDependency].expr.asInstanceOf[CPLess]
+    inhDependency3.operand1.asInstanceOf[CPAttribute].attrName should equal (CPAttributeName("Profit", "val"))
+    inhDependency3.operand2.asInstanceOf[CPConstant].value.getIntValue.get should equal (0)
+
+    val inhConceptStmt4 = stmtParser("concept Unprofitable() :> Profit(val < 0)").get.asInstanceOf[ConceptDefinitionStatement].definition.asInstanceOf[CPInheritedConcept]
+    inhConceptStmt3 should equal (inhConceptStmt4)
+
+
+
+
   }
 
 }
