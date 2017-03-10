@@ -5,7 +5,7 @@ import java.time.LocalDate
 import org.conceptualprogramming.core.datatypes.composite.CPMap
 import org.conceptualprogramming.core.statements.expressions.operations.CPOperation
 import org.conceptualprogramming.parser.{StatementsParser, ExpressionsParser, ConstantsParser}
-import org.concepualprogramming.core.{CPInheritedConcept, CPAttributeName, CPStrictConcept}
+import org.concepualprogramming.core.{CPFreeConcept, CPInheritedConcept, CPAttributeName, CPStrictConcept}
 import org.concepualprogramming.core.datatypes.CPBooleanValue
 import org.concepualprogramming.core.datatypes.CPIntValue
 import org.concepualprogramming.core.datatypes.CPStringValue
@@ -329,6 +329,31 @@ class ParserTests  extends FlatSpec with Matchers {
 
     val inhConceptStmt4 = stmtParser("concept Unprofitable() :> Profit(val < 0)").get.asInstanceOf[ConceptDefinitionStatement].definition.asInstanceOf[CPInheritedConcept]
     inhConceptStmt3 should equal (inhConceptStmt4)
+
+    val freeConceptStmt= stmtParser("concept NumbersSequence := {for(i=0;i<10;i=i+1){object Number{val: i}}; return Number{}}").get.asInstanceOf[ConceptDefinitionStatement].definition.asInstanceOf[CPFreeConcept]
+    freeConceptStmt.name should equal ("NumbersSequence")
+    val freeConceptBody = freeConceptStmt.steps
+    freeConceptBody.size should equal (2)
+    val freeConceptStep1 = freeConceptBody(0).asInstanceOf[ForStatement]
+    val freeConceptStep1Start = freeConceptStep1.startOperator.asInstanceOf[VariableStatement]
+    freeConceptStep1Start.variableName should equal ("i")
+    freeConceptStep1Start.operand.asInstanceOf[CPConstant].value.getIntValue.get should equal (0)
+    val freeConceptStep1Cond = freeConceptStep1.condition.asInstanceOf[CPLess]
+    freeConceptStep1Cond.operand1.asInstanceOf[CPVariable].name should equal ("i")
+    freeConceptStep1Cond.operand2.asInstanceOf[CPConstant].value.getIntValue.get should equal (10)
+    var freeConceptStep1End = freeConceptStep1.endOperator.asInstanceOf[VariableStatement]
+    freeConceptStep1End.variableName should equal ("i")
+    freeConceptStep1End.operand.asInstanceOf[CPAdd].operand1.asInstanceOf[CPVariable].name should equal ("i")
+    freeConceptStep1End.operand.asInstanceOf[CPAdd].operand2.asInstanceOf[CPConstant].value.getIntValue.get should equal (1)
+    val freeConceptStep1Body = freeConceptStep1.body.asInstanceOf[CompositeStatement].body.head.asInstanceOf[AddObjectStatement]
+    freeConceptStep1Body.name should equal ("Number")
+    val freeConceptStep1BodyAttrs = freeConceptStep1Body.attributes
+    freeConceptStep1BodyAttrs.size should equal (1)
+    freeConceptStep1BodyAttrs.get("val").get.asInstanceOf[CPVariable].name should equal ("i")
+    val freeConceptStep2 = freeConceptBody(1).asInstanceOf[ReturnObjectsStatement]
+    freeConceptStep2.returnObjectsName.asInstanceOf[CPConstant].value.getStringValue.get should equal ("Number")
+    freeConceptStep2.queryExpr.size should equal (0)
+
 
 
 

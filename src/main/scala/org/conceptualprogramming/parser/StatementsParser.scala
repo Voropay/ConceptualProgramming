@@ -1,7 +1,11 @@
 package org.conceptualprogramming.parser
 
 import org.conceptualprogramming.core.statements.expressions.operations.CPOperation
-import org.concepualprogramming.core.{CPInheritedConcept, CPAttributeName, CPStrictConcept, CPConcept}
+import org.concepualprogramming.core.CPAttributeName
+import org.concepualprogramming.core.CPConcept
+import org.concepualprogramming.core.CPInheritedConcept
+import org.concepualprogramming.core.CPStrictConcept
+import org.concepualprogramming.core._
 import org.concepualprogramming.core.datatypes.{CPStringValue, CPBooleanValue}
 import org.concepualprogramming.core.dependencies.{CPExpressionDependency, CPAttributesLinkDependency, CPDependency}
 import org.concepualprogramming.core.statements.CPStatement
@@ -21,7 +25,7 @@ trait StatementsParser extends ExpressionsParser {
                                        ifStatement | forStatement | whileStatement | functionDefinitionStatement |
                                        objectDefinitionStatement | conceptDefinitionStatement | conceptResolvingStatement | compositeStatement
   //TODO: find out how to parse multi line statements
-  def compositeStatement: Parser[CPStatement] = "{" ~ repsep(statement, ";") ~ "}" ^^ {value => new CompositeStatement(value._1._2)}
+  def compositeStatement: Parser[CompositeStatement] = "{" ~ repsep(statement, ";") ~ "}" ^^ {value => new CompositeStatement(value._1._2)}
   def variableAssignmentStatement: Parser[CPStatement] = ident ~ "=" ~ expression ^^ {value => new VariableStatement(value._1._1, value._2)}
   def returnVariableStatement:  Parser[CPStatement] = "return" ~ expression ^^ {value => new ReturnValueStatement(value._2)}
 
@@ -58,7 +62,7 @@ trait StatementsParser extends ExpressionsParser {
   def conceptDefinitionStatement: Parser[CPStatement] = "concept" ~ conceptDefinition ^^ {value => new ConceptDefinitionStatement(value._2)}
   def conceptResolvingStatement: Parser[CPStatement] = "concept" ~ conceptDefinition ~ objectQuery ^^ {value => new ConceptResolvingStatement(value._1._2, value._2)}
 
-  def conceptDefinition: Parser[CPConcept] = strictConceptDefinition | inheritedConceptDefinition //| freeConceptDefinition | groupingConceptDefinition
+  def conceptDefinition: Parser[CPConcept] = strictConceptDefinition | inheritedConceptDefinition | freeConceptDefinition //| groupingConceptDefinition
 
   def strictConceptDefinition: Parser[CPConcept] = parentConcept ~ ":=" ~ rep1sep(childConcept, ",") ~ opt("," ~ rep1sep(attrDependency, ",")) ^^ {
     case parentConcept ~ ":=" ~ childConcepts ~ dependencies => {
@@ -264,4 +268,6 @@ trait StatementsParser extends ExpressionsParser {
       (childConceptName, aliasName, specifiedAttributes.filter(_.isDefined).map(_.get).toMap, dependencies.filter(_.isDefined).map(_.get))
     }
   }
+
+  def freeConceptDefinition: Parser[CPConcept] = ident ~ ":=" ~ compositeStatement ^^ {value => new CPFreeConcept(value._1._1, value._2.body)}
 }
