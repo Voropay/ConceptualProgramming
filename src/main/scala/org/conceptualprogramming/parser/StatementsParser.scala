@@ -13,6 +13,7 @@ import org.concepualprogramming.core.statements.ReturnObjectsStatement
 import org.concepualprogramming.core.statements.ReturnValueStatement
 import org.concepualprogramming.core.statements.VariableStatement
 import org.concepualprogramming.core.statements.expressions.functions.CPCompositeFunctionDefinition
+import org.concepualprogramming.core.statements.expressions.operations.CPEquals
 import org.concepualprogramming.core.statements.expressions.{CPExpression, CPAttribute, CPConstant}
 import org.concepualprogramming.core.statements._
 
@@ -62,7 +63,7 @@ trait StatementsParser extends ExpressionsParser {
   def conceptDefinitionStatement: Parser[CPStatement] = "concept" ~ conceptDefinition ^^ {value => new ConceptDefinitionStatement(value._2)}
   def conceptResolvingStatement: Parser[CPStatement] = "concept" ~ conceptDefinition ~ objectQuery ^^ {value => new ConceptResolvingStatement(value._1._2, value._2)}
 
-  def conceptDefinition: Parser[CPConcept] = strictConceptDefinition | inheritedConceptDefinition | freeConceptDefinition //| groupingConceptDefinition
+  def conceptDefinition: Parser[CPConcept] = strictConceptDefinition | inheritedConceptDefinition | freeConceptDefinition | groupingConceptDefinition
 
   def strictConceptDefinition: Parser[CPConcept] = parentConcept ~ ":=" ~ rep1sep(childConcept, ",") ~ opt("," ~ rep1sep(attrDependency, ",")) ^^ {
     case parentConcept ~ ":=" ~ childConcepts ~ dependencies => {
@@ -270,4 +271,156 @@ trait StatementsParser extends ExpressionsParser {
   }
 
   def freeConceptDefinition: Parser[CPConcept] = ident ~ ":=" ~ compositeStatement ^^ {value => new CPFreeConcept(value._1._1, value._2.body)}
+
+  def groupingConceptDefinition: Parser[CPConcept] = groupedParentConcept ~ ":<" ~ rep1sep(childConcept, ",") ~ opt("," ~ rep1sep(groupedAttrDependency, ",")) ^^ {
+    case parentConcept ~ ":<" ~ childConcepts ~ dependencies => {
+      val parentConceptName = parentConcept._1
+      val parentAttributes = parentConcept._2
+      val parentGroupedAttributes = parentConcept._3
+      val parentDependencies = parentConcept._4
+      val parentGroupedDependencies = parentConcept._5
+
+      val childConceptsNames = childConcepts.map(curItem => (curItem._1, curItem._2))
+      val childConceptsDependencies = childConcepts.flatMap(_._3)
+
+      val additionalDependencies = if(dependencies.isDefined) {
+        dependencies.get._2.map(_._1).filter(_.isDefined).map(_.get)
+      } else {
+        List()
+      }
+      val additionalGroupedAttributes = if(dependencies.isDefined) {
+        dependencies.get._2.map(_._2).filter(_.isDefined).map(_.get).toMap
+      } else {
+        Map()
+      }
+      val additionalGroupedDependencies = if(dependencies.isDefined) {
+        dependencies.get._2.map(_._3).filter(_.isDefined).map(_.get)
+      } else {
+        List()
+      }
+
+      val groupedAttributes = parentGroupedAttributes ++ additionalGroupedAttributes
+      val defaultAttribute = if(!groupedAttributes.isEmpty) {
+        groupedAttributes.head._1
+      } else if(!parentAttributes.isEmpty) {
+        parentAttributes.head
+      } else {
+        "?"
+      }
+      val attributesDependencies = parentDependencies ++ childConceptsDependencies ++ additionalDependencies
+      val groupedDependencies = parentGroupedDependencies ++ additionalGroupedDependencies
+
+
+
+      new CPGroupingConcept(parentConceptName, parentAttributes, defaultAttribute, childConceptsNames, attributesDependencies, groupedAttributes, groupedDependencies)
+    }
+  }
+
+  def groupedParentConcept: Parser[(String, List[String], Map[String, CPExpression], List[CPDependency], List[CPDependency])] =
+    ident ~ "(" ~ rep1sep(opt("*") ~ ident ~ opt(arithmeticalDependencyAttributes | attributesLinkDependencyAttributes), ",") ~ ")" ^^ {
+      case parentConceptName ~ "(" ~ parentConceptAttributes ~ ")" => {
+        val parentConceptAttributesNames = parentConceptAttributes.map(item => {
+          if(item._1._1.isEmpty) {
+            Some(item._1._2)
+          } else {
+            None
+          }
+        })
+
+        val dependencies = parentConceptAttributes.map(curItem => {
+          val grouped = curItem._1._1
+          val attrName = curItem._1._2
+          val dependencyOpt = if(grouped.isEmpty && curItem._2.isDefined) {
+            curItem._2.get match {
+              case d: ArithmeticalDependencyAttributes => Some(new CPExpressionDependency(CPOperation.createBinaryArithmeticExpression(CPAttribute("_", attrName), d.operand, d.operation), CPBooleanValue(true)))
+              case d: AttributesLinkDependencyAttributes => Some(new CPAttributesLinkDependency(CPAttributeName("_", attrName) :: d.attributes))
+              case _ => None
+            }
+          } else {
+            None
+          }
+          dependencyOpt
+        })
+
+        val groupedAttributes = parentConceptAttributes.map(curItem => {
+          val grouped = curItem._1._1
+          val attrName = curItem._1._2
+          val groupedAttrValues = if(grouped.isDefined && curItem._2.isDefined) {
+            curItem._2.get match {
+              case d: ArithmeticalDependencyAttributes => if(d.operation == "==") {
+                Some((attrName, d.operand))
+              } else {
+                None
+              }
+              case _ => None
+            }
+          } else {
+            None
+          }
+          groupedAttrValues
+        })
+
+        val groupedDependencies = parentConceptAttributes.map(curItem => {
+          val grouped = curItem._1._1
+          val attrName = curItem._1._2
+          val groupedDependencyOpt = if(grouped.isDefined && curItem._2.isDefined) {
+            curItem._2.get match {
+              case d: ArithmeticalDependencyAttributes => if(d.operation != "==") {
+                Some(new CPExpressionDependency(CPOperation.createBinaryArithmeticExpression(CPAttribute("_", attrName), d.operand, d.operation), CPBooleanValue(true)))
+              } else {
+                None
+              }
+              case _ => None
+            }
+          } else {
+            None
+          }
+          groupedDependencyOpt
+        })
+        (parentConceptName, parentConceptAttributesNames.filter(_.isDefined).map(_.get), groupedAttributes.filter(_.isDefined).map(_.get).toMap, dependencies.filter(_.isDefined).map(_.get), groupedDependencies.filter(_.isDefined).map(_.get))
+      }
+    }
+
+  def groupedAttrDependency: Parser[(Option[CPDependency], Option[(String, CPExpression)], Option[CPDependency])] = opt("*") ~ (attributesLinkDependency | expressionDependency) ^^ {value => {
+    val grouped = value._1.isDefined
+    val dependency = value._2
+    val dependencyOpt = if(grouped) {
+      None
+    } else {
+      Some(dependency)
+    }
+    val groupedAttributeOpt = if(grouped) {
+      dependency match {
+        case d: CPExpressionDependency => {
+          d.expr match {
+            case e: CPEquals => {
+              e.operand1 match {
+                case o: CPAttribute => {
+                  if(o.attrName.conceptName == "_") {
+                    Some(o.attrName.attributeName, e.operand2)
+                  } else {
+                    None
+                  }
+                }
+                case _ => None
+              }
+            }
+            case _ => None
+          }
+        }
+        case _ => None
+      }
+    } else {
+      None
+    }
+
+    val groupedDependency = if(grouped && groupedAttributeOpt.isEmpty) {
+      Some(dependency)
+    } else {
+      None
+    }
+
+    (dependencyOpt, groupedAttributeOpt, groupedDependency)
+  }
+  }
 }

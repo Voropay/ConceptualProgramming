@@ -5,7 +5,11 @@ import java.time.LocalDate
 import org.conceptualprogramming.core.datatypes.composite.CPMap
 import org.conceptualprogramming.core.statements.expressions.operations.CPOperation
 import org.conceptualprogramming.parser.{StatementsParser, ExpressionsParser, ConstantsParser}
-import org.concepualprogramming.core.{CPFreeConcept, CPInheritedConcept, CPAttributeName, CPStrictConcept}
+import org.concepualprogramming.core.CPAttributeName
+import org.concepualprogramming.core.CPFreeConcept
+import org.concepualprogramming.core.CPInheritedConcept
+import org.concepualprogramming.core.CPStrictConcept
+import org.concepualprogramming.core._
 import org.concepualprogramming.core.datatypes.CPBooleanValue
 import org.concepualprogramming.core.datatypes.CPIntValue
 import org.concepualprogramming.core.datatypes.CPStringValue
@@ -354,10 +358,67 @@ class ParserTests  extends FlatSpec with Matchers {
     freeConceptStep2.returnObjectsName.asInstanceOf[CPConstant].value.getStringValue.get should equal ("Number")
     freeConceptStep2.queryExpr.size should equal (0)
 
+    val grpConceptStmt1 = stmtParser("concept Totals(*income == GroupingSum(i.val), *outcome == GroupingSum(o.val), *profit == GroupingSum(p.val)) :< Income: i(), Outcome: o(), Profit: p(), i.row ~ o.row ~ p.row").get.asInstanceOf[ConceptDefinitionStatement].definition.asInstanceOf[CPGroupingConcept]
+    grpConceptStmt1.name should equal ("Totals")
+    grpConceptStmt1.attributes.isEmpty should be (true)
+    grpConceptStmt1.childConcepts.size should equal (3)
+    grpConceptStmt1.childConcepts.contains(("Income", "i")) should be (true)
+    grpConceptStmt1.childConcepts.contains(("Outcome", "o")) should be (true)
+    grpConceptStmt1.childConcepts.contains(("Profit", "p")) should be (true)
+    grpConceptStmt1.attributesDependencies.size should equal (1)
+    grpConceptStmt1.attributesDependencies.head should equal (new CPAttributesLinkDependency(CPAttributeName("i", "row") :: CPAttributeName("o", "row") :: CPAttributeName("p", "row") :: Nil))
+    grpConceptStmt1.groupedAttributes.size should equal (3)
+    grpConceptStmt1.groupedAttributes.get("income").get should equal (new CPFunctionCall("GroupingSum", CPAttribute("i", "val") :: Nil))
+    grpConceptStmt1.groupedAttributes.get("outcome").get should equal (new CPFunctionCall("GroupingSum", CPAttribute("o", "val") :: Nil))
+    grpConceptStmt1.groupedAttributes.get("profit").get should equal (new CPFunctionCall("GroupingSum", CPAttribute("p", "val") :: Nil))
+    grpConceptStmt1.groupedAttributesDependencies.isEmpty should be (true)
 
+    val grpConceptStmt2 = stmtParser("concept RowSum(*val == GroupingSum(c.val), row ~ c.row) :< Cell: c()").get.asInstanceOf[ConceptDefinitionStatement].definition.asInstanceOf[CPGroupingConcept]
+    grpConceptStmt2.name should equal ("RowSum")
+    grpConceptStmt2.attributes.size should equal (1)
+    grpConceptStmt2.attributes.head should equal ("row")
+    grpConceptStmt2.childConcepts.size should equal (1)
+    grpConceptStmt2.childConcepts.head should equal (("Cell", "c"))
+    grpConceptStmt2.attributesDependencies.size should equal (1)
+    grpConceptStmt2.attributesDependencies.head should equal (new CPAttributesLinkDependency(CPAttributeName("_", "row") :: CPAttributeName("c", "row") :: Nil))
+    grpConceptStmt2.groupedAttributes.size should equal (1)
+    grpConceptStmt2.groupedAttributes.get("val").get should equal (new CPFunctionCall("GroupingSum", CPAttribute("c", "val") :: Nil))
+    grpConceptStmt2.groupedAttributesDependencies.isEmpty should be (true)
 
+    val grpConceptStmt3 = stmtParser("concept RowSum(row ~ c.row) :< Cell: c(), *_.val == GroupingSum(c.val)").get.asInstanceOf[ConceptDefinitionStatement].definition.asInstanceOf[CPGroupingConcept]
+    grpConceptStmt3 should equal (grpConceptStmt2)
 
+    val grpConceptStmt4 = stmtParser("concept PositiveRows(*val == GroupingSum(c.val), row ~ c.row, *val > 0) :< Cell: c()").get.asInstanceOf[ConceptDefinitionStatement].definition.asInstanceOf[CPGroupingConcept]
+    grpConceptStmt4.name should equal ("PositiveRows")
+    grpConceptStmt4.attributes.size should equal (1)
+    grpConceptStmt4.attributes.head should equal ("row")
+    grpConceptStmt4.childConcepts.size should equal (1)
+    grpConceptStmt4.childConcepts.head should equal (("Cell", "c"))
+    grpConceptStmt4.attributesDependencies.size should equal (1)
+    grpConceptStmt4.attributesDependencies.head should equal (new CPAttributesLinkDependency(CPAttributeName("_", "row") :: CPAttributeName("c", "row") :: Nil))
+    grpConceptStmt4.groupedAttributes.size should equal (1)
+    grpConceptStmt4.groupedAttributes.get("val").get should equal (new CPFunctionCall("GroupingSum", CPAttribute("c", "val") :: Nil))
+    grpConceptStmt4.groupedAttributesDependencies.size should equal (1)
+    val grpConceptDep4 = grpConceptStmt4.groupedAttributesDependencies.head.asInstanceOf[CPExpressionDependency].expr.asInstanceOf[CPGreater]
+    grpConceptDep4.operand1.asInstanceOf[CPAttribute].attrName should equal (CPAttributeName("_", "val"))
+    grpConceptDep4.operand2.asInstanceOf[CPConstant].value.getIntValue.get should equal (0)
 
+    val grpConceptStmt5 = stmtParser("concept PositiveRows(*val == GroupingSum(c.val), row ~ c.row) :< Cell: c(), *_.val > 0").get.asInstanceOf[ConceptDefinitionStatement].definition.asInstanceOf[CPGroupingConcept]
+    grpConceptStmt5 should equal (grpConceptStmt4)
+
+    val grpConceptStmt6 = stmtParser("concept PositiveRowsNums(row ~ c.row) :< Cell: c(), *GroupingSum(c.val) > 0").get.asInstanceOf[ConceptDefinitionStatement].definition.asInstanceOf[CPGroupingConcept]
+    grpConceptStmt6.name should equal ("PositiveRowsNums")
+    grpConceptStmt6.attributes.size should equal (1)
+    grpConceptStmt6.attributes.head should equal ("row")
+    grpConceptStmt6.childConcepts.size should equal (1)
+    grpConceptStmt6.childConcepts.head should equal (("Cell", "c"))
+    grpConceptStmt6.attributesDependencies.size should equal (1)
+    grpConceptStmt6.attributesDependencies.head should equal (new CPAttributesLinkDependency(CPAttributeName("_", "row") :: CPAttributeName("c", "row") :: Nil))
+    grpConceptStmt6.groupedAttributes.size should equal (0)
+    grpConceptStmt6.groupedAttributesDependencies.size should equal (1)
+    val grpConceptDep6 = grpConceptStmt6.groupedAttributesDependencies.head.asInstanceOf[CPExpressionDependency].expr.asInstanceOf[CPGreater]
+    grpConceptDep6.operand1 should equal (new CPFunctionCall("GroupingSum", CPAttribute("c", "val") :: Nil))
+    grpConceptDep6.operand2.asInstanceOf[CPConstant].value.getIntValue.get should equal (0)
   }
 
 }
