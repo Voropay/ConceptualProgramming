@@ -1,5 +1,7 @@
 package org.conceptualprogramming
 
+import org.conceptualprogramming.core.statements.ProcedureCallStatement
+import org.conceptualprogramming.core.statements.expressions.functions.ConsoleFunctions
 import org.concepualprogramming.core.datatypes.{CPStringValue, CPBooleanValue, CPIntValue}
 import org.concepualprogramming.core.dependencies.CPDependency
 import org.concepualprogramming.core.statements.expressions.operations.CPAdd
@@ -297,4 +299,19 @@ class ExecutionContextTests extends FlatSpec with Matchers {
       val res = attr.calculate(context)
       res.get.getStringValue.get should equal ("A1")
     }
+/*
+  "procedure calls and console functions" should "be executed correctly" in {
+    val context = new CPExecutionContext
+    ConsoleFunctions.register(context)
+    println("enter string 'hello'")
+    val printFunc = new CPFunctionCall("Console.print", List(new CPVariable("str")))
+    val scanFunc = new CPFunctionCall("Console.scan", Nil)
+    val varStmt = new VariableStatement("str", scanFunc)
+    val procStmt = new ProcedureCallStatement(printFunc)
+    varStmt.execute(context)
+    procStmt.execute(context)
+    val hello = context.getVariable("str")
+    hello.get.getStringValue.get should equal ("hello")
+  }
+  */
 }

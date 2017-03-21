@@ -1,5 +1,6 @@
 package org.conceptualprogramming.parser
 
+import org.conceptualprogramming.core.statements.ProcedureCallStatement
 import org.conceptualprogramming.core.statements.expressions.operations.CPOperation
 import org.concepualprogramming.core.CPAttributeName
 import org.concepualprogramming.core.CPConcept
@@ -23,7 +24,7 @@ import org.concepualprogramming.core.statements._
  */
 trait StatementsParser extends ExpressionsParser {
   def statement: Parser[CPStatement] = variableAssignmentStatement | returnObjectStatement | returnVariableStatement |
-                                       ifStatement | forStatement | whileStatement | functionDefinitionStatement |
+                                       ifStatement | forStatement | whileStatement | functionDefinitionStatement | procedureCallStatement |
                                        objectDefinitionStatement | conceptDefinitionStatement | conceptResolvingStatement | compositeStatement
   //TODO: find out how to parse multi line statements
   def compositeStatement: Parser[CompositeStatement] = "{" ~ repsep(statement, ";") ~ "}" ^^ {value => new CompositeStatement(value._1._2)}
@@ -57,6 +58,8 @@ trait StatementsParser extends ExpressionsParser {
   def functionDefinitionStatement: Parser[CPStatement] = "def" ~ ident ~ "(" ~ repsep(ident, ",") ~ ")" ~ (compositeStatement | statement) ^^ {
     case "def" ~ functionName ~ "(" ~ argList ~ ")" ~ body => new FunctionDefinitionStatement(new CPCompositeFunctionDefinition(functionName, argList, body))
   }
+
+  def procedureCallStatement: Parser[CPStatement] = functionCallExpression ^^ {value => new ProcedureCallStatement(value)}
 
   def objectDefinitionStatement: Parser[CPStatement] = "object" ~ ident ~ objectQuery ^^ {value => new AddObjectStatement(value._1._2, value._2, value._2.head._1)}
 

@@ -3,6 +3,7 @@ package org.conceptualprogramming
 import java.time.LocalDate
 
 import org.conceptualprogramming.core.datatypes.composite.CPMap
+import org.conceptualprogramming.core.statements.ProcedureCallStatement
 import org.conceptualprogramming.core.statements.expressions.operations.CPOperation
 import org.conceptualprogramming.parser.{StatementsParser, ExpressionsParser, ConstantsParser}
 import org.concepualprogramming.core.CPAttributeName
@@ -110,6 +111,10 @@ class ParserTests  extends FlatSpec with Matchers {
     (functionCallExpr.args(0).asInstanceOf[CPConstant].value similar (CPIntValue(1))) should equal (true)
     (functionCallExpr.args(1).asInstanceOf[CPConstant].value similar (CPBooleanValue(true))) should equal (true)
 
+    val functionCallExpr1 = exprParser("namespace.function()").get.asInstanceOf[CPFunctionCall]
+    functionCallExpr1.name should equal ("namespace.function")
+    functionCallExpr1.args.size should equal (0)
+
     val arithm = exprParser("a + b").get.asInstanceOf[CPAdd]
     arithm.name should equal ("+")
     arithm.operand1.asInstanceOf[CPVariable].name should equal ("a")
@@ -135,6 +140,10 @@ class ParserTests  extends FlatSpec with Matchers {
     val comparison = exprParser("a >= 10").get.asInstanceOf[CPEqualsOrGreater]
     comparison.operand1.asInstanceOf[CPVariable].name should equal ("a")
     comparison.operand2.asInstanceOf[CPConstant].value.getIntValue.get should equal (10)
+
+    val comparison1 = exprParser("Grouping.Sum(c.val) > 0").get.asInstanceOf[CPGreater]
+    comparison1.operand1 should equal (new CPFunctionCall("Grouping.Sum", CPAttribute("c", "val") :: Nil))
+    comparison1.operand2.asInstanceOf[CPConstant].value.getIntValue.get should equal (0)
   }
 
   "Statements" should "be parsed correctly" in {
@@ -406,7 +415,7 @@ class ParserTests  extends FlatSpec with Matchers {
     val grpConceptStmt5 = stmtParser("concept PositiveRows(*val == GroupingSum(c.val), row ~ c.row) :< Cell: c(), *_.val > 0").get.asInstanceOf[ConceptDefinitionStatement].definition.asInstanceOf[CPGroupingConcept]
     grpConceptStmt5 should equal (grpConceptStmt4)
 
-    val grpConceptStmt6 = stmtParser("concept PositiveRowsNums(row ~ c.row) :< Cell: c(), *GroupingSum(c.val) > 0").get.asInstanceOf[ConceptDefinitionStatement].definition.asInstanceOf[CPGroupingConcept]
+    val grpConceptStmt6 = stmtParser("concept PositiveRowsNums(row ~ c.row) :< Cell: c(), *Grouping.Sum(c.val) > 0").get.asInstanceOf[ConceptDefinitionStatement].definition.asInstanceOf[CPGroupingConcept]
     grpConceptStmt6.name should equal ("PositiveRowsNums")
     grpConceptStmt6.attributes.size should equal (1)
     grpConceptStmt6.attributes.head should equal ("row")
@@ -417,8 +426,15 @@ class ParserTests  extends FlatSpec with Matchers {
     grpConceptStmt6.groupedAttributes.size should equal (0)
     grpConceptStmt6.groupedAttributesDependencies.size should equal (1)
     val grpConceptDep6 = grpConceptStmt6.groupedAttributesDependencies.head.asInstanceOf[CPExpressionDependency].expr.asInstanceOf[CPGreater]
-    grpConceptDep6.operand1 should equal (new CPFunctionCall("GroupingSum", CPAttribute("c", "val") :: Nil))
+    grpConceptDep6.operand1 should equal (new CPFunctionCall("Grouping.Sum", CPAttribute("c", "val") :: Nil))
     grpConceptDep6.operand2.asInstanceOf[CPConstant].value.getIntValue.get should equal (0)
+
+    val procStmtFunc = stmtParser("Console.print(\"Hello world\")").get.asInstanceOf[ProcedureCallStatement].function
+    procStmtFunc.name should equal ("Console.print")
+    procStmtFunc.args.size should equal (1)
+    procStmtFunc.args.head.asInstanceOf[CPConstant].value.getStringValue.get should equal ("Hello world")
+
+
   }
 
 }
