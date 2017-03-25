@@ -8,7 +8,7 @@ import org.concepualprogramming.core.{CPObject, CPDecisionNode, CPConcept, CPExe
  * Created by oleksii.voropai on 10/3/2016.
  */
 
-class ConceptResolvingStatement(definition: CPConcept, queryExpr: Map[String, CPExpression]) extends CPStatement{
+case class ConceptResolvingStatement(definition: CPConcept, queryExpr: Map[String, CPExpression]) extends CPStatement{
 
   override def execute(context: CPExecutionContext): Unit = {
     val queryOpt = queryExpr.mapValues(_.calculate(context))

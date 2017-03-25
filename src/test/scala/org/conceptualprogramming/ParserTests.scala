@@ -5,7 +5,7 @@ import java.time.LocalDate
 import org.conceptualprogramming.core.datatypes.composite.CPMap
 import org.conceptualprogramming.core.statements.ProcedureCallStatement
 import org.conceptualprogramming.core.statements.expressions.operations.CPOperation
-import org.conceptualprogramming.parser.{StatementsParser, ExpressionsParser, ConstantsParser}
+import org.conceptualprogramming.parser.{ProgramParser, StatementsParser, ExpressionsParser, ConstantsParser}
 import org.concepualprogramming.core.CPAttributeName
 import org.concepualprogramming.core.CPFreeConcept
 import org.concepualprogramming.core.CPInheritedConcept
@@ -180,6 +180,30 @@ class ParserTests  extends FlatSpec with Matchers {
     compositeBody.variableName should equal ("i")
     compositeBody.operand.asInstanceOf[CPAdd].operand1.asInstanceOf[CPVariable].name should equal ("i")
     compositeBody.operand.asInstanceOf[CPAdd].operand2.asInstanceOf[CPConstant].value.getIntValue.get should equal (1)
+
+    val composite1 = stmtParser("{i = 1; j = 2}").get.asInstanceOf[CompositeStatement]
+    composite1.body.size should equal (2)
+    val composite1body1 = composite1.body.head.asInstanceOf[VariableStatement]
+    composite1body1.variableName should equal ("i")
+    composite1body1.operand.asInstanceOf[CPConstant].value.getIntValue.get should equal (1)
+    val composite1body2 = composite1.body.tail.head.asInstanceOf[VariableStatement]
+    composite1body2.variableName should equal ("j")
+    composite1body2.operand.asInstanceOf[CPConstant].value.getIntValue.get should equal (2)
+
+    val composite2 = stmtParser(
+      """{i = 1;
+          j = 2;;
+          k = 3;}""").get.asInstanceOf[CompositeStatement]
+    composite2.body.size should equal (3)
+    val composite2body1 = composite2.body.head.asInstanceOf[VariableStatement]
+    composite2body1.variableName should equal ("i")
+    composite2body1.operand.asInstanceOf[CPConstant].value.getIntValue.get should equal (1)
+    val composite2body2 = composite2.body.tail.head.asInstanceOf[VariableStatement]
+    composite2body2.variableName should equal ("j")
+    composite2body2.operand.asInstanceOf[CPConstant].value.getIntValue.get should equal (2)
+    val composite2body3 = composite2.body.tail.tail.head.asInstanceOf[VariableStatement]
+    composite2body3.variableName should equal ("k")
+    composite2body3.operand.asInstanceOf[CPConstant].value.getIntValue.get should equal (3)
 
     val ifStmt = stmtParser("if (i >= 0) {i = i + 1} else {return x}").get.asInstanceOf[IfStatement]
     val ifCond = ifStmt.condition.asInstanceOf[CPEqualsOrGreater]
@@ -433,8 +457,74 @@ class ParserTests  extends FlatSpec with Matchers {
     procStmtFunc.name should equal ("Console.print")
     procStmtFunc.args.size should equal (1)
     procStmtFunc.args.head.asInstanceOf[CPConstant].value.getStringValue.get should equal ("Hello world")
-
-
   }
 
+  "Programs" should "be parsed correctly" in {
+    val programStr =
+      """
+      i = 10;
+      j = 20;
+      """
+    val program = ProgramParser(programStr).get.body
+    program.size should equal (2)
+    program.head should equal (new VariableStatement("i", new CPConstant(CPFloatingValue(10))))
+    program.tail.head should equal (new VariableStatement("j", new CPConstant(CPFloatingValue(20))))
+
+    val programStr1 =
+    """
+      maxNumber = 50;
+      concept number := {
+        for(i=0;i<10;i=i+1){
+          object digit {val: i}
+        };
+        objects number(val == d1.val*10+d0.val) := digit: d0(), digit: d1() {};
+        return number {}
+      };
+      objects numbers50() :> number: n(), n.val < maxNumber {}
+    """
+    val program1 = ProgramParser(programStr1).get.body
+    program1.size should equal (3)
+    program1(0) should equal (new VariableStatement("maxNumber", new CPConstant(CPFloatingValue(50))))
+    val freeCconcept = program1(1).asInstanceOf[ConceptDefinitionStatement].definition.asInstanceOf[CPFreeConcept].steps
+    val forStmt = freeCconcept(0).asInstanceOf[ForStatement]
+    forStmt.startOperator should equal (new VariableStatement("i", new CPConstant(CPFloatingValue(0))))
+    forStmt.condition should equal (new CPLess(new CPVariable("i"), CPConstant(CPFloatingValue(10))))
+    forStmt.endOperator should equal (new VariableStatement("i", new CPAdd(new CPVariable("i"), new CPConstant(CPFloatingValue(1)))))
+    forStmt.body.asInstanceOf[CompositeStatement].body.head should equal (new AddObjectStatement("digit", Map("val" -> CPVariable("i")), "val"))
+    val numberConceptStmt = freeCconcept(1).asInstanceOf[ConceptResolvingStatement]
+    numberConceptStmt.queryExpr.size should equal (0)
+    val numberConcept = numberConceptStmt.definition.asInstanceOf[CPStrictConcept]
+    numberConcept.name should equal ("number")
+    numberConcept.attributes.size should equal (1)
+    numberConcept.attributes.head should equal ("val")
+    numberConcept.defaultAttribute should equal ("val")
+    numberConcept.childConcepts.size should equal (2)
+    numberConcept.childConcepts.contains(("digit", "d0")) should be (true)
+    numberConcept.childConcepts.contains(("digit", "d1")) should be (true)
+    numberConcept.attributesDependencies.size should equal (1)
+    numberConcept.attributesDependencies.head should equal (
+      new CPExpressionDependency(new CPEquals(
+        CPAttribute("_", "val"),
+        new CPAdd(
+          new CPMul(
+            CPAttribute("d1", "val"),
+            new CPConstant(CPFloatingValue(10))
+          ),
+          CPAttribute("d0", "val")
+        )),
+        CPBooleanValue(true)
+      )
+    )
+    val returnObj = freeCconcept(2).asInstanceOf[ReturnObjectsStatement]
+    returnObj.returnObjectsName should equal (CPConstant(CPStringValue("number")))
+    returnObj.queryExpr.size should equal (0)
+    val numbers50Stmt = program1(2).asInstanceOf[ConceptResolvingStatement]
+    numbers50Stmt.queryExpr.size should equal (0)
+    val numbers50 = numbers50Stmt.definition.asInstanceOf[CPInheritedConcept]
+    numbers50.name should equal ("numbers50")
+    numbers50.childConcepts.head should equal (("number", "n"))
+    numbers50.overriddenAttributes.size should equal (0)
+    numbers50.specifiedAttributes.size should equal (0)
+    numbers50.filterDependencies.head should equal (new CPExpressionDependency(new CPLess(CPAttribute("n", "val"), new CPVariable("maxNumber")), CPBooleanValue(true)))
+  }
 }
