@@ -1,5 +1,8 @@
 package org.conceptualprogramming
 
+import org.conceptualprogramming.core.RunPreferences
+import org.conceptualprogramming.core.statements.ProgramExecutor
+import org.conceptualprogramming.parser.ProgramParser
 import org.concepualprogramming.core.dependencies._
 import org.concepualprogramming.core._
 import org.concepualprogramming.core.datatypes.{CPFloatingValue, CPStringValue, CPIntValue}
@@ -533,11 +536,6 @@ class TestExamples extends FlatSpec with Matchers {
       Nil
     )
 
-    //context.knowledgeBase.add(name)
-    //context.knowledgeBase.add(income)
-    //context.knowledgeBase.add(outcome)
-    //context.knowledgeBase.add(profit)
-
     GroupingFunctions.register(context)
 
     val totals = new CPGroupingConcept(
@@ -573,4 +571,35 @@ class TestExamples extends FlatSpec with Matchers {
 
   }
 
+  "Test examples" should "be executed as program" in {
+    //TODO: add possibility to resolve concept by its name not only by definition
+    val westExample =
+      """
+        concept Criminal(name ~ a.name ~ s.seller) := American: a(), Sells: s(product == w.name, buyer == h.name), Weapon: w(), Hostile: h();
+        object Owns {owner: "Nono", object: "M1"};
+        object Missle {name: "M1"};
+        concept Sells(seller, product == m.name, buyer == o.owner) := Missle: m(), Owns: o(), _.buyer == "Nono", _.seller == "West";
+        concept Weapon(name == m.name) := Missle: m();
+        concept Hostile(name == e.name) := Enemy: e(target == "America");
+        object American {name: "West"};
+        object Enemy {name: "Nono", target: "America"};
+        objects WestIsCriminal(name == c.name) := Criminal: c() {name: "West"};
+        westIsCriminal = !Objects.isEmpty("WestIsCriminal");
+        if(westIsCriminal) {
+          return "West is criminal";
+        } else {
+          return "West is not criminal";
+        };
+        return "Something went wrong";
+      """
+    val westExampleCode = ProgramParser(westExample)
+    westExampleCode.isDefined should be (true)
+    westExampleCode.get.body.size should equal (12)
+    val program = new ProgramExecutor()
+    val res = program.execute(westExample, new RunPreferences(Map()))
+    res should equal ("West is criminal")
+
+    val res1 = program.execute(westExample, new RunPreferences(Map("RESOLVE_TYPE" -> RunPreferences.DECISION_TREE_RESOLVE_TYPE)))
+    res1 should equal ("West is criminal")
+  }
 }

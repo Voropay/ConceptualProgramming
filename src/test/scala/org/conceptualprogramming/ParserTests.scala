@@ -115,6 +115,11 @@ class ParserTests  extends FlatSpec with Matchers {
     functionCallExpr1.name should equal ("namespace.function")
     functionCallExpr1.args.size should equal (0)
 
+    val functionCallExpr2 = exprParser("function(\"argument\")").get.asInstanceOf[CPFunctionCall]
+    functionCallExpr2.name should equal ("function")
+    functionCallExpr2.args.size should equal (1)
+    functionCallExpr2.args(0).asInstanceOf[CPConstant].value.getStringValue.get should equal ("argument")
+
     val arithm = exprParser("a + b").get.asInstanceOf[CPAdd]
     arithm.name should equal ("+")
     arithm.operand1.asInstanceOf[CPVariable].name should equal ("a")
@@ -290,13 +295,13 @@ class ParserTests  extends FlatSpec with Matchers {
       }
     }
     val dep1 = dependenciesParser("_.val == i.val - o.val").get.asInstanceOf[CPExpressionDependency].expr.asInstanceOf[CPEquals]
-    dep1.operand1.asInstanceOf[CPAttribute].attrName should equal (CPAttributeName("_", "val"))
+    dep1.operand1.asInstanceOf[CPAttribute].attrName should equal (CPAttributeName("", "val"))
     dep1.operand2.asInstanceOf[CPSub].operand1.asInstanceOf[CPAttribute].attrName should equal (CPAttributeName("i", "val"))
     dep1.operand2.asInstanceOf[CPSub].operand2.asInstanceOf[CPAttribute].attrName should equal (CPAttributeName("o", "val"))
 
     val dep2 = dependenciesParser("_.row ~ i.row ~ o.row").get.asInstanceOf[CPAttributesLinkDependency].attributesNames
     dep2.size should equal (3)
-    dep2.contains(CPAttributeName("_", "row")) should be (true)
+    dep2.contains(CPAttributeName("", "row")) should be (true)
     dep2.contains(CPAttributeName("i", "row")) should be (true)
     dep2.contains(CPAttributeName("o", "row")) should be (true)
 
@@ -311,7 +316,7 @@ class ParserTests  extends FlatSpec with Matchers {
     strictConceptsChild1.head should equal (("cell", "c"))
     val strictConceptsDependencies1 = strictConceptStmt1.attributesDependencies
     strictConceptsDependencies1.size should equal (2)
-    strictConceptsDependencies1.contains(new CPExpressionDependency(CPOperation.createBinaryArithmeticExpression(CPAttribute("_", "row"), CPAttribute("c", "row"), "=="), CPBooleanValue(true))) should be (true)
+    strictConceptsDependencies1.contains(new CPExpressionDependency(CPOperation.createBinaryArithmeticExpression(CPAttribute("", "row"), CPAttribute("c", "row"), "=="), CPBooleanValue(true))) should be (true)
     strictConceptsDependencies1.contains(new CPExpressionDependency(CPOperation.createBinaryArithmeticExpression(CPAttribute("c", "col"), CPConstant(CPFloatingValue(2)), "=="), CPBooleanValue(true))) should be (true)
 
     val strictConceptStmt2 = stmtParser("concept profit (row, val == i.val - o.val) := income: i(), outcome: o(), _.row ~ i.row ~ o.row").get.asInstanceOf[ConceptDefinitionStatement].definition.asInstanceOf[CPStrictConcept]
@@ -326,8 +331,8 @@ class ParserTests  extends FlatSpec with Matchers {
     strictConceptsChild2.contains(("outcome", "o")) should be (true)
     val strictConceptsDependencies2 = strictConceptStmt2.attributesDependencies
     strictConceptsDependencies2.size should equal (2)
-    strictConceptsDependencies2.contains(new CPAttributesLinkDependency(CPAttributeName("_", "row") :: CPAttributeName("o", "row") :: CPAttributeName("i", "row") :: Nil)) should be (true)
-    strictConceptsDependencies2.contains(new CPExpressionDependency(CPOperation.createBinaryArithmeticExpression(CPAttribute("_", "val"), new CPSub(CPAttribute("i", "val"), CPAttribute("o", "val")), "=="), CPBooleanValue(true))) should be (true)
+    strictConceptsDependencies2.contains(new CPAttributesLinkDependency(CPAttributeName("", "row") :: CPAttributeName("o", "row") :: CPAttributeName("i", "row") :: Nil)) should be (true)
+    strictConceptsDependencies2.contains(new CPExpressionDependency(CPOperation.createBinaryArithmeticExpression(CPAttribute("", "val"), new CPSub(CPAttribute("i", "val"), CPAttribute("o", "val")), "=="), CPBooleanValue(true))) should be (true)
 
     val strictConceptStmt3 = stmtParser("concept profit (row ~ i.row ~ o.row, val == i.val - o.val) := income: i(), outcome: o()").get.asInstanceOf[ConceptDefinitionStatement].definition.asInstanceOf[CPStrictConcept]
     strictConceptStmt2 should equal (strictConceptStmt3)
@@ -413,7 +418,7 @@ class ParserTests  extends FlatSpec with Matchers {
     grpConceptStmt2.childConcepts.size should equal (1)
     grpConceptStmt2.childConcepts.head should equal (("Cell", "c"))
     grpConceptStmt2.attributesDependencies.size should equal (1)
-    grpConceptStmt2.attributesDependencies.head should equal (new CPAttributesLinkDependency(CPAttributeName("_", "row") :: CPAttributeName("c", "row") :: Nil))
+    grpConceptStmt2.attributesDependencies.head should equal (new CPAttributesLinkDependency(CPAttributeName("", "row") :: CPAttributeName("c", "row") :: Nil))
     grpConceptStmt2.groupedAttributes.size should equal (1)
     grpConceptStmt2.groupedAttributes.get("val").get should equal (new CPFunctionCall("GroupingSum", CPAttribute("c", "val") :: Nil))
     grpConceptStmt2.groupedAttributesDependencies.isEmpty should be (true)
@@ -428,12 +433,12 @@ class ParserTests  extends FlatSpec with Matchers {
     grpConceptStmt4.childConcepts.size should equal (1)
     grpConceptStmt4.childConcepts.head should equal (("Cell", "c"))
     grpConceptStmt4.attributesDependencies.size should equal (1)
-    grpConceptStmt4.attributesDependencies.head should equal (new CPAttributesLinkDependency(CPAttributeName("_", "row") :: CPAttributeName("c", "row") :: Nil))
+    grpConceptStmt4.attributesDependencies.head should equal (new CPAttributesLinkDependency(CPAttributeName("", "row") :: CPAttributeName("c", "row") :: Nil))
     grpConceptStmt4.groupedAttributes.size should equal (1)
     grpConceptStmt4.groupedAttributes.get("val").get should equal (new CPFunctionCall("GroupingSum", CPAttribute("c", "val") :: Nil))
     grpConceptStmt4.groupedAttributesDependencies.size should equal (1)
     val grpConceptDep4 = grpConceptStmt4.groupedAttributesDependencies.head.asInstanceOf[CPExpressionDependency].expr.asInstanceOf[CPGreater]
-    grpConceptDep4.operand1.asInstanceOf[CPAttribute].attrName should equal (CPAttributeName("_", "val"))
+    grpConceptDep4.operand1.asInstanceOf[CPAttribute].attrName should equal (CPAttributeName("", "val"))
     grpConceptDep4.operand2.asInstanceOf[CPConstant].value.getIntValue.get should equal (0)
 
     val grpConceptStmt5 = stmtParser("concept PositiveRows(*val == GroupingSum(c.val), row ~ c.row) :< Cell: c(), *_.val > 0").get.asInstanceOf[ConceptDefinitionStatement].definition.asInstanceOf[CPGroupingConcept]
@@ -446,7 +451,7 @@ class ParserTests  extends FlatSpec with Matchers {
     grpConceptStmt6.childConcepts.size should equal (1)
     grpConceptStmt6.childConcepts.head should equal (("Cell", "c"))
     grpConceptStmt6.attributesDependencies.size should equal (1)
-    grpConceptStmt6.attributesDependencies.head should equal (new CPAttributesLinkDependency(CPAttributeName("_", "row") :: CPAttributeName("c", "row") :: Nil))
+    grpConceptStmt6.attributesDependencies.head should equal (new CPAttributesLinkDependency(CPAttributeName("", "row") :: CPAttributeName("c", "row") :: Nil))
     grpConceptStmt6.groupedAttributes.size should equal (0)
     grpConceptStmt6.groupedAttributesDependencies.size should equal (1)
     val grpConceptDep6 = grpConceptStmt6.groupedAttributesDependencies.head.asInstanceOf[CPExpressionDependency].expr.asInstanceOf[CPGreater]
@@ -504,7 +509,7 @@ class ParserTests  extends FlatSpec with Matchers {
     numberConcept.attributesDependencies.size should equal (1)
     numberConcept.attributesDependencies.head should equal (
       new CPExpressionDependency(new CPEquals(
-        CPAttribute("_", "val"),
+        CPAttribute("", "val"),
         new CPAdd(
           new CPMul(
             CPAttribute("d1", "val"),

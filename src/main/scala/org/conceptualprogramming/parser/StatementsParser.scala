@@ -96,8 +96,8 @@ trait StatementsParser extends ExpressionsParser {
         val attrName = curItem._1
         val dependencyOpt = if(curItem._2.isDefined) {
           curItem._2.get match {
-            case d: ArithmeticalDependencyAttributes => Some(new CPExpressionDependency(CPOperation.createBinaryArithmeticExpression(CPAttribute("_", attrName), d.operand, d.operation), CPBooleanValue(true)))
-            case d: AttributesLinkDependencyAttributes => Some(new CPAttributesLinkDependency(CPAttributeName("_", attrName) :: d.attributes))
+            case d: ArithmeticalDependencyAttributes => Some(new CPExpressionDependency(CPOperation.createBinaryArithmeticExpression(CPAttribute("", attrName), d.operand, d.operation), CPBooleanValue(true)))
+            case d: AttributesLinkDependencyAttributes => Some(new CPAttributesLinkDependency(CPAttributeName("", attrName) :: d.attributes))
               case _ => None
           }
         } else {
@@ -144,7 +144,7 @@ trait StatementsParser extends ExpressionsParser {
     val dependencyList = value._1._2
     dependencyList.map(curItem => {
       val attrName = curItem._1
-      val attrOperand = CPAttribute("_", attrName)
+      val attrOperand = CPAttribute("", attrName)
       val dependency = if(curItem._2.isDefined) {
         val comparisonSign = curItem._2.get._1
         val expression = curItem._2.get._2
@@ -214,7 +214,7 @@ trait StatementsParser extends ExpressionsParser {
           item._2.get match {
             case x: ArithmeticalDependencyAttributes => {
               if(x.operation != "==") {
-                Some(new CPExpressionDependency(CPOperation.createBinaryArithmeticExpression(CPAttribute("_", attrName), x.operand, x.operation), CPBooleanValue(true)))
+                Some(new CPExpressionDependency(CPOperation.createBinaryArithmeticExpression(CPAttribute("", attrName), x.operand, x.operation), CPBooleanValue(true)))
               } else {
                 None
               }
@@ -339,8 +339,8 @@ trait StatementsParser extends ExpressionsParser {
           val attrName = curItem._1._2
           val dependencyOpt = if(grouped.isEmpty && curItem._2.isDefined) {
             curItem._2.get match {
-              case d: ArithmeticalDependencyAttributes => Some(new CPExpressionDependency(CPOperation.createBinaryArithmeticExpression(CPAttribute("_", attrName), d.operand, d.operation), CPBooleanValue(true)))
-              case d: AttributesLinkDependencyAttributes => Some(new CPAttributesLinkDependency(CPAttributeName("_", attrName) :: d.attributes))
+              case d: ArithmeticalDependencyAttributes => Some(new CPExpressionDependency(CPOperation.createBinaryArithmeticExpression(CPAttribute("", attrName), d.operand, d.operation), CPBooleanValue(true)))
+              case d: AttributesLinkDependencyAttributes => Some(new CPAttributesLinkDependency(CPAttributeName("", attrName) :: d.attributes))
               case _ => None
             }
           } else {
@@ -373,7 +373,7 @@ trait StatementsParser extends ExpressionsParser {
           val groupedDependencyOpt = if(grouped.isDefined && curItem._2.isDefined) {
             curItem._2.get match {
               case d: ArithmeticalDependencyAttributes => if(d.operation != "==") {
-                Some(new CPExpressionDependency(CPOperation.createBinaryArithmeticExpression(CPAttribute("_", attrName), d.operand, d.operation), CPBooleanValue(true)))
+                Some(new CPExpressionDependency(CPOperation.createBinaryArithmeticExpression(CPAttribute("", attrName), d.operand, d.operation), CPBooleanValue(true)))
               } else {
                 None
               }
@@ -403,7 +403,7 @@ trait StatementsParser extends ExpressionsParser {
             case e: CPEquals => {
               e.operand1 match {
                 case o: CPAttribute => {
-                  if(o.attrName.conceptName == "_") {
+                  if(o.attrName.conceptName == "") {
                     Some(o.attrName.attributeName, e.operand2)
                   } else {
                     None

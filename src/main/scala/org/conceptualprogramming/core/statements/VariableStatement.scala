@@ -24,4 +24,6 @@ case class VariableStatement(variableName: String, operand: CPExpression) extend
   override def setCurrentNodeResolvingResult(res: List[CPObject], context: CPExecutionContext): Unit = {}
 
   override def isDefined(context: CPExecutionContext): Boolean = operand.isDefined(context)
+
+  override def toString: String = "VariableStatement: {" + variableName + " = " + operand + "}"
 }

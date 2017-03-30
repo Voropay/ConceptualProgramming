@@ -15,7 +15,7 @@ import org.concepualprogramming.core.statements.expressions.operations.CPNot
 trait ExpressionsParser extends ConstantsParser {
   def expression: Parser[CPExpression] = unaryOperatorExpression | operatorExpression | constantExpression | functionCallExpression | attributeExpression | variableExpression | subExpression
   def constantExpression: Parser[CPConstant] = constant ^^ {value => new CPConstant(value)}
-  def attributeExpression: Parser[CPAttribute] = ident ~ "." ~ ident ^^ {value => CPAttribute(value._1._1, value._2)}
+  def attributeExpression: Parser[CPAttribute] = ident ~ "." ~ ident ^^ {value => CPAttribute((if(value._1._1 == "_") "" else value._1._1), value._2)}
   def variableExpression: Parser[CPVariable] = ident ^^ {value => new CPVariable(value)}
   def functionCallExpression: Parser[CPFunctionCall] = funcName ~ "(" ~ repsep(expression, ",") <~ ")" ^^ {value => new CPFunctionCall(value._1._1, value._2)}
   def funcName: Parser[String] = fullFuncName | ident

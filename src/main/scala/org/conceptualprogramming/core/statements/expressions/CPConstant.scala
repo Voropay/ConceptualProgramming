@@ -16,7 +16,7 @@ case class CPConstant(value: CPValue) extends CPExpression{
     }
   }
 
-  override def toString: String = "CPConstant: {" + value.getStringValue + "}"
+  override def toString: String = "CPConstant: {" + (if(value.getStringValue.isDefined) value.getStringValue.get else "") + "}"
 
   override def isDefined(context: CPExecutionContext): Boolean = true
 

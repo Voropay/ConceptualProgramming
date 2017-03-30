@@ -20,4 +20,6 @@ case class CPVariable(name: String) extends CPExpression{
   override def isDefined(context: CPExecutionContext): Boolean = true
 
   override def infer(result: CPValue, context: CPExecutionContext): Map[CPAttributeName, CPValue] = Map()
+
+  override def toString: String = "CPVariable: {" + name + "}"
 }
