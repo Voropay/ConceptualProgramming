@@ -575,15 +575,15 @@ class TestExamples extends FlatSpec with Matchers {
     //TODO: add possibility to resolve concept by its name not only by definition
     val westExample =
       """
-        concept Criminal(name ~ a.name ~ s.seller) := American: a(), Sells: s(product == w.name, buyer == h.name), Weapon: w(), Hostile: h();
+        concept Criminal(name ~ a.name ~ s.seller) := American a(), Sells s(product == w.name, buyer == h.name), Weapon w(), Hostile h();
         object Owns {owner: "Nono", object: "M1"};
         object Missle {name: "M1"};
-        concept Sells(seller, product == m.name, buyer == o.owner) := Missle: m(), Owns: o(), _.buyer == "Nono", _.seller == "West";
-        concept Weapon(name == m.name) := Missle: m();
-        concept Hostile(name == e.name) := Enemy: e(target == "America");
+        concept Sells(seller, product == m.name, buyer == o.owner) := Missle m(), Owns o(), _.buyer == "Nono", _.seller == "West";
+        concept Weapon(name == m.name) := Missle m();
+        concept Hostile(name == e.name) := Enemy e(target == "America");
         object American {name: "West"};
         object Enemy {name: "Nono", target: "America"};
-        objects WestIsCriminal(name == c.name) := Criminal: c() {name: "West"};
+        objects WestIsCriminal(name == c.name) := Criminal c() {name: "West"};
         westIsCriminal = !Objects.isEmpty("WestIsCriminal");
         if(westIsCriminal) {
           return "West is criminal";

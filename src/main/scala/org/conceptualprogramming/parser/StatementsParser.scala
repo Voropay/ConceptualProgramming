@@ -109,9 +109,9 @@ trait StatementsParser extends ExpressionsParser {
     }
   }
 
-  def childConcept: Parser[(String, String, List[CPDependency])] = ident ~ opt(":" ~ ident) ~ "(" ~ repsep(ident ~ (arithmeticalDependencyAttributes | attributesLinkDependencyAttributes), ",") ~ ")" ^^ {
+  def childConcept: Parser[(String, String, List[CPDependency])] = ident ~ opt(ident) ~ "(" ~ repsep(ident ~ (arithmeticalDependencyAttributes | attributesLinkDependencyAttributes), ",") ~ ")" ^^ {
     case childConceptName ~ alias ~ "(" ~ childConceptAttributes ~ ")" => {
-      val aliasName = if(alias.isDefined) {alias.get._2} else {childConceptName}
+      val aliasName = if(alias.isDefined) {alias.get} else {childConceptName}
       val dependenciesOpt = childConceptAttributes.map(curItem => {
         val attrName = curItem._1
         val dependencyOpt = curItem._2 match {
@@ -230,9 +230,9 @@ trait StatementsParser extends ExpressionsParser {
     }
   }
 
-  def inheritedChildConcept: Parser[(String, String, Map[CPAttributeName, CPExpression], List[CPDependency])] = ident ~ opt(":" ~ ident) ~ "(" ~ repsep(opt("*") ~ ident ~ (arithmeticalDependencyAttributes | attributesLinkDependencyAttributes), ",") ~ ")" ^^ {
+  def inheritedChildConcept: Parser[(String, String, Map[CPAttributeName, CPExpression], List[CPDependency])] = ident ~ opt(ident) ~ "(" ~ repsep(opt("*") ~ ident ~ (arithmeticalDependencyAttributes | attributesLinkDependencyAttributes), ",") ~ ")" ^^ {
     case childConceptName ~ alias ~ "(" ~ childConceptAttributes ~ ")" => {
-      val aliasName = if(alias.isDefined) {alias.get._2} else {childConceptName}
+      val aliasName = if(alias.isDefined) {alias.get} else {childConceptName}
       val specifiedAttributes = childConceptAttributes.map(item => {
         if(item._1._1.isEmpty) {
           None

@@ -305,7 +305,7 @@ class ParserTests  extends FlatSpec with Matchers {
     dep2.contains(CPAttributeName("i", "row")) should be (true)
     dep2.contains(CPAttributeName("o", "row")) should be (true)
 
-    val strictConceptStmt1 = stmtParser("concept income (row, val) := cell: c (col == 2), _.row == c.row").get.asInstanceOf[ConceptDefinitionStatement].definition.asInstanceOf[CPStrictConcept]
+    val strictConceptStmt1 = stmtParser("concept income (row, val) := cell c (col == 2), _.row == c.row").get.asInstanceOf[ConceptDefinitionStatement].definition.asInstanceOf[CPStrictConcept]
     strictConceptStmt1.name should equal ("income")
     var strictConceptAttrs1 = strictConceptStmt1.attributes
     strictConceptAttrs1.size should equal (2)
@@ -319,7 +319,7 @@ class ParserTests  extends FlatSpec with Matchers {
     strictConceptsDependencies1.contains(new CPExpressionDependency(CPOperation.createBinaryArithmeticExpression(CPAttribute("", "row"), CPAttribute("c", "row"), "=="), CPBooleanValue(true))) should be (true)
     strictConceptsDependencies1.contains(new CPExpressionDependency(CPOperation.createBinaryArithmeticExpression(CPAttribute("c", "col"), CPConstant(CPFloatingValue(2)), "=="), CPBooleanValue(true))) should be (true)
 
-    val strictConceptStmt2 = stmtParser("concept profit (row, val == i.val - o.val) := income: i(), outcome: o(), _.row ~ i.row ~ o.row").get.asInstanceOf[ConceptDefinitionStatement].definition.asInstanceOf[CPStrictConcept]
+    val strictConceptStmt2 = stmtParser("concept profit (row, val == i.val - o.val) := income i(), outcome o(), _.row ~ i.row ~ o.row").get.asInstanceOf[ConceptDefinitionStatement].definition.asInstanceOf[CPStrictConcept]
     strictConceptStmt2.name should equal ("profit")
     var strictConceptAttrs2 = strictConceptStmt2.attributes
     strictConceptAttrs2.size should equal (2)
@@ -334,7 +334,7 @@ class ParserTests  extends FlatSpec with Matchers {
     strictConceptsDependencies2.contains(new CPAttributesLinkDependency(CPAttributeName("", "row") :: CPAttributeName("o", "row") :: CPAttributeName("i", "row") :: Nil)) should be (true)
     strictConceptsDependencies2.contains(new CPExpressionDependency(CPOperation.createBinaryArithmeticExpression(CPAttribute("", "val"), new CPSub(CPAttribute("i", "val"), CPAttribute("o", "val")), "=="), CPBooleanValue(true))) should be (true)
 
-    val strictConceptStmt3 = stmtParser("concept profit (row ~ i.row ~ o.row, val == i.val - o.val) := income: i(), outcome: o()").get.asInstanceOf[ConceptDefinitionStatement].definition.asInstanceOf[CPStrictConcept]
+    val strictConceptStmt3 = stmtParser("concept profit (row ~ i.row ~ o.row, val == i.val - o.val) := income i(), outcome o()").get.asInstanceOf[ConceptDefinitionStatement].definition.asInstanceOf[CPStrictConcept]
     strictConceptStmt2 should equal (strictConceptStmt3)
 
     val inhConceptStmt1 = stmtParser("concept Income() :> Cell(*col == 2)").get.asInstanceOf[ConceptDefinitionStatement].definition.asInstanceOf[CPInheritedConcept]
@@ -346,7 +346,7 @@ class ParserTests  extends FlatSpec with Matchers {
     inhConceptStmt1.specifiedAttributes.get(CPAttributeName("Cell", "col")).get.asInstanceOf[CPConstant].value.getIntValue.get should equal (2)
     inhConceptStmt1.filterDependencies.isEmpty should be (true)
 
-    val inhConceptStmt2 = stmtParser("concept Profit(val == i.val - o.val) :> Income: i(), Outcome: o()").get.asInstanceOf[ConceptDefinitionStatement].definition.asInstanceOf[CPInheritedConcept]
+    val inhConceptStmt2 = stmtParser("concept Profit(val == i.val - o.val) :> Income i(), Outcome o()").get.asInstanceOf[ConceptDefinitionStatement].definition.asInstanceOf[CPInheritedConcept]
     inhConceptStmt2.name should equal ("Profit")
     inhConceptStmt2.childConcepts.size should equal (2)
     inhConceptStmt2.childConcepts.contains(("Income", "i")) should be (true)
@@ -396,7 +396,7 @@ class ParserTests  extends FlatSpec with Matchers {
     freeConceptStep2.returnObjectsName.asInstanceOf[CPConstant].value.getStringValue.get should equal ("Number")
     freeConceptStep2.queryExpr.size should equal (0)
 
-    val grpConceptStmt1 = stmtParser("concept Totals(*income == GroupingSum(i.val), *outcome == GroupingSum(o.val), *profit == GroupingSum(p.val)) :< Income: i(), Outcome: o(), Profit: p(), i.row ~ o.row ~ p.row").get.asInstanceOf[ConceptDefinitionStatement].definition.asInstanceOf[CPGroupingConcept]
+    val grpConceptStmt1 = stmtParser("concept Totals(*income == GroupingSum(i.val), *outcome == GroupingSum(o.val), *profit == GroupingSum(p.val)) :< Income i(), Outcome o(), Profit p(), i.row ~ o.row ~ p.row").get.asInstanceOf[ConceptDefinitionStatement].definition.asInstanceOf[CPGroupingConcept]
     grpConceptStmt1.name should equal ("Totals")
     grpConceptStmt1.attributes.isEmpty should be (true)
     grpConceptStmt1.childConcepts.size should equal (3)
@@ -411,7 +411,7 @@ class ParserTests  extends FlatSpec with Matchers {
     grpConceptStmt1.groupedAttributes.get("profit").get should equal (new CPFunctionCall("GroupingSum", CPAttribute("p", "val") :: Nil))
     grpConceptStmt1.groupedAttributesDependencies.isEmpty should be (true)
 
-    val grpConceptStmt2 = stmtParser("concept RowSum(*val == GroupingSum(c.val), row ~ c.row) :< Cell: c()").get.asInstanceOf[ConceptDefinitionStatement].definition.asInstanceOf[CPGroupingConcept]
+    val grpConceptStmt2 = stmtParser("concept RowSum(*val == GroupingSum(c.val), row ~ c.row) :< Cell c()").get.asInstanceOf[ConceptDefinitionStatement].definition.asInstanceOf[CPGroupingConcept]
     grpConceptStmt2.name should equal ("RowSum")
     grpConceptStmt2.attributes.size should equal (1)
     grpConceptStmt2.attributes.head should equal ("row")
@@ -423,10 +423,10 @@ class ParserTests  extends FlatSpec with Matchers {
     grpConceptStmt2.groupedAttributes.get("val").get should equal (new CPFunctionCall("GroupingSum", CPAttribute("c", "val") :: Nil))
     grpConceptStmt2.groupedAttributesDependencies.isEmpty should be (true)
 
-    val grpConceptStmt3 = stmtParser("concept RowSum(row ~ c.row) :< Cell: c(), *_.val == GroupingSum(c.val)").get.asInstanceOf[ConceptDefinitionStatement].definition.asInstanceOf[CPGroupingConcept]
+    val grpConceptStmt3 = stmtParser("concept RowSum(row ~ c.row) :< Cell c(), *_.val == GroupingSum(c.val)").get.asInstanceOf[ConceptDefinitionStatement].definition.asInstanceOf[CPGroupingConcept]
     grpConceptStmt3 should equal (grpConceptStmt2)
 
-    val grpConceptStmt4 = stmtParser("concept PositiveRows(*val == GroupingSum(c.val), row ~ c.row, *val > 0) :< Cell: c()").get.asInstanceOf[ConceptDefinitionStatement].definition.asInstanceOf[CPGroupingConcept]
+    val grpConceptStmt4 = stmtParser("concept PositiveRows(*val == GroupingSum(c.val), row ~ c.row, *val > 0) :< Cell c()").get.asInstanceOf[ConceptDefinitionStatement].definition.asInstanceOf[CPGroupingConcept]
     grpConceptStmt4.name should equal ("PositiveRows")
     grpConceptStmt4.attributes.size should equal (1)
     grpConceptStmt4.attributes.head should equal ("row")
@@ -441,10 +441,10 @@ class ParserTests  extends FlatSpec with Matchers {
     grpConceptDep4.operand1.asInstanceOf[CPAttribute].attrName should equal (CPAttributeName("", "val"))
     grpConceptDep4.operand2.asInstanceOf[CPConstant].value.getIntValue.get should equal (0)
 
-    val grpConceptStmt5 = stmtParser("concept PositiveRows(*val == GroupingSum(c.val), row ~ c.row) :< Cell: c(), *_.val > 0").get.asInstanceOf[ConceptDefinitionStatement].definition.asInstanceOf[CPGroupingConcept]
+    val grpConceptStmt5 = stmtParser("concept PositiveRows(*val == GroupingSum(c.val), row ~ c.row) :< Cell c(), *_.val > 0").get.asInstanceOf[ConceptDefinitionStatement].definition.asInstanceOf[CPGroupingConcept]
     grpConceptStmt5 should equal (grpConceptStmt4)
 
-    val grpConceptStmt6 = stmtParser("concept PositiveRowsNums(row ~ c.row) :< Cell: c(), *Grouping.Sum(c.val) > 0").get.asInstanceOf[ConceptDefinitionStatement].definition.asInstanceOf[CPGroupingConcept]
+    val grpConceptStmt6 = stmtParser("concept PositiveRowsNums(row ~ c.row) :< Cell c(), *Grouping.Sum(c.val) > 0").get.asInstanceOf[ConceptDefinitionStatement].definition.asInstanceOf[CPGroupingConcept]
     grpConceptStmt6.name should equal ("PositiveRowsNums")
     grpConceptStmt6.attributes.size should equal (1)
     grpConceptStmt6.attributes.head should equal ("row")
@@ -482,10 +482,10 @@ class ParserTests  extends FlatSpec with Matchers {
         for(i=0;i<10;i=i+1){
           object digit {val: i}
         };
-        objects number(val == d1.val*10+d0.val) := digit: d0(), digit: d1() {};
+        objects number(val == d1.val*10+d0.val) := digit d0(), digit d1() {};
         return number {}
       };
-      objects numbers50() :> number: n(), n.val < maxNumber {}
+      objects numbers50() :> number n(), n.val < maxNumber {}
     """
     val program1 = ProgramParser(programStr1).get.body
     program1.size should equal (3)
