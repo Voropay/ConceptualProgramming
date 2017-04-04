@@ -64,7 +64,7 @@ class ConceptTests extends FlatSpec with Matchers {
     obj1.get.get("row").get.getIntValue.get should equal (1)
     obj1.get.get("val").get.getIntValue.get should equal (10)
     obj1.get.name should equal ("SomeConcept")
-    obj1.get.value.getIntValue.get should equal (10)
+    obj1.get.value.get.getIntValue.get should equal (10)
 
     val c2 = new CPStrictConcept(
       "SomeConcept",

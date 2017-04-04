@@ -2,7 +2,7 @@ package org.concepualprogramming.core.datatypes.composite
 
 import java.time.LocalDate
 
-import org.conceptualprogramming.core.datatypes.composite.CPMap
+import org.conceptualprogramming.core.datatypes.composite.{CPObjectValue, CPMap}
 import org.concepualprogramming.core.CPExecutionContext
 import org.concepualprogramming.core.datatypes.{CPIntValue, CPBooleanValue, CPPrimitiveType, CPValue}
 import org.concepualprogramming.core.statements.expressions.functions.BuiltInFunctionDefinition
@@ -136,6 +136,7 @@ object CPList {
     context.addFunctionDefinition(createTailFunction)
     context.addFunctionDefinition(createElementAtFunction)
     context.addFunctionDefinition(createContainsFunction)
+    context.addFunctionDefinition(createToMapFunction)
   }
 
   def createIsEmptyFunction: CPFunctionDefinition = {
@@ -151,6 +152,10 @@ object CPList {
       val empty = list.get match {
         case other: CPList => other.values.isEmpty
         case other: CPMap => {
+          val otherList = other.getListValues
+          otherList.isDefined && otherList.get.values.isEmpty
+        }
+        case other: CPObjectValue => {
           val otherList = other.getListValues
           otherList.isDefined && otherList.get.values.isEmpty
         }
@@ -179,6 +184,14 @@ object CPList {
       val size = list.get match {
         case other: CPList => other.values.size
         case other: CPMap => {
+          val otherList = other.getListValues
+          if(otherList.isEmpty) {
+            0
+          } else {
+            otherList.get.values.size
+          }
+        }
+        case other: CPObjectValue => {
           val otherList = other.getListValues
           if(otherList.isEmpty) {
             0
@@ -301,6 +314,37 @@ object CPList {
       "List.contains",
       "list" :: "element" :: Nil,
       contains,
+      CPFunctionDefinition.checkAttributesDefined
+    )
+  }
+
+  def createToMapFunction: CPFunctionDefinition = {
+    def toMap(args: Map[String, CPExpression], context: CPExecutionContext): Option[CPValue] = {
+      val listExpr = args.get("list")
+      if(listExpr.isEmpty) {
+        return None
+      }
+      val list = listExpr.get.calculate(context)
+      if(list.isEmpty) {
+        return None
+      }
+
+      val mapValue = list.get match {
+        case other: CPList => other.getMapValues
+        case other: CPMap => Some(other)
+        case other: CPObjectValue => other.getMapValues
+        case _ => None
+      }
+      if(mapValue.isDefined) {
+        return Some(mapValue.get)
+      } else {
+        None
+      }
+    }
+    new BuiltInFunctionDefinition(
+      "List.toMap",
+      "list":: Nil,
+      toMap,
       CPFunctionDefinition.checkAttributesDefined
     )
   }

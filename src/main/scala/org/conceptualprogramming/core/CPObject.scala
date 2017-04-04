@@ -10,13 +10,19 @@ import scala.collection.immutable.SortedMap
 class CPObject(_name: String, _attributes: Map[String, CPValue], _defaultAttribute: String) {
   val name = _name
   val attributes = SortedMap[String, CPValue]() ++ _attributes
-  val defaultAttribute = _defaultAttribute
+  def defaultAttribute = if(_defaultAttribute != null && !_defaultAttribute.isEmpty) {_defaultAttribute} else {attributes.head._1}
 
   if (!attributes.contains(defaultAttribute)) {
     throw new IllegalArgumentException("Default attribute must be in attributes list: " + defaultAttribute)
   }
 
-  def value: CPValue = attributes.get(defaultAttribute).get
+  def value: Option[CPValue] = {
+    if(defaultAttribute != null && !defaultAttribute.isEmpty) {
+      attributes.get(defaultAttribute)
+    } else {
+      Some(attributes.head._2)
+    }
+  }
   def get(attributeName: String) = attributes.get(attributeName)
   def hasAttribute(attributeName: String) = attributes.contains(attributeName)
 

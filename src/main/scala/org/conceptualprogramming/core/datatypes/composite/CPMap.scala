@@ -2,7 +2,7 @@ package org.conceptualprogramming.core.datatypes.composite
 
 import java.time.LocalDate
 
-import org.concepualprogramming.core.CPExecutionContext
+import org.concepualprogramming.core.{CPObject, CPExecutionContext}
 import org.concepualprogramming.core.datatypes.{CPBooleanValue, CPIntValue, CPPrimitiveType, CPValue}
 import org.concepualprogramming.core.datatypes.composite.{CPList, CPCompositeType}
 import org.concepualprogramming.core.statements.expressions.functions.BuiltInFunctionDefinition
@@ -99,6 +99,14 @@ case class CPMap(values: Map[CPValue, CPValue]) extends CPCompositeType {
       }
       return thisList.get.similar(other)
     }
+    case other: CPObjectValue => {
+      val otherMap = other.getMapValues
+      if(otherMap.isDefined) {
+        otherMap.get.values.toList.corresponds(values.toList)((entry1, entry2) => entry1._1.similar(entry2._1) && entry1._2.similar(entry2._2))
+      } else {
+        false
+      }
+    }
     case other: CPPrimitiveType => values.size <= 1 && other.similar(this)
     case other: String => values.size <= 1 && getStringValue.isDefined && getStringValue.get == other
     case other: Int => values.size <= 1 && getIntValue.isDefined && getIntValue.get == other
@@ -115,6 +123,10 @@ case class CPMap(values: Map[CPValue, CPValue]) extends CPCompositeType {
         val otherMap = other.getMapValues.get
         Some(new CPMap(values ++ otherMap.values))
       }
+      case other: CPObjectValue => {
+        val otherMap = other.getMapValues.get
+        Some(new CPMap(values ++ otherMap.values))
+      }
       case _ => None
     }
   }
@@ -123,6 +135,10 @@ case class CPMap(values: Map[CPValue, CPValue]) extends CPCompositeType {
     other match {
       case other: CPMap => Some(new CPMap((values.toSet diff other.values.toSet).toMap))
       case other: CPList => {
+        val otherMap = other.getMapValues.get.values
+        Some(new CPMap((values.toSet diff otherMap.toSet).toMap))
+      }
+      case other: CPObjectValue => {
         val otherMap = other.getMapValues.get.values
         Some(new CPMap((values.toSet diff otherMap.toSet).toMap))
       }
@@ -141,6 +157,10 @@ case class CPMap(values: Map[CPValue, CPValue]) extends CPCompositeType {
     other match {
       case other: CPMap => Some(new CPMap((values.toSet intersect other.values.toSet).toMap))
       case other: CPList => {
+        val otherMap = other.getMapValues.get
+        Some(new CPMap((values.toSet intersect otherMap.values.toSet).toMap))
+      }
+      case other: CPObjectValue => {
         val otherMap = other.getMapValues.get
         Some(new CPMap((values.toSet intersect otherMap.values.toSet).toMap))
       }
@@ -188,6 +208,8 @@ object CPMap {
     context.addFunctionDefinition(createRemoveFunction)
     context.addFunctionDefinition(createValuesFunction)
     context.addFunctionDefinition(createKeysFunction)
+    context.addFunctionDefinition(createToListFunction)
+    context.addFunctionDefinition(createToObjectFunction)
   }
 
   def createIsEmptyFunction: CPFunctionDefinition = {
@@ -203,6 +225,7 @@ object CPMap {
       val empty = map.get match {
         case other: CPMap => other.values.isEmpty
         case other: CPList => {other.values.isEmpty}
+        case other: CPObjectValue => {other.objectValue.attributes.isEmpty}
         case _ => false
       }
       return Some(CPBooleanValue(empty))
@@ -228,6 +251,7 @@ object CPMap {
       val size = map.get match {
         case other: CPMap => other.values.size
         case other: CPList => other.values.size
+        case other: CPObjectValue => other.objectValue.attributes.size
         case _ => 1
       }
       return Some(CPIntValue(size))
@@ -258,6 +282,14 @@ object CPMap {
         case other: CPList => {
           val pos = key.get.getIntValue
           pos.isDefined && pos.get >= 0 && pos.get < other.values.size
+        }
+        case other: CPObjectValue => {
+          val keyStr = key.get.getStringValue
+          if(keyStr.isEmpty) {
+            false
+          } else {
+            other.objectValue.attributes.contains(keyStr.get)
+          }
         }
         case _ => false
       }
@@ -294,6 +326,14 @@ object CPMap {
             None
           }
         }
+        case other: CPObjectValue => {
+          val keyStr = key.get.getStringValue
+          if(keyStr.isEmpty) {
+            None
+          } else {
+            other.objectValue.attributes.get(keyStr.get)
+          }
+        }
         case _ => None
       }
       return res
@@ -324,6 +364,14 @@ object CPMap {
       val res = map.get match {
         case other: CPMap => Some(new CPMap(other.values + (key.get -> value.get)))
         case other: CPList => {
+          val otherMap = other.getMapValues
+          if(otherMap.isDefined) {
+            Some(new CPMap(otherMap.get.values + (key.get -> value.get)))
+          } else {
+            None
+          }
+        }
+        case other: CPObjectValue => {
           val otherMap = other.getMapValues
           if(otherMap.isDefined) {
             Some(new CPMap(otherMap.get.values + (key.get -> value.get)))
@@ -374,6 +422,15 @@ object CPMap {
             newMap
           }
         }
+        case other: CPObjectValue => {
+          val keyStr = key.get.getStringValue
+          val newMap = other.getMapValues
+          if(newMap.isDefined && keyStr.isDefined && newMap.contains(key.get)) {
+            Some(new CPMap(newMap.get.values - key.get))
+          } else {
+            newMap
+          }
+        }
         case _ => None
       }
       return res
@@ -399,6 +456,7 @@ object CPMap {
       val values = map.get match {
         case other: CPMap => other.values.values.toList
         case other: CPList => other.values
+        case other: CPObjectValue => other.objectValue.attributes.values.toList
         case other: CPValue => List(other)
       }
       return Some(new CPList(values))
@@ -431,6 +489,14 @@ object CPMap {
             None
           }
         }
+        case other: CPObjectValue => {
+          val otherMap = other.getMapValues
+          if(otherMap.isDefined) {
+            Some(new CPList(otherMap.get.values.keys.toList))
+          } else {
+            None
+          }
+        }
         case other: CPValue => None
       }
       return keys
@@ -442,4 +508,93 @@ object CPMap {
       CPFunctionDefinition.checkAttributesDefined
     )
   }
+
+  def createToListFunction: CPFunctionDefinition = {
+    def toList(args: Map[String, CPExpression], context: CPExecutionContext): Option[CPValue] = {
+      val mapExpr = args.get("map")
+      if(mapExpr.isEmpty) {
+        return None
+      }
+      val map = mapExpr.get.calculate(context)
+      if(map.isEmpty) {
+        return None
+      }
+
+      val listValue = map.get match {
+        case other: CPList => Some(other)
+        case other: CPMap => other.getListValues
+        case other: CPObjectValue => other.getListValues
+        case _ => None
+      }
+      if(listValue.isDefined) {
+        return Some(listValue.get)
+      } else {
+        None
+      }
+    }
+    new BuiltInFunctionDefinition(
+      "Map.toList",
+      "map":: Nil,
+      toList,
+      CPFunctionDefinition.checkAttributesDefined
+    )
+  }
+
+  def createToObjectFunction: CPFunctionDefinition = {
+    def toObject(args: Map[String, CPExpression], context: CPExecutionContext): Option[CPValue] = {
+      val mapExpr = args.get("map")
+      if(mapExpr.isEmpty) {
+        return None
+      }
+      val nameExpr = args.get("name")
+      if(nameExpr.isEmpty) {
+        return None
+      }
+      val map = mapExpr.get.calculate(context)
+      if(map.isEmpty) {
+        return None
+      }
+      val name = nameExpr.get.calculate(context)
+      if(name.isEmpty || name.get.getStringValue.isEmpty) {
+        return None
+      }
+
+      val attributes = map.get match {
+        case other: CPList => {
+          val indexed = other.values.zipWithIndex
+          val mapValues = indexed.map(entry => (entry._2.toString -> entry._1))
+          Some(mapValues)
+        }
+        case other: CPMap => {
+          val attrsOpts = other.values.map(item => {
+            val keyStr = item._1.getStringValue
+            if (keyStr.isEmpty) {
+              None
+            } else {
+              Some((keyStr.get, item._2))
+            }
+          })
+          if(attrsOpts.find(_.isEmpty).isDefined) {
+            None
+          } else {
+            Some(attrsOpts.map(_.get))
+          }
+        }
+        case other: CPObjectValue => Some(other.objectValue.attributes)
+        case other => Some(Map("value" -> other))
+      }
+      if(attributes.isDefined) {
+        Some(new CPObjectValue(new CPObject(name.get.getStringValue.get, attributes.get.toMap, attributes.get.head._1)))
+      } else {
+        None
+      }
+    }
+    new BuiltInFunctionDefinition(
+      "Map.toObject",
+      "map" :: "name" :: Nil,
+      toObject,
+      CPFunctionDefinition.checkAttributesDefined
+    )
+  }
+
 }

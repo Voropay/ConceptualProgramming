@@ -1,6 +1,6 @@
 package org.concepualprogramming.core.datatypes.composite
 
-import org.conceptualprogramming.core.datatypes.composite.CPMap
+import org.conceptualprogramming.core.datatypes.composite.{CPObjectValue, CPMap}
 import org.concepualprogramming.core.datatypes.CPValue
 
 /**

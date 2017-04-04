@@ -20,7 +20,7 @@ class ObjectTests extends FlatSpec with Matchers {
     attr2.getIntValue.get should equal (10)
     cpObject.get("source").get.getStringValue.get should equal ("test")
     cpObject.get("value").get.getIntValue.get should equal (10)
-    cpObject.value.getIntValue.get should equal (10)
+    cpObject.value.get.getIntValue.get should equal (10)
   }
 
   "An Object" should "be compared correctly" in {
