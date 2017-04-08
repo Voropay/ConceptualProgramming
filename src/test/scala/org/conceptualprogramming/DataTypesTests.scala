@@ -185,6 +185,17 @@ class DataTypesTests extends FlatSpec with Matchers {
     new CPFunctionCall("List.contains", List(CPConstant(l1), CPConstant(CPIntValue(1)))).calculate(context).get should equal (CPBooleanValue(true))
     new CPFunctionCall("List.contains", List(CPConstant(l2), CPConstant(CPIntValue(5)))).calculate(context).get should equal (CPBooleanValue(false))
 
+    val put1 = new CPFunctionCall("List.put", CPConstant(l1) :: CPConstant(CPIntValue(10)) :: CPConstant(CPIntValue(3)) :: Nil).calculate(context).get.asInstanceOf[CPList]
+    put1.values.size should equal (4)
+    put1.values(0).getIntValue.get should equal (1)
+    put1.values(3).getIntValue.get should equal (10)
+
+    val put2 = new CPFunctionCall("List.put", CPConstant(l1) :: CPConstant(CPIntValue(10)) :: Nil).calculate(context).get.asInstanceOf[CPList]
+    put2.values.size should equal (4)
+    put2.values(0).getIntValue.get should equal (10)
+    put2.values(1).getIntValue.get should equal (1)
+
+
     (new CPList(CPIntValue(1) :: Nil) ?= CPIntValue(1)) should be (true)
     (new CPList(CPIntValue(1) :: Nil) ?= CPIntValue(2)) should be (false)
     (new CPList(CPIntValue(1) :: CPIntValue(2) :: Nil) ?= CPIntValue(1)) should be (false)

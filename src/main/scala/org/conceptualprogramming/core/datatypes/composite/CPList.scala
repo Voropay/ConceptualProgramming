@@ -136,6 +136,7 @@ object CPList {
     context.addFunctionDefinition(createTailFunction)
     context.addFunctionDefinition(createElementAtFunction)
     context.addFunctionDefinition(createContainsFunction)
+    context.addFunctionDefinition(createPutFunction)
     context.addFunctionDefinition(createToMapFunction)
   }
 
@@ -222,10 +223,26 @@ object CPList {
         return None
       }
       val headElement = list.get match {
-        case other: CPList => other.values.head
-        case _ => list.get
+        case other: CPList => Some(other.values.head)
+        case other: CPMap => {
+          val asList = other.getListValues
+          if(asList.isDefined) {
+            Some(asList.get.values.head)
+          } else {
+            None
+          }
+        }
+        case other: CPObjectValue => {
+          val asList = other.getListValues
+          if(asList.isDefined) {
+            Some(asList.get.values.head)
+          } else {
+            None
+          }
+        }
+        case _ => Some(list.get)
       }
-      return Some(headElement)
+      return headElement
     }
     new BuiltInFunctionDefinition(
       "List.head",
@@ -247,6 +264,22 @@ object CPList {
       }
       val listTail = list.get match {
         case other: CPList => Some(new CPList(other.values.tail))
+        case other: CPMap => {
+          val asList = other.getListValues
+          if(asList.isDefined) {
+            Some(new CPList(asList.get.values.tail))
+          } else {
+            None
+          }
+        }
+        case other: CPObjectValue => {
+          val asList = other.getListValues
+          if(asList.isDefined) {
+            Some(new CPList(asList.get.values.tail))
+          } else {
+            None
+          }
+        }
         case _ => None
       }
       return listTail
@@ -274,13 +307,29 @@ object CPList {
 
       val posValue = pos.get.getIntValue.get
       val listValues = list.get match {
-        case other: CPList => other.values
-        case _ => List(list.get)
+        case other: CPList => Some(other.values)
+        case other: CPMap => {
+          val asList = other.getListValues
+          if(asList.isDefined) {
+            Some(asList.get.values)
+          } else {
+            None
+          }
+        }
+        case other: CPObjectValue => {
+          val asList = other.getListValues
+          if(asList.isDefined) {
+            Some(asList.get.values)
+          } else {
+            None
+          }
+        }
+        case _ => Some(List(list.get))
       }
-      if(posValue < 0 || posValue >= listValues.size) {
+      if(listValues.isEmpty || posValue < 0 || posValue >= listValues.get.size) {
         return None
       }
-      return Some(listValues(posValue))
+      return Some(listValues.get(posValue))
     }
     new BuiltInFunctionDefinition(
       "List.elementAt",
@@ -304,16 +353,93 @@ object CPList {
       }
 
       val listValues = list.get match {
-        case other: CPList => other.values
-        case _ => List(list.get)
+        case other: CPList => Some(other.values)
+        case other: CPMap => {
+          val asList = other.getListValues
+          if(asList.isDefined) {
+            Some(asList.get.values)
+          } else {
+            None
+          }
+        }
+        case other: CPObjectValue => {
+          val asList = other.getListValues
+          if(asList.isDefined) {
+            Some(asList.get.values)
+          } else {
+            None
+          }
+        }
+        case _ => Some(List(list.get))
       }
-      val res = listValues.contains(element.get)
-      return Some(CPBooleanValue(res))
+      if(listValues.isEmpty) {
+        None
+      } else {
+        val res = listValues.get.contains(element.get)
+        Some(CPBooleanValue(res))
+      }
     }
     new BuiltInFunctionDefinition(
       "List.contains",
       "list" :: "element" :: Nil,
       contains,
+      CPFunctionDefinition.checkAttributesDefined
+    )
+  }
+
+  def createPutFunction: CPFunctionDefinition = {
+    def put(args: Map[String, CPExpression], context: CPExecutionContext): Option[CPValue] = {
+      val listExpr = args.get("list")
+      val valueExpr = args.get("value")
+      val posExpr = args.get("pos")
+      if(listExpr.isEmpty || valueExpr.isEmpty) {
+        return None
+      }
+      val list = listExpr.get.calculate(context)
+      val value = valueExpr.get.calculate(context)
+      if(list.isEmpty || value.isEmpty) {
+        return None
+      }
+
+      val listValues = list.get match {
+        case other: CPList => Some(other.values)
+        case other: CPMap => {
+          val asList = other.getListValues
+          if(asList.isDefined) {
+            Some(asList.get.values)
+          } else {
+            None
+          }
+        }
+        case other: CPObjectValue => {
+          val asList = other.getListValues
+          if(asList.isDefined) {
+            Some(asList.get.values)
+          } else {
+            None
+          }
+        }
+        case _ => Some(List(list.get))
+      }
+      if(posExpr.isEmpty) {
+        return Some(new CPList(value.get :: listValues.get))
+      } else {
+        val pos = posExpr.get.calculate(context)
+        if(pos.isEmpty || pos.get.getIntValue.isEmpty) {
+          return None
+        }
+        val posValue = pos.get.getIntValue.get
+        if(posValue < 0 || posValue > listValues.get.size) {
+          return None
+        }
+        val newList = listValues.get.take(posValue) ++ List(value.get) ++ listValues.get.drop(posValue)
+        return Some(new CPList(newList))
+      }
+    }
+    new BuiltInFunctionDefinition(
+      "List.put",
+      "list" :: "value" :: "pos" :: Nil,
+      put,
       CPFunctionDefinition.checkAttributesDefined
     )
   }
@@ -343,7 +469,7 @@ object CPList {
     }
     new BuiltInFunctionDefinition(
       "List.toMap",
-      "list":: Nil,
+      "list" :: Nil,
       toMap,
       CPFunctionDefinition.checkAttributesDefined
     )
