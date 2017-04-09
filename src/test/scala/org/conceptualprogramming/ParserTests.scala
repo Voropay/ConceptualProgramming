@@ -2,8 +2,9 @@ package org.conceptualprogramming
 
 import java.time.LocalDate
 
-import org.conceptualprogramming.core.datatypes.composite.CPMap
+import org.conceptualprogramming.core.datatypes.composite.{CPObjectValue, CPMap}
 import org.conceptualprogramming.core.statements.ProcedureCallStatement
+import org.conceptualprogramming.core.statements.expressions.{CPObjectExpression, CPMapExpression, CPListExpression}
 import org.conceptualprogramming.core.statements.expressions.operations.CPOperation
 import org.conceptualprogramming.parser.{ProgramParser, StatementsParser, ExpressionsParser, ConstantsParser}
 import org.concepualprogramming.core.CPAttributeName
@@ -53,22 +54,6 @@ class ParserTests  extends FlatSpec with Matchers {
     constantsParser("10.5").get.getFloatingValue.get should equal (10.5)
     constantsParser("\"string\"").get.getStringValue.get should equal ("string")
     constantsParser("2017-01-28").get.getDateValue.get should equal (LocalDate.of(2017, 1, 28))
-    val listContent: List[CPValue] = constantsParser("[3, false, \"string\"]").get match {
-      case cplist: CPList => cplist.values
-      case _ => List()
-    }
-    listContent.size should equal (3)
-    listContent(0).getIntValue.get should equal (3)
-    listContent(1).getBooleanValue.get should equal (false)
-    listContent(2).getStringValue.get should equal ("string")
-
-    val mapContent: Map[CPValue, CPValue] = constantsParser("{\"name\" : \"aaa\", \"value\" : 1}").get match {
-      case cpmap: CPMap => cpmap.values
-      case _ => Map()
-    }
-    mapContent.size should equal (2)
-    mapContent.get(CPStringValue("name")).get.getStringValue.get should equal ("aaa")
-    mapContent.get(CPStringValue("value")).get.getIntValue.get should equal (1)
   }
 
   "Expressions" should "be parsed correctly" in {
@@ -99,11 +84,22 @@ class ParserTests  extends FlatSpec with Matchers {
     (exprParser("\"string\"").get.asInstanceOf[CPConstant]).value.getStringValue.get should equal ("string")
     (exprParser("2017-01-28").get.asInstanceOf[CPConstant]).value.getDateValue.get should equal (LocalDate.of(2017, 1, 28))
 
-    val listExpr = (exprParser("[3, false, \"string\"]").get.asInstanceOf[CPConstant]).value
-    ((listExpr.asInstanceOf[CPList]) similar (new CPList(CPIntValue(3) :: CPBooleanValue(false) :: CPStringValue("string") :: Nil))) should equal (true)
+    val listExpr = (exprParser("[3, false, \"string\"]").get.asInstanceOf[CPListExpression]).list
+    listExpr.size should equal (3)
+    listExpr.head.asInstanceOf[CPConstant].value.getIntValue.get should equal (3)
+    listExpr.tail.head.asInstanceOf[CPConstant].value.getBooleanValue.get should equal (false)
+    listExpr.tail.tail.head.asInstanceOf[CPConstant].value.getStringValue.get should equal ("string")
 
-    val mapExpr = (exprParser("{\"name\" : \"aaa\", \"value\" : 1}").get.asInstanceOf[CPConstant]).value
-    ((mapExpr.asInstanceOf[CPMap]) similar (new CPMap(Map(CPStringValue("name") -> CPStringValue("aaa"), CPStringValue("value") -> CPIntValue(1))))) should equal (true)
+    val listExpr1 = (exprParser("[a, b, c]").get.asInstanceOf[CPListExpression]).list
+    listExpr1.size should equal (3)
+    listExpr1.head.asInstanceOf[CPVariable].name should equal ("a")
+    listExpr1.tail.head.asInstanceOf[CPVariable].name should equal ("b")
+    listExpr1.tail.tail.head.asInstanceOf[CPVariable].name should equal ("c")
+
+    val mapExpr = (exprParser("{\"name\" : \"aaa\", \"value\" : 1}").get.asInstanceOf[CPMapExpression]).map
+    mapExpr.size should equal (2)
+    mapExpr.get(CPConstant(CPStringValue("name"))).get.asInstanceOf[CPConstant].value.getStringValue.get should equal ("aaa")
+    mapExpr.get(CPConstant(CPStringValue("value"))).get.asInstanceOf[CPConstant].value.getIntValue.get should equal (1)
 
     val functionCallExpr = exprParser("function(1, true)").get.asInstanceOf[CPFunctionCall]
     functionCallExpr.name should equal ("function")
@@ -149,6 +145,21 @@ class ParserTests  extends FlatSpec with Matchers {
     val comparison1 = exprParser("Grouping.Sum(c.val) > 0").get.asInstanceOf[CPGreater]
     comparison1.operand1 should equal (new CPFunctionCall("Grouping.Sum", CPAttribute("c", "val") :: Nil))
     comparison1.operand2.asInstanceOf[CPConstant].value.getIntValue.get should equal (0)
+
+    val mapContent = exprParser("{\"name\" : \"aaa\", \"value\" : 1}").get.asInstanceOf[CPMapExpression].map
+    mapContent.size should equal (2)
+    mapContent.get(CPConstant(CPStringValue("name"))).get.asInstanceOf[CPConstant].value.getStringValue.get should equal ("aaa")
+    mapContent.get(CPConstant(CPStringValue("value"))).get.asInstanceOf[CPConstant].value.getIntValue.get should equal (1)
+
+    val objectexpr = exprParser("myobj {name: \"aaa\", default value: 1}").get.asInstanceOf[CPObjectExpression]
+    objectexpr.name should equal ("myobj")
+    objectexpr.attributes.size should equal (2)
+    objectexpr.attributes.get("name").get.asInstanceOf[CPConstant].value.getStringValue.get should equal ("aaa")
+    objectexpr.attributes.get("value").get.asInstanceOf[CPConstant].value.getIntValue.get should equal (1)
+    objectexpr.defaultAttribute should equal (Some("value"))
+
+    val objectexpr1 = exprParser("myobj {name: \"aaa\", value: 1}").get.asInstanceOf[CPObjectExpression]
+    objectexpr1.defaultAttribute should equal (None)
   }
 
   "Statements" should "be parsed correctly" in {
@@ -462,6 +473,13 @@ class ParserTests  extends FlatSpec with Matchers {
     procStmtFunc.name should equal ("Console.print")
     procStmtFunc.args.size should equal (1)
     procStmtFunc.args.head.asInstanceOf[CPConstant].value.getStringValue.get should equal ("Hello world")
+
+    val conceptResolving = stmtParser("objects numbers50() :> number n(), n.val < maxNumber").get.asInstanceOf[ConceptDefinitionResolvingStatement]
+    val conceptResolvingDef = conceptResolving.definition.asInstanceOf[CPInheritedConcept]
+    conceptResolvingDef.name should equal ("numbers50")
+    conceptResolvingDef.childConcepts should equal (List(("number", "n")))
+    conceptResolvingDef.attributesDependencies should equal (List(new CPExpressionDependency(CPLess(CPAttribute("n", "val"), CPVariable("maxNumber")), CPBooleanValue(true))))
+    conceptResolving.queryExpr.isEmpty should equal (true)
   }
 
   "Programs" should "be parsed correctly" in {
@@ -482,10 +500,10 @@ class ParserTests  extends FlatSpec with Matchers {
         for(i=0;i<10;i=i+1){
           object digit {val: i}
         };
-        objects number(val == d1.val*10+d0.val) := digit d0(), digit d1() {};
+        objects number(val == d1.val*10+d0.val) := digit d0(), digit d1();
         return number {}
       };
-      objects numbers50() :> number n(), n.val < maxNumber {}
+      objects numbers50() :> number n(), n.val < maxNumber
     """
     val program1 = ProgramParser(programStr1).get.body
     program1.size should equal (3)
@@ -496,7 +514,7 @@ class ParserTests  extends FlatSpec with Matchers {
     forStmt.condition should equal (new CPLess(new CPVariable("i"), CPConstant(CPFloatingValue(10))))
     forStmt.endOperator should equal (new VariableStatement("i", new CPAdd(new CPVariable("i"), new CPConstant(CPFloatingValue(1)))))
     forStmt.body.asInstanceOf[CompositeStatement].body.head should equal (new AddObjectStatement("digit", Map("val" -> CPVariable("i")), "val"))
-    val numberConceptStmt = freeCconcept(1).asInstanceOf[ConceptResolvingStatement]
+    val numberConceptStmt = freeCconcept(1).asInstanceOf[ConceptDefinitionResolvingStatement]
     numberConceptStmt.queryExpr.size should equal (0)
     val numberConcept = numberConceptStmt.definition.asInstanceOf[CPStrictConcept]
     numberConcept.name should equal ("number")
@@ -523,7 +541,7 @@ class ParserTests  extends FlatSpec with Matchers {
     val returnObj = freeCconcept(2).asInstanceOf[ReturnObjectsStatement]
     returnObj.returnObjectsName should equal (CPConstant(CPStringValue("number")))
     returnObj.queryExpr.size should equal (0)
-    val numbers50Stmt = program1(2).asInstanceOf[ConceptResolvingStatement]
+    val numbers50Stmt = program1(2).asInstanceOf[ConceptDefinitionResolvingStatement]
     numbers50Stmt.queryExpr.size should equal (0)
     val numbers50 = numbers50Stmt.definition.asInstanceOf[CPInheritedConcept]
     numbers50.name should equal ("numbers50")

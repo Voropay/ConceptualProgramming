@@ -1,5 +1,8 @@
 package org.conceptualprogramming
 
+import org.conceptualprogramming.core.datatypes.composite.{CPObjectValue, CPMap}
+import org.conceptualprogramming.core.statements.expressions.{CPObjectExpression, CPMapExpression, CPListExpression}
+import org.concepualprogramming.core.datatypes.composite.CPList
 import org.concepualprogramming.core.statements.expressions.operations._
 import org.concepualprogramming.core.{CPSubstitutions, CPExecutionContext, CPAttributeName}
 import org.concepualprogramming.core.datatypes.{CPFloatingValue, CPBooleanValue, CPIntValue}
@@ -232,6 +235,36 @@ class ExpressionTests extends FlatSpec with Matchers {
     ls1.infer(CPBooleanValue(true), context) should equal (Map())
   }
 
+  "List" should "be calculated correctly" in {
+    val context = new CPExecutionContext
+    val list = new CPListExpression(CPConstant(CPIntValue(1)) :: CPConstant(CPIntValue(2)) :: CPConstant(CPIntValue(3)) :: Nil)
+    val res = list.calculate(context).get.asInstanceOf[CPList].values
+    res.size should equal (3)
+    res.head.getIntValue.get should equal (1)
+    res.tail.head.getIntValue.get should equal (2)
+    res.tail.tail.head.getIntValue.get should equal (3)
+  }
+
+  "Map" should "be calculated correctly" in {
+    val context = new CPExecutionContext
+    val map = new CPMapExpression(Map(CPConstant(CPIntValue(1)) -> CPConstant(CPIntValue(10)), CPConstant(CPIntValue(2)) -> CPConstant(CPIntValue(20))))
+    val res = map.calculate(context).get.asInstanceOf[CPMap].values
+    res.size should equal (2)
+    res.get(CPIntValue(1)).get.getIntValue.get should equal (10)
+    res.get(CPIntValue(2)).get.getIntValue.get should equal (20)
+  }
+
+  "Object" should "be calculated correctly" in {
+    val context = new CPExecutionContext
+    val obj = new CPObjectExpression("myobj", Map("attr1" -> CPConstant(CPIntValue(10)), "attr2" -> CPConstant(CPIntValue(20))), Some("attr1"))
+    val res = obj.calculate(context).get.asInstanceOf[CPObjectValue].objectValue
+    res.name should equal ("myobj")
+    res.attributes.size should equal (2)
+    res.attributes.get("attr1").get.getIntValue.get should equal (10)
+    res.attributes.get("attr2").get.getIntValue.get should equal (20)
+    res.defaultAttribute should equal ("attr1")
+  }
+
   "Expressions" should "be compared correctly" in {
     val c = new CPConstant(CPIntValue(1))
     (c == new CPConstant(CPIntValue(1))) should be (true)
@@ -259,5 +292,13 @@ class ExpressionTests extends FlatSpec with Matchers {
     val exp1 = new CPAdd(add1, mul1)
     val exp2 = new CPAdd(add2, mul2)
     (exp1 == exp2) should be (true)
+
+    val list1 = new CPListExpression(CPConstant(CPIntValue(1)) :: CPConstant(CPIntValue(2)) :: CPConstant(CPIntValue(3)) :: Nil)
+    val list2 = new CPListExpression(CPConstant(CPIntValue(1)) :: CPConstant(CPIntValue(2)) :: CPConstant(CPIntValue(3)) :: Nil)
+    (list1 == list2) should be (true)
+
+    val map1 = new CPMapExpression(Map(CPConstant(CPIntValue(1)) -> CPConstant(CPIntValue(10)), CPConstant(CPIntValue(2)) -> CPConstant(CPIntValue(20))))
+    val map2 = new CPMapExpression(Map(CPConstant(CPIntValue(1)) -> CPConstant(CPIntValue(10)), CPConstant(CPIntValue(2)) -> CPConstant(CPIntValue(20))))
+    (map1 == map2) should be (true)
   }
 }

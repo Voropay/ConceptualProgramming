@@ -9,7 +9,7 @@ import org.concepualprogramming.core.datatypes.{CPFloatingValue, CPStringValue, 
 import org.concepualprogramming.core.statements.expressions.operations.CPSub
 import org.concepualprogramming.core.statements.expressions.{CPConstant, CPAttribute, CPFunctionCall}
 import org.concepualprogramming.core.statements.expressions.functions.GroupingFunctions
-import org.concepualprogramming.core.statements.{ConceptDefinitionStatement, CompositeStatement, ReturnObjectsStatement, ConceptResolvingStatement}
+import org.concepualprogramming.core.statements.{ConceptDefinitionStatement, CompositeStatement, ReturnObjectsStatement, ConceptDefinitionResolvingStatement}
 import org.scalatest.{Matchers, FlatSpec}
 
 /**
@@ -463,12 +463,12 @@ class TestExamples extends FlatSpec with Matchers {
     )
 
     val task = new CPFreeConcept("ToNotify",
-      new ConceptResolvingStatement(name, Map()) ::
-      new ConceptResolvingStatement(income, Map()) ::
-      new ConceptResolvingStatement(outcome, Map()) ::
-      new ConceptResolvingStatement(profit, Map()) ::
-      new ConceptResolvingStatement(unprofitable, Map()) ::
-      new ConceptResolvingStatement(toNotify, Map()) ::
+      new ConceptDefinitionResolvingStatement(name, Map()) ::
+      new ConceptDefinitionResolvingStatement(income, Map()) ::
+      new ConceptDefinitionResolvingStatement(outcome, Map()) ::
+      new ConceptDefinitionResolvingStatement(profit, Map()) ::
+      new ConceptDefinitionResolvingStatement(unprofitable, Map()) ::
+      new ConceptDefinitionResolvingStatement(toNotify, Map()) ::
       new ReturnObjectsStatement(CPConstant(CPStringValue("ToNotify")), Map()) ::  Nil
     )
 
@@ -485,7 +485,7 @@ class TestExamples extends FlatSpec with Matchers {
     toNotifyRow1.get("val").get.getIntValue.get should equal (-2)
 
     val taskWithQuery = new CPFreeConcept("ToNotify",
-      new ConceptResolvingStatement(name, Map()) ::
+      new ConceptDefinitionResolvingStatement(name, Map()) ::
       new ReturnObjectsStatement(CPConstant(CPStringValue("Name")), Map()) ::  Nil
     )
 
@@ -555,7 +555,7 @@ class TestExamples extends FlatSpec with Matchers {
         new ConceptDefinitionStatement(income) ::
         new ConceptDefinitionStatement(outcome) ::
         new ConceptDefinitionStatement(profit) ::
-        new ConceptResolvingStatement(totals, Map()) ::
+        new ConceptDefinitionResolvingStatement(totals, Map()) ::
         new ReturnObjectsStatement(CPConstant(CPStringValue("Total")), Map()) ::
         Nil
     )
@@ -583,7 +583,7 @@ class TestExamples extends FlatSpec with Matchers {
         concept Hostile(name == e.name) := Enemy e(target == "America");
         object American {name: "West"};
         object Enemy {name: "Nono", target: "America"};
-        objects WestIsCriminal(name == c.name) := Criminal c() {name: "West"};
+        objects WestIsCriminal(name == c.name) := Criminal c(name == "West");
         westIsCriminal = !Objects.isEmpty("WestIsCriminal");
         if(westIsCriminal) {
           return "West is criminal";

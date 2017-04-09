@@ -1,6 +1,6 @@
 package org.conceptualprogramming
 
-import org.concepualprogramming.core.statements.ConceptResolvingStatement
+import org.concepualprogramming.core.statements.ConceptDefinitionResolvingStatement
 import org.concepualprogramming.core.statements.expressions.{CPVariable, CPConstant, CPAttribute}
 import org.concepualprogramming.core.statements.expressions.operations.{CPMul, CPDiv}
 import org.concepualprogramming.core._
@@ -152,7 +152,7 @@ class DependenciesTests extends FlatSpec with Matchers {
     val context = new CPExecutionContext
     context.knowledgeBase.add(new CPObject("Var", Map("val" -> CPIntValue(1)), "val"))
     context.knowledgeBase.add(new CPObject("Var", Map("val" -> CPIntValue(-1)), "val"))
-    val step = new ConceptResolvingStatement(
+    val step = new ConceptDefinitionResolvingStatement(
       new CPStrictConcept(
         "PositiveVariable",
         "val" :: Nil,

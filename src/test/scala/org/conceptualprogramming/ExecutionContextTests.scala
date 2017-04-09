@@ -1,6 +1,6 @@
 package org.conceptualprogramming
 
-import org.conceptualprogramming.core.statements.ProcedureCallStatement
+import org.conceptualprogramming.core.statements.{ConceptResolvingStatement, ProcedureCallStatement}
 import org.conceptualprogramming.core.statements.expressions.functions.ConsoleFunctions
 import org.concepualprogramming.core.datatypes.{CPStringValue, CPBooleanValue, CPIntValue}
 import org.concepualprogramming.core.dependencies.CPDependency
@@ -51,7 +51,7 @@ class ExecutionContextTests extends FlatSpec with Matchers {
     val context = new CPExecutionContext
     context.knowledgeBase.add(new CPObject("Var", Map("val" -> CPIntValue(1)), "val"))
     context.knowledgeBase.add(new CPObject("Var", Map("val" -> CPIntValue(-1)), "val"))
-    val step = new ConceptResolvingStatement(
+    val step = new ConceptDefinitionResolvingStatement(
       new CPStrictConcept(
         "PositiveVariable",
         "val" :: Nil,
@@ -74,7 +74,7 @@ class ExecutionContextTests extends FlatSpec with Matchers {
     res.head.name should equal ("PositiveVariable")
     res.head.get("val").get.getIntValue.get should equal (1)
 
-    val step1 = new ConceptResolvingStatement(
+    val step1 = new ConceptDefinitionResolvingStatement(
       new CPStrictConcept(
         "Variable",
         "val" :: Nil,
@@ -91,9 +91,35 @@ class ExecutionContextTests extends FlatSpec with Matchers {
     res1.head.name should equal ("Variable")
     res1.head.get("val").get.getIntValue.get should equal (-1)
 
+    context.knowledgeBase.add(new CPStrictConcept(
+      "NegativeVariable",
+      "val" :: Nil,
+      "val",
+      ("Var", "v") :: Nil,
+      CPDependency(CPAttributeName("", "val") :: CPAttributeName("v", "val") :: Nil)  ::
+        CPDependency(
+          new CPAttribute(CPAttributeName("v", "val")),
+          new CPConstant(CPIntValue(0)),
+          "<"
+        ) :: Nil
+    ))
+    val step2 = new ConceptResolvingStatement("NegativeVariable", Map())
+    step2.execute(context)
+    val res2 = context.knowledgeBase.getObjects("NegativeVariable")
+    res2.size should equal (1)
+    res2.head.name should equal ("NegativeVariable")
+    res2.head.get("val").get.getIntValue.get should equal (-1)
 
-
-
+    val decisionNode = step2.createDecisionNode(context)
+    decisionNode.init
+    decisionNode.hasNextBranch should be (true)
+    val curBranch = decisionNode.nextBranch
+    curBranch.init
+    curBranch.hasNextBranch should be (false)
+    val res3 = curBranch.getAllResults
+    res3.size should equal (1)
+    res3.head.name should equal ("NegativeVariable")
+    res3.head.get("val").get.getIntValue.get should equal (-1)
   }
 
     "Variable statement" should "set variable value correctly" in {
@@ -117,7 +143,7 @@ class ExecutionContextTests extends FlatSpec with Matchers {
       val context = new CPExecutionContext
       context.knowledgeBase.add(new CPObject("Var", Map("val" -> CPIntValue(1)), "val"))
       context.knowledgeBase.add(new CPObject("Var", Map("val" -> CPIntValue(-1)), "val"))
-      val stepThen = new ConceptResolvingStatement(
+      val stepThen = new ConceptDefinitionResolvingStatement(
         new CPStrictConcept(
           "Res",
           "val" :: Nil,
@@ -132,7 +158,7 @@ class ExecutionContextTests extends FlatSpec with Matchers {
         ),
         Map()
       )
-      val stepElse = new ConceptResolvingStatement(
+      val stepElse = new ConceptDefinitionResolvingStatement(
         new CPStrictConcept(
           "Res",
           "val" :: Nil,
@@ -190,7 +216,7 @@ class ExecutionContextTests extends FlatSpec with Matchers {
       val size = new CPFunctionCall("Objects.size", List(CPConstant(CPStringValue("Var"))))
       size.calculate(context).get.getIntValue.get should be (2)
 
-      val positiveValueStep = new ConceptResolvingStatement(
+      val positiveValueStep = new ConceptDefinitionResolvingStatement(
         new CPStrictConcept(
           "PosRes",
           "val" :: Nil,

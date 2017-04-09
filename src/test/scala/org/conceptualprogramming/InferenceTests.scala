@@ -299,7 +299,7 @@ class InferenceTests extends FlatSpec with Matchers {
     val context = new CPExecutionContext
     context.knowledgeBase.add(new CPObject("Var", Map("val" -> CPIntValue(1)), "val"))
     context.knowledgeBase.add(new CPObject("Var", Map("val" -> CPIntValue(-1)), "val"))
-    val step1 = new ConceptResolvingStatement(
+    val step1 = new ConceptDefinitionResolvingStatement(
       new CPStrictConcept(
         "Res",
         "val" :: Nil,
@@ -334,7 +334,7 @@ class InferenceTests extends FlatSpec with Matchers {
     objects1.head.name should equal ("PositiveVariables")
     objects1.head.get("val").get.getIntValue.get should equal (1)
 
-    val step11 = new ConceptResolvingStatement(
+    val step11 = new ConceptDefinitionResolvingStatement(
       new CPStrictConcept(
         "Res",
         "val" :: Nil,
@@ -357,7 +357,7 @@ class InferenceTests extends FlatSpec with Matchers {
     context.knowledgeBase.add(new CPObject("Var", Map("val" -> CPIntValue(1)), "val"))
     context.knowledgeBase.add(new CPObject("Var", Map("val" -> CPIntValue(-1)), "val"))
 
-    val positiveValueStep = new ConceptResolvingStatement(
+    val positiveValueStep = new ConceptDefinitionResolvingStatement(
       new CPStrictConcept(
         "PosRes",
         "val" :: Nil,
@@ -372,7 +372,7 @@ class InferenceTests extends FlatSpec with Matchers {
       ),
       Map()
     )
-    val negativeValueStep = new ConceptResolvingStatement(
+    val negativeValueStep = new ConceptDefinitionResolvingStatement(
       new CPStrictConcept(
         "NegRes",
         "val" :: Nil,
