@@ -282,6 +282,17 @@ class ParserTests  extends FlatSpec with Matchers {
     objAttrs.get("col").get.asInstanceOf[CPConstant].value.getIntValue.get should equal (2)
     objAttrs.get("val").get.asInstanceOf[CPConstant].value.getIntValue.get should equal (10)
 
+    val objStmt1 = stmtParser("objVar = cell {row: 1, col: 2, default val: 10}").get.asInstanceOf[VariableStatement]//.expression.asInstanceOf[CPObjectExpression]
+    objStmt1.variableName should equal ("objVar")
+    val objVal = objStmt1.operand.asInstanceOf[CPObjectExpression]
+    objVal.name should equal ("cell")
+    val objAttrs1 = objStmt.attributes
+    objAttrs1.size should equal (3)
+    objAttrs1.get("row").get.asInstanceOf[CPConstant].value.getIntValue.get should equal (1)
+    objAttrs1.get("col").get.asInstanceOf[CPConstant].value.getIntValue.get should equal (2)
+    objAttrs1.get("val").get.asInstanceOf[CPConstant].value.getIntValue.get should equal (10)
+    objVal.defaultAttribute.get should equal ("val")
+
     val childConceptParser = new StatementsParser {
       def apply(code: String): Option[List[(String, String, CPExpression)]] = {
         parse(conceptAttrDependencies, code) match {

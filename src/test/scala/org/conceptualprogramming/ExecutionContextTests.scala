@@ -124,10 +124,24 @@ class ExecutionContextTests extends FlatSpec with Matchers {
   }
 
     "Variable statement" should "set variable value correctly" in {
-      var v = new VariableStatement("a", new CPConstant(CPIntValue(1)))
+      val v = new VariableStatement("a", new CPConstant(CPIntValue(1)))
       val context = new CPExecutionContext
       v.execute(context)
       context.getVariable("a").get.getIntValue.get should equal (1)
+    }
+
+    "Add object statement" should "work with variables correctly" in {
+      val v = new VariableStatement("v", new CPObjectExpression("myobj", Map("name" -> CPConstant(CPStringValue("abc")), "value" -> CPConstant(CPIntValue(1))), Some("value")))
+      val add = new AddObjectStatement(new CPVariable("v"))
+      val context = new CPExecutionContext
+      v.execute(context)
+      add.execute(context)
+      val res = context.knowledgeBase.getObjects("myobj")
+      res.size should equal (1)
+      res.head.name should equal ("myobj")
+      res.head.attributes.get("name").get.getStringValue.get should equal ("abc")
+      res.head.attributes.get("value").get.getIntValue.get should equal (1)
+      res.head.defaultAttribute should equal ("value")
     }
 
     "Return value statement" should "return variable value correctly" in {
