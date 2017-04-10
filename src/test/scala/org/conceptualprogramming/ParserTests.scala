@@ -274,7 +274,7 @@ class ParserTests  extends FlatSpec with Matchers {
     funcBody.operand1.asInstanceOf[CPVariable].name should equal ("a")
     funcBody.operand2.asInstanceOf[CPVariable].name should equal ("a")
 
-    val objStmt = stmtParser("object cell {row: 1, col: 2, val: 10}").get.asInstanceOf[AddObjectStatement]
+    val objStmt = stmtParser("object cell {row: 1, col: 2, val: 10}").get.asInstanceOf[AddObjectStatement].expression.asInstanceOf[CPObjectExpression]
     objStmt.name should equal ("cell")
     val objAttrs = objStmt.attributes
     objAttrs.size should equal (3)
@@ -398,7 +398,7 @@ class ParserTests  extends FlatSpec with Matchers {
     freeConceptStep1End.variableName should equal ("i")
     freeConceptStep1End.operand.asInstanceOf[CPAdd].operand1.asInstanceOf[CPVariable].name should equal ("i")
     freeConceptStep1End.operand.asInstanceOf[CPAdd].operand2.asInstanceOf[CPConstant].value.getIntValue.get should equal (1)
-    val freeConceptStep1Body = freeConceptStep1.body.asInstanceOf[CompositeStatement].body.head.asInstanceOf[AddObjectStatement]
+    val freeConceptStep1Body = freeConceptStep1.body.asInstanceOf[CompositeStatement].body.head.asInstanceOf[AddObjectStatement].expression.asInstanceOf[CPObjectExpression]
     freeConceptStep1Body.name should equal ("Number")
     val freeConceptStep1BodyAttrs = freeConceptStep1Body.attributes
     freeConceptStep1BodyAttrs.size should equal (1)
@@ -513,7 +513,7 @@ class ParserTests  extends FlatSpec with Matchers {
     forStmt.startOperator should equal (new VariableStatement("i", new CPConstant(CPFloatingValue(0))))
     forStmt.condition should equal (new CPLess(new CPVariable("i"), CPConstant(CPFloatingValue(10))))
     forStmt.endOperator should equal (new VariableStatement("i", new CPAdd(new CPVariable("i"), new CPConstant(CPFloatingValue(1)))))
-    forStmt.body.asInstanceOf[CompositeStatement].body.head should equal (new AddObjectStatement("digit", Map("val" -> CPVariable("i")), "val"))
+    forStmt.body.asInstanceOf[CompositeStatement].body.head should equal (new AddObjectStatement(new CPObjectExpression("digit", Map("val" -> CPVariable("i")), None)))
     val numberConceptStmt = freeCconcept(1).asInstanceOf[ConceptDefinitionResolvingStatement]
     numberConceptStmt.queryExpr.size should equal (0)
     val numberConcept = numberConceptStmt.definition.asInstanceOf[CPStrictConcept]

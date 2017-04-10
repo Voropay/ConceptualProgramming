@@ -1,5 +1,6 @@
 package org.conceptualprogramming
 
+import org.conceptualprogramming.core.statements.expressions.CPObjectExpression
 import org.conceptualprogramming.core.statements.{ConceptResolvingStatement, ProcedureCallStatement}
 import org.conceptualprogramming.core.statements.expressions.functions.ConsoleFunctions
 import org.concepualprogramming.core.datatypes.{CPStringValue, CPBooleanValue, CPIntValue}
@@ -271,7 +272,7 @@ class ExecutionContextTests extends FlatSpec with Matchers {
         new CPFunctionCall("Objects.size", List(CPConstant(CPStringValue("Var")))),
         new CPConstant(CPIntValue(5))
       )
-      val addObject = new AddObjectStatement("Var", Map("val" -> CPVariable("i")), "val")
+      val addObject = new AddObjectStatement(new CPObjectExpression("Var", Map("val" -> CPVariable("i")), Some("val")))
       val body = new CompositeStatement(iInc :: addObject :: Nil)
       val whileStep = new WhileStatement(exitCond, body)
       val returnStep = new ReturnObjectsStatement(CPConstant(CPStringValue("Var")), Map())
@@ -297,7 +298,7 @@ class ExecutionContextTests extends FlatSpec with Matchers {
         new CPFunctionCall("Objects.size", List(CPConstant(CPStringValue("Var")))),
         new CPConstant(CPIntValue(5))
       )
-      val body = new AddObjectStatement("Var", Map("val" -> CPVariable("i")), "val")
+      val body = new AddObjectStatement(new CPObjectExpression("Var", Map("val" -> CPVariable("i")), Some("val")))
       val forStep = new ForStatement(iInit, exitCond, iInc, body)
       val returnStep = new ReturnObjectsStatement(CPConstant(CPStringValue("Var")), Map())
 

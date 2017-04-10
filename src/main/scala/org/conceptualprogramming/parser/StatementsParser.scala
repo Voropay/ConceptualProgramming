@@ -27,7 +27,7 @@ import scala.util.Properties
 trait StatementsParser extends ExpressionsParser {
   def statement: Parser[CPStatement] = variableAssignmentStatement | returnObjectStatement | returnVariableStatement |
                                        ifStatement | forStatement | whileStatement | functionDefinitionStatement | procedureCallStatement |
-                                       objectDefinitionStatement | conceptDefinitionStatement | conceptDefinitionResolvingStatement | conceptResolvingStatement |
+                                       conceptDefinitionStatement | conceptDefinitionResolvingStatement | conceptResolvingStatement | objectDefinitionStatement |
                                        compositeStatement
   //TODO: find out how to parse multi line statements
   def compositeStatement: Parser[CompositeStatement] = "{" ~ repsep(statement, rep1(statementsSeparator)) ~ rep(statementsSeparator) ~ "}" ^^ {value => new CompositeStatement(value._1._1._2)}
@@ -66,7 +66,7 @@ trait StatementsParser extends ExpressionsParser {
 
   def procedureCallStatement: Parser[CPStatement] = functionCallExpression ^^ {value => new ProcedureCallStatement(value)}
 
-  def objectDefinitionStatement: Parser[CPStatement] = "object" ~ ident ~ objectQuery ^^ {value => new AddObjectStatement(value._1._2, value._2, value._2.head._1)}
+  def objectDefinitionStatement: Parser[CPStatement] = "object" ~ expression ^^ {value => new AddObjectStatement(value._2)}
 
   def conceptDefinitionStatement: Parser[CPStatement] = "concept" ~ conceptDefinition ^^ {value => new ConceptDefinitionStatement(value._2)}
   def conceptDefinitionResolvingStatement: Parser[CPStatement] = "objects" ~ conceptDefinition ^^ {value => new ConceptDefinitionResolvingStatement(value._2, Map())}
