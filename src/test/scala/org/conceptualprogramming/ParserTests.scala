@@ -3,7 +3,7 @@ package org.conceptualprogramming
 import java.time.LocalDate
 
 import org.conceptualprogramming.core.datatypes.composite.{CPObjectValue, CPMap}
-import org.conceptualprogramming.core.statements.ProcedureCallStatement
+import org.conceptualprogramming.core.statements.{ConceptResolvingToVariableStatement, ConceptDefinitionResolvingToVariableStatement, ConceptResolvingStatement, ProcedureCallStatement}
 import org.conceptualprogramming.core.statements.expressions.{CPObjectExpression, CPMapExpression, CPListExpression}
 import org.conceptualprogramming.core.statements.expressions.operations.CPOperation
 import org.conceptualprogramming.parser.{ProgramParser, StatementsParser, ExpressionsParser, ConstantsParser}
@@ -491,6 +491,25 @@ class ParserTests  extends FlatSpec with Matchers {
     conceptResolvingDef.childConcepts should equal (List(("number", "n")))
     conceptResolvingDef.attributesDependencies should equal (List(new CPExpressionDependency(CPLess(CPAttribute("n", "val"), CPVariable("maxNumber")), CPBooleanValue(true))))
     conceptResolving.queryExpr.isEmpty should equal (true)
+
+    val conceptResolving1 = stmtParser("objects myConcept {myAttr: someValue}").get.asInstanceOf[ConceptResolvingStatement]
+    conceptResolving1.conceptName should equal ("myConcept")
+    conceptResolving1.queryExpr.size should equal (1)
+    conceptResolving1.queryExpr.get("myAttr").get.asInstanceOf[CPVariable].name should equal ("someValue")
+
+    val conceptResolving2 = stmtParser("res <- numbers50() :> number n(), n.val < maxNumber").get.asInstanceOf[ConceptDefinitionResolvingToVariableStatement]
+    conceptResolving2.variableName should equal ("res")
+    val conceptResolvingDef2 = conceptResolving2.definition.asInstanceOf[CPInheritedConcept]
+    conceptResolvingDef2.name should equal ("numbers50")
+    conceptResolvingDef2.childConcepts should equal (List(("number", "n")))
+    conceptResolvingDef2.attributesDependencies should equal (List(new CPExpressionDependency(CPLess(CPAttribute("n", "val"), CPVariable("maxNumber")), CPBooleanValue(true))))
+    conceptResolving2.queryExpr.isEmpty should equal (true)
+
+    val conceptResolving3 = stmtParser("res <- myConcept {myAttr: someValue}").get.asInstanceOf[ConceptResolvingToVariableStatement]
+    conceptResolving3.variableName should equal ("res")
+    conceptResolving3.conceptName should equal ("myConcept")
+    conceptResolving3.queryExpr.size should equal (1)
+    conceptResolving3.queryExpr.get("myAttr").get.asInstanceOf[CPVariable].name should equal ("someValue")
   }
 
   "Programs" should "be parsed correctly" in {

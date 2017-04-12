@@ -44,6 +44,8 @@ class CPObject(_name: String, _attributes: Map[String, CPValue], _defaultAttribu
     result = attributes.values.foldLeft(result) ((r, c) => prime * r + c.hashCode)
     return result
   }
+
+  override def toString: String = "CPObject {" + name + " "+ attributes + ", default: " + _defaultAttribute + "}"
 }
 
 object CPObject {

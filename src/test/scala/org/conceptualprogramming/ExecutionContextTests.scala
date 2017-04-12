@@ -1,8 +1,10 @@
 package org.conceptualprogramming
 
+import org.conceptualprogramming.core.datatypes.composite.CPObjectValue
 import org.conceptualprogramming.core.statements.expressions.CPObjectExpression
-import org.conceptualprogramming.core.statements.{ConceptResolvingStatement, ProcedureCallStatement}
+import org.conceptualprogramming.core.statements.{ConceptResolvingToVariableStatement, ConceptDefinitionResolvingToVariableStatement, ConceptResolvingStatement, ProcedureCallStatement}
 import org.conceptualprogramming.core.statements.expressions.functions.ConsoleFunctions
+import org.concepualprogramming.core.datatypes.composite.CPList
 import org.concepualprogramming.core.datatypes.{CPStringValue, CPBooleanValue, CPIntValue}
 import org.concepualprogramming.core.dependencies.CPDependency
 import org.concepualprogramming.core.statements.expressions.operations.CPAdd
@@ -121,6 +123,49 @@ class ExecutionContextTests extends FlatSpec with Matchers {
     res3.size should equal (1)
     res3.head.name should equal ("NegativeVariable")
     res3.head.get("val").get.getIntValue.get should equal (-1)
+  }
+
+  "Resolve to variable statement" should "assign objects correctly" in {
+    val context = new CPExecutionContext
+    context.knowledgeBase.add(new CPObject("Var", Map("val" -> CPIntValue(2)), "val"))
+    context.knowledgeBase.add(new CPObject("Var", Map("val" -> CPIntValue(1)), "val"))
+    context.knowledgeBase.add(new CPObject("Var", Map("val" -> CPIntValue(-1)), "val"))
+    val concept = new CPStrictConcept(
+      "PositiveVariable",
+      "val" :: Nil,
+      "val",
+      ("Var", "v") :: Nil,
+      CPDependency(CPAttributeName("", "val") :: CPAttributeName("v", "val") :: Nil)  ::
+        CPDependency(
+          new CPAttribute(CPAttributeName("v", "val")),
+          new CPConstant(CPIntValue(0)),
+          ">"
+        ) :: Nil
+    );
+    val step = new ConceptDefinitionResolvingToVariableStatement(
+      "positiveVariables",
+      concept,
+      Map()
+    )
+
+    step.execute(context)
+    context.getCurrentStep should equal (1)
+    val res = context.getVariable("positiveVariables").get.asInstanceOf[CPList].values
+    res.size should equal (2)
+    res.contains(new CPObjectValue(new CPObject("PositiveVariable", Map("val" -> CPIntValue(2)), "val"))) should be (true)
+    res.contains(new CPObjectValue(new CPObject("PositiveVariable", Map("val" -> CPIntValue(1)), "val"))) should be (true)
+
+    context.knowledgeBase.add(concept)
+    val step1 = new ConceptResolvingToVariableStatement(
+      "positiveVariables1",
+      "PositiveVariable",
+      Map()
+    )
+    step1.execute(context)
+    val res1 = context.getVariable("positiveVariables1").get.asInstanceOf[CPList].values
+    res1.size should equal (2)
+    res1.contains(new CPObjectValue(new CPObject("PositiveVariable", Map("val" -> CPIntValue(2)), "val"))) should be (true)
+    res1.contains(new CPObjectValue(new CPObject("PositiveVariable", Map("val" -> CPIntValue(1)), "val"))) should be (true)
   }
 
     "Variable statement" should "set variable value correctly" in {

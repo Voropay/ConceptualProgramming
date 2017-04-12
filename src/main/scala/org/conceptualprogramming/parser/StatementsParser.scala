@@ -1,6 +1,6 @@
 package org.conceptualprogramming.parser
 
-import org.conceptualprogramming.core.statements.ProcedureCallStatement
+import org.conceptualprogramming.core.statements.{ConceptResolvingToVariableStatement, ConceptDefinitionResolvingToVariableStatement, ConceptResolvingStatement, ProcedureCallStatement}
 import org.conceptualprogramming.core.statements.expressions.operations.CPOperation
 import org.concepualprogramming.core.CPAttributeName
 import org.concepualprogramming.core.CPConcept
@@ -27,7 +27,8 @@ import scala.util.Properties
 trait StatementsParser extends ExpressionsParser {
   def statement: Parser[CPStatement] = variableAssignmentStatement | returnObjectStatement | returnVariableStatement |
                                        ifStatement | forStatement | whileStatement | functionDefinitionStatement | procedureCallStatement |
-                                       conceptDefinitionStatement | conceptDefinitionResolvingStatement | conceptResolvingStatement | objectDefinitionStatement |
+                                       conceptDefinitionStatement | conceptDefinitionResolvingToVariableStatement | conceptResolvingToVariableStatement |
+                                       conceptDefinitionResolvingStatement | conceptResolvingStatement | objectDefinitionStatement |
                                        compositeStatement
   //TODO: find out how to parse multi line statements
   def compositeStatement: Parser[CompositeStatement] = "{" ~ repsep(statement, rep1(statementsSeparator)) ~ rep(statementsSeparator) ~ "}" ^^ {value => new CompositeStatement(value._1._1._2)}
@@ -70,7 +71,10 @@ trait StatementsParser extends ExpressionsParser {
 
   def conceptDefinitionStatement: Parser[CPStatement] = "concept" ~ conceptDefinition ^^ {value => new ConceptDefinitionStatement(value._2)}
   def conceptDefinitionResolvingStatement: Parser[CPStatement] = "objects" ~ conceptDefinition ^^ {value => new ConceptDefinitionResolvingStatement(value._2, Map())}
-  def conceptResolvingStatement: Parser[CPStatement] = "objects" ~ ident ~ objectQuery ^^ {null}
+  def conceptResolvingStatement: Parser[CPStatement] = "objects" ~ ident ~ objectQuery ^^ {value => new ConceptResolvingStatement(value._1._2, value._2)}
+  //TODO: Implement concept resolving as expression
+  def conceptDefinitionResolvingToVariableStatement: Parser[CPStatement] = ident ~ "<-" ~ conceptDefinition ^^ {value => new ConceptDefinitionResolvingToVariableStatement(value._1._1, value._2, Map())}
+  def conceptResolvingToVariableStatement: Parser[CPStatement] = ident ~ "<-" ~ ident ~ objectQuery ^^ {value => new ConceptResolvingToVariableStatement(value._1._1._1, value._1._2, value._2)}
 
   def conceptDefinition: Parser[CPConcept] = strictConceptDefinition | inheritedConceptDefinition | freeConceptDefinition | groupingConceptDefinition
 
