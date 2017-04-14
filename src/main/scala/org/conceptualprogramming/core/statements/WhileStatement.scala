@@ -48,7 +48,9 @@ case class WhileStatement(condition: CPExpression, body: CPStatement) extends CP
 
     override def setCurrentNodeResolvingResult(res: List[CPObject]): Unit = {
       curDecisionNode.setCurrentNodeResolvingResult(res)
-      findNextBranch
+      if(nextBranchExists) {
+        findNextBranch
+      }
     }
 
     def findNextBranch: Unit = {

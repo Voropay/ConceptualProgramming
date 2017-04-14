@@ -239,7 +239,7 @@ abstract class CPAbstractConcept extends CPConcept{
     }
 
     override def getAllResults: List[CPObject] = {
-      val objectsOptions = allResults.map(prepareObjectFromAttributesValues(_))
+      val objectsOptions = prepareObjects(allResults, context)//allResults.map(prepareObjectFromAttributesValues(_))
       val objects = objectsOptions.filter(_.isDefined).map(_.get)
       return objects
     }

@@ -53,10 +53,13 @@ case class CompositeStatement(body: List[CPStatement]) extends CPStatement{
 
     override def setCurrentNodeResolvingResult(objects: List[CPObject]): Unit = {
       steps(context.getCurrentStep).setCurrentNodeResolvingResult(objects, context)
-      findNextConceptStep
+      if (nextBranchExists) {
+        findNextConceptStep
+      }
     }
 
     def findNextConceptStep: Unit = {
+
       while(!context.isStopped && context.getCurrentStep < steps.size) {
         val step = steps(context.getCurrentStep)
         if(step.needsResolve(context)) {

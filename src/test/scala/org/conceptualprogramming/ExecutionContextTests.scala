@@ -2,11 +2,11 @@ package org.conceptualprogramming
 
 import org.conceptualprogramming.core.datatypes.composite.CPObjectValue
 import org.conceptualprogramming.core.statements.expressions.CPObjectExpression
-import org.conceptualprogramming.core.statements.{ConceptResolvingToVariableStatement, ConceptDefinitionResolvingToVariableStatement, ConceptResolvingStatement, ProcedureCallStatement}
+import org.conceptualprogramming.core.statements._
 import org.conceptualprogramming.core.statements.expressions.functions.ConsoleFunctions
 import org.concepualprogramming.core.datatypes.composite.CPList
 import org.concepualprogramming.core.datatypes.{CPStringValue, CPBooleanValue, CPIntValue}
-import org.concepualprogramming.core.dependencies.CPDependency
+import org.concepualprogramming.core.dependencies.{CPAttributesLinkDependency, CPDependency}
 import org.concepualprogramming.core.statements.expressions.operations.CPAdd
 import org.concepualprogramming.core.statements.expressions.{CPAttribute, CPFunctionCall, CPVariable, CPConstant}
 import org.concepualprogramming.core.statements._
@@ -374,6 +374,49 @@ class ExecutionContextTests extends FlatSpec with Matchers {
       objects2.head.name should equal ("Values")
     }
 
+    "foreach statement" should "be executed correctly" in {
+
+      val list = new CPList(List(CPIntValue(1), CPIntValue(2), CPIntValue(3)))
+      val body = new VariableStatement("sum", new CPAdd(CPVariable("sum"), CPVariable("item")))
+      val forStmt = new ForeachStatement("item", CPConstant(list), body)
+      val context = new CPExecutionContext
+      val init = new VariableStatement("sum", new CPConstant(CPIntValue(0)))
+      init.execute(context)
+      forStmt.execute(context)
+      context.getVariable("sum").get.getIntValue.get should equal (6)
+
+      val context1 = new CPExecutionContext
+      GroupingFunctions.register(context1)
+      context1.knowledgeBase.add(new CPObject("Var", Map("name" -> CPStringValue("n1"), "value" -> CPIntValue(1)), "value"))
+      context1.knowledgeBase.add(new CPObject("Var", Map("name" -> CPStringValue("n2"), "value" -> CPIntValue(2)), "value"))
+      context1.knowledgeBase.add(new CPObject("Var", Map("name" -> CPStringValue("n3"), "value" -> CPIntValue(2)), "value"))
+      context1.knowledgeBase.add(new CPObject("Var", Map("name" -> CPStringValue("n4"), "value" -> CPIntValue(3)), "value"))
+      context1.knowledgeBase.add(new CPObject("Var", Map("name" -> CPStringValue("n5"), "value" -> CPIntValue(3)), "value"))
+      context1.knowledgeBase.add(new CPGroupingConcept(
+        "VarsCount",
+        "value" :: Nil,
+        "count",
+        ("Var", "v") :: Nil,
+        new CPAttributesLinkDependency(CPAttributeName("", "value") :: CPAttributeName("v", "value") :: Nil) :: Nil,
+        Map("count" -> new CPFunctionCall("Grouping.count", Nil)),
+        Nil
+      ))
+      val init1 = new VariableStatement("resList", new CPConstant(CPList(Nil)))
+      val body1 = CompositeStatement(
+        new ConceptResolvingToVariableStatement("res", "VarsCount", Map("value" -> CPVariable("item"))) ::
+        new VariableStatement("resList", new CPAdd(CPVariable("resList"), CPVariable("res"))) ::
+        Nil
+      )
+      val forStmt1 = new ForeachStatement("item", CPConstant(list), body1)
+      init1.execute(context1)
+      (new ProgramExecutor).resolveDecisionTree(new CompositeStatement(forStmt1 :: Nil), context1)
+      val res = context1.getVariable("resList").get.asInstanceOf[CPList].values
+      res.size should equal (3)
+      res.contains(new CPObjectValue(new CPObject("VarsCount", Map("value" -> CPIntValue(1), "count" -> CPIntValue(1)), "count"))) should equal (true)
+      res.contains(new CPObjectValue(new CPObject("VarsCount", Map("value" -> CPIntValue(2), "count" -> CPIntValue(2)), "count"))) should equal (true)
+      res.contains(new CPObjectValue(new CPObject("VarsCount", Map("value" -> CPIntValue(3), "count" -> CPIntValue(2)), "count"))) should equal (true)
+    }
+
     "Attribute variables" should "be executed correctly" in {
       val context = new CPExecutionContext
       val subst = new CPSubstitutions(
@@ -385,6 +428,7 @@ class ExecutionContextTests extends FlatSpec with Matchers {
       val res = attr.calculate(context)
       res.get.getStringValue.get should equal ("A1")
     }
+
 /*
   "procedure calls and console functions" should "be executed correctly" in {
     val context = new CPExecutionContext

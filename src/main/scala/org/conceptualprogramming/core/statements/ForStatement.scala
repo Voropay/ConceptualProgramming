@@ -64,7 +64,9 @@ case class ForStatement(startOperator: CPStatement, condition: CPExpression, end
 
     override def setCurrentNodeResolvingResult(res: List[CPObject]): Unit = {
       curDecisionNode.setCurrentNodeResolvingResult(res)
-      findNextBranch
+      if(nextBranchExists) {
+        findNextBranch
+      }
     }
 
     def findNextBranch: Unit = {
