@@ -1,7 +1,7 @@
 package org.conceptualprogramming
 
 import org.conceptualprogramming.core.datatypes.composite.CPObjectValue
-import org.conceptualprogramming.core.statements.expressions.CPObjectExpression
+import org.conceptualprogramming.core.statements.expressions.{CPAddToCollection, CPObjectExpression}
 import org.conceptualprogramming.core.statements._
 import org.conceptualprogramming.core.statements.expressions.functions.ConsoleFunctions
 import org.concepualprogramming.core.datatypes.composite.CPList
@@ -428,6 +428,20 @@ class ExecutionContextTests extends FlatSpec with Matchers {
       val res = attr.calculate(context)
       res.get.getStringValue.get should equal ("A1")
     }
+
+  "AddToCollectionStatement" should "be executed correctly" in {
+    val context = new CPExecutionContext
+    val list = new CPList(List(CPIntValue(1), CPIntValue(2), CPIntValue(3)))
+    context.setVariable("myList", list)
+    val stmt = new AddToCollectionStatement(new CPAddToCollection(new CPVariable("myList"), CPConstant(CPIntValue(4)), Some(CPConstant(CPIntValue(3)))))
+    stmt.execute(context)
+    val newList = context.getVariable("myList").get.asInstanceOf[CPList].values
+    newList.size should equal (4)
+    newList(0) should equal (CPIntValue(1))
+    newList(1) should equal (CPIntValue(2))
+    newList(2) should equal (CPIntValue(3))
+    newList(3) should equal (CPIntValue(4))
+  }
 
 /*
   "procedure calls and console functions" should "be executed correctly" in {

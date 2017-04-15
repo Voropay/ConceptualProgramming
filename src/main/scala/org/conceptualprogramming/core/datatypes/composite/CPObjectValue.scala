@@ -20,7 +20,7 @@ case class CPObjectValue(objectValue: CPObject) extends CPCompositeType {
 
   override def getBooleanValue: Option[Boolean] = {
     val defaultValue = objectValue.value
-    if(defaultValue.isDefined) {
+    if (defaultValue.isDefined) {
       defaultValue.get.getBooleanValue
     } else {
       None
@@ -29,7 +29,7 @@ case class CPObjectValue(objectValue: CPObject) extends CPCompositeType {
 
   override def getStringValue: Option[String] = {
     val defaultValue = objectValue.value
-    if(defaultValue.isDefined) {
+    if (defaultValue.isDefined) {
       defaultValue.get.getStringValue
     } else {
       None
@@ -38,7 +38,7 @@ case class CPObjectValue(objectValue: CPObject) extends CPCompositeType {
 
   override def getIntValue: Option[Int] = {
     val defaultValue = objectValue.value
-    if(defaultValue.isDefined) {
+    if (defaultValue.isDefined) {
       defaultValue.get.getIntValue
     } else {
       None
@@ -47,7 +47,7 @@ case class CPObjectValue(objectValue: CPObject) extends CPCompositeType {
 
   override def getDateValue: Option[LocalDate] = {
     val defaultValue = objectValue.value
-    if(defaultValue.isDefined) {
+    if (defaultValue.isDefined) {
       defaultValue.get.getDateValue
     } else {
       None
@@ -56,7 +56,7 @@ case class CPObjectValue(objectValue: CPObject) extends CPCompositeType {
 
   override def getFloatingValue: Option[Double] = {
     val defaultValue = objectValue.value
-    if(defaultValue.isDefined) {
+    if (defaultValue.isDefined) {
       defaultValue.get.getFloatingValue
     } else {
       None
@@ -69,7 +69,7 @@ case class CPObjectValue(objectValue: CPObject) extends CPCompositeType {
     val curMap = getMapValues.get
     val indices = (0 to (curMap.values.size - 1))
     val keys = curMap.values.keys
-    if(indices.find(index => keys.find(_.getIntValue == Some(index)).isEmpty).isDefined) {
+    if (indices.find(index => keys.find(_.getIntValue == Some(index)).isEmpty).isDefined) {
       return None
     }
     val list = indices.map(index => {
@@ -81,12 +81,12 @@ case class CPObjectValue(objectValue: CPObject) extends CPCompositeType {
 
   override def similar(other: Any): Boolean = {
     val defaultValue = objectValue.value
-    if(defaultValue.isEmpty) {
+    if (defaultValue.isEmpty) {
       return false
     }
     other match {
       case other: CPValue => {
-          defaultValue.get ?= other
+        defaultValue.get ?= other
       }
       case other: String => defaultValue.get.getStringValue.get == other
       case other: Int => defaultValue.get.getIntValue.get == other
@@ -94,6 +94,34 @@ case class CPObjectValue(objectValue: CPObject) extends CPCompositeType {
       case other: LocalDate => defaultValue.get.getDateValue.get == other
       case other: Boolean => defaultValue.get.getBooleanValue.get == other
       case _ => false
+    }
+  }
+
+  def add(value: CPValue): Option[CPCompositeType] = {
+    val asList = getListValues
+    if (asList.isDefined) {
+      val key = asList.get.values.size
+      Some(new CPObjectValue(new CPObject(objectValue.name, objectValue.attributes + (key.toString -> value), objectValue.defaultAttribute)))
+    } else {
+      None
+    }
+  }
+
+  def add(value: CPValue, position: CPValue): Option[CPCompositeType] = {
+    val key = position.getStringValue
+    if(key.isDefined) {
+      Some(new CPObjectValue(new CPObject(objectValue.name, objectValue.attributes + (key.get -> value), objectValue.defaultAttribute)))
+    } else {
+      None
+    }
+  }
+
+  def get(position: CPValue): Option[CPValue] = {
+    val posVal = position.getStringValue
+    if(posVal.isDefined) {
+      objectValue.get(posVal.get)
+    } else {
+      None
     }
   }
 

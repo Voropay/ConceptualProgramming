@@ -31,4 +31,11 @@ case class CPListExpression(list: List[CPExpression]) extends CPExpression {
   override def infer(result: CPValue, context: CPExecutionContext): Map[CPAttributeName, CPValue] = Map()
 
   override def toString: String = "CPList: {" + list.mkString(",") + "}"
+
+  override def hashCode:Int = {
+    val prime = 31
+    var result = 1
+    result = prime * result + list.hashCode
+    return result
+  }
 }

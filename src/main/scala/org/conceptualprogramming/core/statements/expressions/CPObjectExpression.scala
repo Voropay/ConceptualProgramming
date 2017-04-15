@@ -33,4 +33,13 @@ case class CPObjectExpression(name: String, attributes: Map[String, CPExpression
 
   override def toString: String = "CPObject: {" + name + "{" + attributes.mkString(",") + "}, default: " + defaultAttribute + "}"
 
+  override def hashCode:Int = {
+    val prime = 31
+    var result = 1
+    result = prime * result + name.hashCode
+    result = prime * result + attributes.hashCode
+    result = prime * result + defaultAttribute.hashCode
+    return result
+  }
+
 }

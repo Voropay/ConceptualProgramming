@@ -74,6 +74,30 @@ case class CPList(values: List[CPValue]) extends CPCompositeType {
     case _ => false
   }
 
+  override def add(value: CPValue): Option[CPCompositeType] = Some(new CPList(value :: values))
+
+  override def add(value: CPValue, position: CPValue): Option[CPCompositeType] = {
+    val posValue = position.getIntValue
+    if(posValue.isDefined && posValue.get >= 0 && posValue.get <= values.size) {
+      if(posValue.get == 0) {
+        Some(new CPList(value :: values))
+      } else {
+        Some(new CPList(values.take(posValue.get) ++ List(value) ++ values.drop(posValue.get)))
+      }
+    } else {
+      None
+    }
+  }
+
+  override def get(position: CPValue): Option[CPValue] = {
+    val posValue = position.getIntValue
+    if(posValue.isDefined && posValue.get >= 0 && posValue.get < values.size) {
+      Some(values(posValue.get))
+    } else {
+      None
+    }
+  }
+
   override def +(other: CPValue): Option[CPValue] = {
     val res = other match {
       case other: CPList => new CPList(values ++ other.values)

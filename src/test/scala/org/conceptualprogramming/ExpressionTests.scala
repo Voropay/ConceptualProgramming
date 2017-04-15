@@ -1,11 +1,11 @@
 package org.conceptualprogramming
 
 import org.conceptualprogramming.core.datatypes.composite.{CPObjectValue, CPMap}
-import org.conceptualprogramming.core.statements.expressions.{CPObjectExpression, CPMapExpression, CPListExpression}
+import org.conceptualprogramming.core.statements.expressions._
 import org.concepualprogramming.core.datatypes.composite.CPList
 import org.concepualprogramming.core.statements.expressions.operations._
-import org.concepualprogramming.core.{CPSubstitutions, CPExecutionContext, CPAttributeName}
-import org.concepualprogramming.core.datatypes.{CPFloatingValue, CPBooleanValue, CPIntValue}
+import org.concepualprogramming.core.{CPObject, CPSubstitutions, CPExecutionContext, CPAttributeName}
+import org.concepualprogramming.core.datatypes.{CPStringValue, CPFloatingValue, CPBooleanValue, CPIntValue}
 import org.concepualprogramming.core.statements.expressions.{CPAttribute, CPVariable, CPConstant}
 import org.scalatest._
 
@@ -263,6 +263,51 @@ class ExpressionTests extends FlatSpec with Matchers {
     res.attributes.get("attr1").get.getIntValue.get should equal (10)
     res.attributes.get("attr2").get.getIntValue.get should equal (20)
     res.defaultAttribute should equal ("attr1")
+  }
+
+  "collections operations" should "be calculated correctly" in {
+    val context = new CPExecutionContext
+    val list = new CPList(List(CPIntValue(1), CPIntValue(2), CPIntValue(3)))
+    val listRes1 = (new CPAddToCollection(CPConstant(list), CPConstant(CPIntValue(4)), None)).calculate(context).get.asInstanceOf[CPList].values
+    listRes1.size should equal (4)
+    listRes1(0) should equal (CPIntValue(4))
+    listRes1(1) should equal (CPIntValue(1))
+    listRes1(2) should equal (CPIntValue(2))
+    listRes1(3) should equal (CPIntValue(3))
+
+    val listRes2 = (new CPAddToCollection(CPConstant(list), CPConstant(CPIntValue(4)), Some(CPConstant(CPIntValue(2))))).calculate(context).get.asInstanceOf[CPList].values
+    listRes2.size should equal (4)
+    listRes2(0) should equal (CPIntValue(1))
+    listRes2(1) should equal (CPIntValue(2))
+    listRes2(2) should equal (CPIntValue(4))
+    listRes2(3) should equal (CPIntValue(3))
+
+    val listRes3 = (new CPGetFromCollection(CPConstant(list), CPConstant(CPIntValue(1)))).calculate(context).get
+    listRes3.getIntValue.get should equal (2)
+
+    val map = new CPMap(Map(CPStringValue("a") -> CPIntValue(1), CPStringValue("b") -> CPIntValue(2), CPStringValue("c") -> CPIntValue(3)))
+    val mapRes1 = (new CPAddToCollection(CPConstant(map), CPConstant(CPIntValue(4)), Some(CPConstant(CPStringValue("d"))))).calculate(context).get.asInstanceOf[CPMap].values
+    mapRes1.size should equal (4)
+    mapRes1(CPStringValue("d")) should equal (CPIntValue(4))
+    mapRes1(CPStringValue("a")) should equal (CPIntValue(1))
+    mapRes1(CPStringValue("b")) should equal (CPIntValue(2))
+    mapRes1(CPStringValue("c")) should equal (CPIntValue(3))
+
+    val mapRes3 = (new CPGetFromCollection(CPConstant(map), CPConstant(CPStringValue("b")))).calculate(context).get
+    listRes3.getIntValue.get should equal (2)
+
+    val obj = new CPObjectValue(new CPObject("myobj", Map("name" -> CPStringValue("obj1"), "value" -> CPIntValue(2)), "value"))
+    val objRes1 = (new CPAddToCollection(CPConstant(obj), CPConstant(CPStringValue("kg")), Some(CPConstant(CPStringValue("unit"))))).calculate(context).get.asInstanceOf[CPObjectValue].objectValue
+    objRes1.name should equal ("myobj")
+    objRes1.defaultAttribute should equal ("value")
+    val attr1 = objRes1.attributes
+    attr1.size should equal (3)
+    attr1("name") should equal (CPStringValue("obj1"))
+    attr1("value") should equal (CPIntValue(2))
+    attr1("unit") should equal (CPStringValue("kg"))
+
+    val objRes2 = (new CPGetFromCollection(CPConstant(obj), CPConstant(CPStringValue("value")))).calculate(context).get
+    objRes2.getIntValue.get should equal (2)
   }
 
   "Expressions" should "be compared correctly" in {

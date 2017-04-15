@@ -21,4 +21,11 @@ case class CPConstant(value: CPValue) extends CPExpression{
   override def isDefined(context: CPExecutionContext): Boolean = true
 
   override def infer(result: CPValue, context: CPExecutionContext): Map[CPAttributeName, CPValue] = Map()
+
+  override def hashCode:Int = {
+    val prime = 31
+    var result = 1
+    result = prime * result + value.hashCode
+    return result
+  }
 }

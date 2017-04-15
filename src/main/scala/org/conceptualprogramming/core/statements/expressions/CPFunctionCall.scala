@@ -28,4 +28,19 @@ case class CPFunctionCall(name: String, args: List[CPExpression]) extends CPExpr
   override def infer(result: CPValue, context: CPExecutionContext): Map[CPAttributeName, CPValue] = Map()
 
   override def toString: String = "CPFunctionCall {" + name + "(" + args + ")}"
+
+  override def equals(other: Any): Boolean = {
+    other match {
+      case other: CPFunctionCall => name == other.name && other.args.corresponds(args)(_ == _)
+      case _ => false
+    }
+  }
+
+  override def hashCode:Int = {
+    val prime = 31
+    var result = 1
+    result = prime * result + name.hashCode
+    result = prime * result + args.hashCode
+    return result
+  }
 }

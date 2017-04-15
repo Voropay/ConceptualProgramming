@@ -1,6 +1,7 @@
 package org.conceptualprogramming.parser
 
-import org.conceptualprogramming.core.statements.{ConceptResolvingToVariableStatement, ConceptDefinitionResolvingToVariableStatement, ConceptResolvingStatement, ProcedureCallStatement}
+import org.conceptualprogramming.core.statements._
+import org.conceptualprogramming.core.statements.expressions.CPAddToCollection
 import org.conceptualprogramming.core.statements.expressions.operations.CPOperation
 import org.concepualprogramming.core.CPAttributeName
 import org.concepualprogramming.core.CPConcept
@@ -15,7 +16,7 @@ import org.concepualprogramming.core.statements.ReturnValueStatement
 import org.concepualprogramming.core.statements.VariableStatement
 import org.concepualprogramming.core.statements.expressions.functions.CPCompositeFunctionDefinition
 import org.concepualprogramming.core.statements.expressions.operations.CPEquals
-import org.concepualprogramming.core.statements.expressions.{CPExpression, CPAttribute, CPConstant}
+import org.concepualprogramming.core.statements.expressions.{CPVariable, CPExpression, CPAttribute, CPConstant}
 import org.concepualprogramming.core.statements._
 
 import scala.util.Properties
@@ -26,7 +27,7 @@ import scala.util.Properties
  */
 trait StatementsParser extends ExpressionsParser {
   def statement: Parser[CPStatement] = variableAssignmentStatement | returnObjectStatement | returnVariableStatement |
-                                       ifStatement | forStatement | whileStatement | functionDefinitionStatement | procedureCallStatement |
+                                       ifStatement | forStatement | whileStatement | functionDefinitionStatement | procedureCallStatement | addToCollectionStatement |
                                        conceptDefinitionStatement | conceptDefinitionResolvingToVariableStatement | conceptResolvingToVariableStatement |
                                        conceptDefinitionResolvingStatement | conceptResolvingStatement | objectDefinitionStatement |
                                        compositeStatement
@@ -66,6 +67,10 @@ trait StatementsParser extends ExpressionsParser {
   }
 
   def procedureCallStatement: Parser[CPStatement] = functionCallExpression ^^ {value => new ProcedureCallStatement(value)}
+
+  def addToCollectionStatement: Parser[CPStatement] = ident ~ "[" ~ opt(expression) ~ "]" ~ "=" ~ expression ^^ {
+    case collectionName ~ "[" ~ key ~ "]" ~ "=" ~ value => new AddToCollectionStatement(new CPAddToCollection(new CPVariable(collectionName), value, key))
+  }
 
   def objectDefinitionStatement: Parser[CPStatement] = "object" ~ expression ^^ {value => new AddObjectStatement(value._2)}
 

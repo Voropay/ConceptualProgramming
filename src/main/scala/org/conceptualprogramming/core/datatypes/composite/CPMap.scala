@@ -116,6 +116,20 @@ case class CPMap(values: Map[CPValue, CPValue]) extends CPCompositeType {
     case _ => false
   }
 
+  override def add(value: CPValue): Option[CPCompositeType] = {
+    val asList = getListValues
+    if(asList.isDefined) {
+      val key = asList.get.values.size
+      Some(new CPMap(values + (CPIntValue(key) -> value)))
+    } else {
+      None
+    }
+  }
+
+  override def add(value: CPValue, position: CPValue): Option[CPCompositeType] = Some(new CPMap(values + (position -> value)))
+
+  override def get(position: CPValue): Option[CPValue] = values.get(position)
+
   override def +(other: CPValue): Option[CPValue] = {
     other match {
       case other: CPMap => Some(new CPMap(values ++ other.values))

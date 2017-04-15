@@ -35,6 +35,13 @@ case class CPAttribute(attrName: CPAttributeName) extends CPExpression {
       case _ => false
     }
   }
+
+  override def hashCode:Int = {
+    val prime = 31
+    var result = 1
+    result = prime * result + attrName.hashCode
+    return result
+  }
 }
 
 object CPAttribute {

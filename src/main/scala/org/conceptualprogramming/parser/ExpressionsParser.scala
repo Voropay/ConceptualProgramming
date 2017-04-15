@@ -1,7 +1,7 @@
 package org.conceptualprogramming.parser
 
 import org.conceptualprogramming.core.datatypes.composite.{CPObjectValue, CPMap}
-import org.conceptualprogramming.core.statements.expressions.{CPObjectExpression, CPMapExpression, CPListExpression}
+import org.conceptualprogramming.core.statements.expressions.{CPGetFromCollection, CPObjectExpression, CPMapExpression, CPListExpression}
 import org.conceptualprogramming.core.statements.expressions.operations.CPOperation
 import org.concepualprogramming.core.CPObject
 import org.concepualprogramming.core.statements.expressions.CPAttribute
@@ -17,7 +17,7 @@ import org.concepualprogramming.core.statements.expressions.operations.CPNot
  */
 trait ExpressionsParser extends ConstantsParser {
   def expression: Parser[CPExpression] = objectExpression | mapExpression | listExpression | unaryOperatorExpression | operatorExpression | constantExpression |
-                                         functionCallExpression | attributeExpression | variableExpression | subExpression
+                                         functionCallExpression | getFromCollectionExpression | attributeExpression | variableExpression | subExpression
   def constantExpression: Parser[CPConstant] = constant ^^ {value => new CPConstant(value)}
   def attributeExpression: Parser[CPAttribute] = ident ~ "." ~ ident ^^ {value => CPAttribute((if(value._1._1 == "_") "" else value._1._1), value._2)}
   def variableExpression: Parser[CPVariable] = ident ^^ {value => new CPVariable(value)}
@@ -55,4 +55,9 @@ trait ExpressionsParser extends ConstantsParser {
       new CPObjectExpression(name, attributesList, defAttr)
     }
   }
+
+  def getFromCollectionExpression: Parser[CPGetFromCollection] = collectionExpression ~ "[" ~ expression ~ "]" ^^ {
+    value => new CPGetFromCollection(value._1._1._1, value._1._2)
+  }
+  def collectionExpression = attributeExpression | variableExpression | subExpression
 }

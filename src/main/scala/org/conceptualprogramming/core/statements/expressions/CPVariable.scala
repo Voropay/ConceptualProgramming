@@ -22,4 +22,11 @@ case class CPVariable(name: String) extends CPExpression{
   override def infer(result: CPValue, context: CPExecutionContext): Map[CPAttributeName, CPValue] = Map()
 
   override def toString: String = "CPVariable: {" + name + "}"
+
+  override def hashCode:Int = {
+    val prime = 31
+    var result = 1
+    result = prime * result + name.hashCode
+    return result
+  }
 }

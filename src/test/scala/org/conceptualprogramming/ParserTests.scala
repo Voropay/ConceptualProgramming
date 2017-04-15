@@ -3,8 +3,8 @@ package org.conceptualprogramming
 import java.time.LocalDate
 
 import org.conceptualprogramming.core.datatypes.composite.{CPObjectValue, CPMap}
-import org.conceptualprogramming.core.statements.{ConceptResolvingToVariableStatement, ConceptDefinitionResolvingToVariableStatement, ConceptResolvingStatement, ProcedureCallStatement}
-import org.conceptualprogramming.core.statements.expressions.{CPObjectExpression, CPMapExpression, CPListExpression}
+import org.conceptualprogramming.core.statements._
+import org.conceptualprogramming.core.statements.expressions.{CPGetFromCollection, CPObjectExpression, CPMapExpression, CPListExpression}
 import org.conceptualprogramming.core.statements.expressions.operations.CPOperation
 import org.conceptualprogramming.parser.{ProgramParser, StatementsParser, ExpressionsParser, ConstantsParser}
 import org.concepualprogramming.core.CPAttributeName
@@ -160,6 +160,15 @@ class ParserTests  extends FlatSpec with Matchers {
 
     val objectexpr1 = exprParser("myobj {name: \"aaa\", value: 1}").get.asInstanceOf[CPObjectExpression]
     objectexpr1.defaultAttribute should equal (None)
+
+    val getFromCollection1 = exprParser("myobj[1]").get.asInstanceOf[CPGetFromCollection]
+    getFromCollection1.collection.asInstanceOf[CPVariable].name should equal ("myobj")
+    getFromCollection1.key.asInstanceOf[CPConstant].value.getIntValue.get should equal (1)
+
+    val getFromCollection2 = exprParser("myconcept.myattr[\"name\"]").get.asInstanceOf[CPGetFromCollection]
+    getFromCollection2.collection.asInstanceOf[CPAttribute].attrName.conceptName should equal ("myconcept")
+    getFromCollection2.collection.asInstanceOf[CPAttribute].attrName.attributeName should equal ("myattr")
+    getFromCollection2.key.asInstanceOf[CPConstant].value.getStringValue.get should equal ("name")
   }
 
   "Statements" should "be parsed correctly" in {
@@ -273,6 +282,16 @@ class ParserTests  extends FlatSpec with Matchers {
     val funcBody = funcStmt.body.asInstanceOf[CompositeStatement].body.head.asInstanceOf[ReturnValueStatement].expr.asInstanceOf[CPMul]
     funcBody.operand1.asInstanceOf[CPVariable].name should equal ("a")
     funcBody.operand2.asInstanceOf[CPVariable].name should equal ("a")
+
+    val addToCollectionStmt1 = stmtParser("myList[] = 1").get.asInstanceOf[AddToCollectionStatement].addOperation
+    addToCollectionStmt1.collection.asInstanceOf[CPVariable].name should equal ("myList")
+    addToCollectionStmt1.value.asInstanceOf[CPConstant].value.getIntValue.get should equal (1)
+    addToCollectionStmt1.key.isEmpty should be (true)
+
+    val addToCollectionStmt2 = stmtParser("myObj[\"unit\"] = \"m/c\"").get.asInstanceOf[AddToCollectionStatement].addOperation
+    addToCollectionStmt2.collection.asInstanceOf[CPVariable].name should equal ("myObj")
+    addToCollectionStmt2.value.asInstanceOf[CPConstant].value.getStringValue.get should equal ("m/c")
+    addToCollectionStmt2.key.get.asInstanceOf[CPConstant].value.getStringValue.get should equal ("unit")
 
     val objStmt = stmtParser("object cell {row: 1, col: 2, val: 10}").get.asInstanceOf[AddObjectStatement].expression.asInstanceOf[CPObjectExpression]
     objStmt.name should equal ("cell")

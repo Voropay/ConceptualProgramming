@@ -9,4 +9,7 @@ import org.concepualprogramming.core.datatypes.CPValue
 abstract trait CPCompositeType extends CPValue {
   def getListValues: Option[CPList]
   def getMapValues: Option[CPMap]
+  def add(value: CPValue): Option[CPCompositeType]
+  def add(value: CPValue, position: CPValue): Option[CPCompositeType]
+  def get(position: CPValue): Option[CPValue]
 }
