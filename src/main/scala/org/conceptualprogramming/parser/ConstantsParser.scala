@@ -18,7 +18,13 @@ trait ConstantsParser extends JavaTokenParsers {
   def constant: Parser[CPValue] = dateConstant | booleanConstant | floatingConstant | intConstant | stringConstant
   def booleanConstant: Parser[CPBooleanValue] = ("true" | "false") ^^ {value => CPBooleanValue(value == "true")}
   def intConstant: Parser[CPIntValue] = wholeNumber ^^  {value => CPIntValue(value.toInt)}
-  def floatingConstant: Parser[CPFloatingValue] = floatingPointNumber ^^  {value => CPFloatingValue(value.toDouble)}
+  def floatingConstant: Parser[CPValue] = floatingPointNumber ^^  {value => {
+    if(value.toDouble != value.toDouble.toInt) {
+      CPFloatingValue(value.toDouble)
+    } else {
+      CPIntValue(value.toInt)
+    }
+  }}
   def dateConstant: Parser[CPDateValue] = """\d{4}\-(0?[1-9]|1[012])\-([12][0-9]|3[01]|0?[1-9])""".r ^^ {value => CPDateValue(value, "yyyy-MM-dd")}
   def stringConstant: Parser[CPStringValue] = stringLiteral ^^ {value => CPStringValue(removeQuotes(value))}
 

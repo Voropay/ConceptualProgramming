@@ -1,9 +1,9 @@
 package org.conceptualprogramming.core.statements
 
 import org.conceptualprogramming.core.RunPreferences
-import org.conceptualprogramming.core.datatypes.composite.CPMap
+import org.conceptualprogramming.core.datatypes.composite.{CPObjectValue, CPMap}
 import org.conceptualprogramming.core.statements.expressions.functions.ConsoleFunctions
-import org.conceptualprogramming.parser.ProgramParser
+import org.conceptualprogramming.parser.{StatementsParser, ProgramParser}
 import org.concepualprogramming.core.statements.CPStatement
 import org.concepualprogramming.core.{CPDecisionNode, CPObject, CPExecutionContext}
 import org.concepualprogramming.core.datatypes.CPValue
@@ -19,6 +19,7 @@ class ProgramExecutor {
   def execute(programText: String, preferences: RunPreferences): String = {
     val programCode = ProgramParser(programText)
     if(programCode.isEmpty) {
+println("parsing failed")
       return ""
     }
     val context = initContext
@@ -42,6 +43,7 @@ class ProgramExecutor {
     ObjectsFunctions.register(context)
     CPList.register(context)
     CPMap.register(context)
+    CPObjectValue.register(context)
     context
   }
 
@@ -62,6 +64,51 @@ class ProgramExecutor {
           currentNode = prevNode
         }
       }
+    }
+  }
+
+  def stepByStepExecute(preferences: RunPreferences) = {
+    val context = initContext
+    val resolveType = preferences.getResolveType
+    val stmtParser = new StatementsParser {
+      def apply(code: String): Option[CPStatement] = {
+        parseAll(statement, code) match {
+          case Success(res, _) => Some(res)
+          case _ => None
+        }
+      }
+    }
+
+    while(!context.isStopped) {
+      print(">")
+      val statementStr = scala.io.StdIn.readLine
+      val statementCode = stmtParser(statementStr)
+      if(statementCode.isDefined) {
+        if(resolveType == RunPreferences.RECURSIVE_RESOLVE_TYPE) {
+          statementCode.get.execute(context)
+        } else {
+          resolveDecisionTree(statementCode.get, context)
+        }
+        //TODO: print execution results
+      } else {
+        //TODO: show parse error
+      }
+      println
+    }
+  }
+}
+
+object ProgramExecutor {
+  def main(args: Array[String]): Unit = {
+    val preferences = RunPreferences(args)
+    val executor = new ProgramExecutor
+    if(preferences.getSourceFile.isEmpty) {
+      executor.stepByStepExecute(preferences)
+    } else {
+      val source = scala.io.Source.fromFile(preferences.getSourceFile)
+      val sourceCode = try source.mkString finally source.close()
+      val res = executor.execute(sourceCode, preferences)
+      println(res)
     }
   }
 }

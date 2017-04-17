@@ -54,6 +54,14 @@ class CPIntValue(value: Int) extends CPValue with CPPrimitiveType {
         } else {
           Some(CPFloatingValue(value + otherVal.get))
         }
+      case other: CPStringValue => {
+        val otherVal = other.getStringValue
+        if(otherVal.isEmpty) {
+          None
+        } else {
+          Some(CPStringValue(value.toString + otherVal.get))
+        }
+      }
       case _ =>
         val otherVal = other.getIntValue
         if(otherVal.isEmpty) {

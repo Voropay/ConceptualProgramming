@@ -572,7 +572,7 @@ class TestExamples extends FlatSpec with Matchers {
   }
 
   "Test examples" should "be executed as program" in {
-    //TODO: add possibility to resolve concept by its name not only by definition
+
     val westExample =
       """
         concept Criminal(name ~ a.name ~ s.seller) := American a(), Sells s(product == w.name, buyer == h.name), Weapon w(), Hostile h();
@@ -601,5 +601,12 @@ class TestExamples extends FlatSpec with Matchers {
 
     val res1 = program.execute(westExample, new RunPreferences(Map("RESOLVE_TYPE" -> RunPreferences.DECISION_TREE_RESOLVE_TYPE)))
     res1 should equal ("West is criminal")
+
+    val preferences = RunPreferences(Array("-sourceFile=src/test/scala/org/conceptualprogramming/profitExample.cp"))
+    val executor = new ProgramExecutor
+    val source = scala.io.Source.fromFile(preferences.getSourceFile)
+    val sourceCode = try source.mkString finally source.close()
+    val res2 = executor.execute(sourceCode, preferences)
+    res2 should equal ("Total income: 57, outcome: 50, profit: 7")
   }
 }

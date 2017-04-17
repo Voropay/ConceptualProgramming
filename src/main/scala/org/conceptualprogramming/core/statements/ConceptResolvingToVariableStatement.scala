@@ -17,11 +17,12 @@ case class ConceptResolvingToVariableStatement(variableName: String, conceptName
     val queryOpt = queryExpr.mapValues(_.calculate(context))
     if(!concepts.isEmpty && queryOpt.find(_._2.isEmpty).isEmpty) {
       val query = queryOpt.mapValues(_.get)
+      var objectsList: List[CPObjectValue] = Nil
       for (definition <- concepts) {
         val objects = definition.resolve(query, context)
-        val objectsList = new CPList(objects.map(new CPObjectValue(_)))
-        context.setVariable(variableName, objectsList)
+        objectsList = objectsList ++ objects.map(new CPObjectValue(_))
       }
+      context.setVariable(variableName, new CPList(objectsList))
     }
     context.nextStep
   }

@@ -34,8 +34,20 @@ class CPBooleanValue(value: Boolean) extends CPValue with CPPrimitiveType {
   override def ?=(other: CPValue): Boolean = similar(other)
 
   override def +(other: CPValue): Option[CPValue] = { //OR
-    val otherVal = other.getBooleanValue.get
-    Some(CPBooleanValue(value || otherVal))
+    other match {
+      case other: CPStringValue => {
+        val otherVal = other.getStringValue
+        if (otherVal.isEmpty) {
+          None
+        } else {
+          Some(CPStringValue(value.toString + otherVal.get))
+        }
+      }
+      case _ => {
+        val otherVal = other.getBooleanValue.get
+        Some(CPBooleanValue(value || otherVal))
+      }
+    }
   }
 
   override def <=(other: CPValue): Option[Boolean] = Some((!value || other.getBooleanValue.get))

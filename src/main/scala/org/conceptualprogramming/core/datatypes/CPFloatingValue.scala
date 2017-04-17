@@ -22,11 +22,23 @@ class CPFloatingValue(value: Double) extends CPValue with CPPrimitiveType {
   def getValue: Double = value
 
   override def +(other: CPValue): Option[CPValue] = {
-    val otherVal = other.getFloatingValue
-    if(otherVal.isEmpty) {
-      None
-    } else {
-      Some(CPFloatingValue(value + otherVal.get))
+    other match {
+      case other: CPStringValue => {
+        val otherVal = other.getStringValue
+        if(otherVal.isEmpty) {
+          None
+        } else {
+          Some(CPStringValue(value.toString + otherVal.get))
+        }
+      }
+      case _ => {
+        val otherVal = other.getFloatingValue
+        if(otherVal.isEmpty) {
+          None
+        } else {
+          Some(CPFloatingValue(value + otherVal.get))
+        }
+      }
     }
   }
 

@@ -1,3 +1,7 @@
+packSettings
+
+packMain := Map("conpro" -> "org.conceptualprogramming.core.statements.ProgramExecutor")
+
 name := "ConceptualProgramming"
 
 version := "1.0"

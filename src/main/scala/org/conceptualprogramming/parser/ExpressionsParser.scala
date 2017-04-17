@@ -36,7 +36,8 @@ trait ExpressionsParser extends ConstantsParser {
     CPOperation.createArithmeticExpression(values._1 :: values._2.map(_._2), values._2.map(_._1))
   }
   def binaryBooleanOperator: Parser[String] = ">=" | ">" | "<=" | "<" | "==" | "!=" | "&&" | "||"
-  def term: Parser[CPExpression] = unaryOperatorExpression | constantExpression | functionCallExpression | attributeExpression | variableExpression | subExpression
+  def term: Parser[CPExpression] = objectExpression | mapExpression | listExpression | unaryOperatorExpression | constantExpression |
+    functionCallExpression | getFromCollectionExpression | attributeExpression | variableExpression | subExpression
 
   def listExpression: Parser[CPListExpression] =  "[" ~> repsep(expression, ",") <~ "]" ^^ {value => new CPListExpression(value)}
   def mapExpression: Parser[CPMapExpression] = "{" ~> repsep(nameValuePair, ",") <~ "}" ^^ {value => CPMapExpression(value.toMap)}
@@ -56,8 +57,8 @@ trait ExpressionsParser extends ConstantsParser {
     }
   }
 
-  def getFromCollectionExpression: Parser[CPGetFromCollection] = collectionExpression ~ "[" ~ expression ~ "]" ^^ {
-    value => new CPGetFromCollection(value._1._1._1, value._1._2)
+  def getFromCollectionExpression: Parser[CPGetFromCollection] = collectionExpression ~ rep1("[" ~ expression ~ "]") ^^ {
+    value => new CPGetFromCollection(value._1, value._2.map(_._1._2))
   }
   def collectionExpression = attributeExpression | variableExpression | subExpression
 }

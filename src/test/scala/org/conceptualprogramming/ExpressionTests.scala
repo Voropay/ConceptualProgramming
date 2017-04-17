@@ -282,7 +282,7 @@ class ExpressionTests extends FlatSpec with Matchers {
     listRes2(2) should equal (CPIntValue(4))
     listRes2(3) should equal (CPIntValue(3))
 
-    val listRes3 = (new CPGetFromCollection(CPConstant(list), CPConstant(CPIntValue(1)))).calculate(context).get
+    val listRes3 = (new CPGetFromCollection(CPConstant(list), CPConstant(CPIntValue(1)) :: Nil)).calculate(context).get
     listRes3.getIntValue.get should equal (2)
 
     val map = new CPMap(Map(CPStringValue("a") -> CPIntValue(1), CPStringValue("b") -> CPIntValue(2), CPStringValue("c") -> CPIntValue(3)))
@@ -293,7 +293,7 @@ class ExpressionTests extends FlatSpec with Matchers {
     mapRes1(CPStringValue("b")) should equal (CPIntValue(2))
     mapRes1(CPStringValue("c")) should equal (CPIntValue(3))
 
-    val mapRes3 = (new CPGetFromCollection(CPConstant(map), CPConstant(CPStringValue("b")))).calculate(context).get
+    val mapRes3 = (new CPGetFromCollection(CPConstant(map), CPConstant(CPStringValue("b")) :: Nil)).calculate(context).get
     listRes3.getIntValue.get should equal (2)
 
     val obj = new CPObjectValue(new CPObject("myobj", Map("name" -> CPStringValue("obj1"), "value" -> CPIntValue(2)), "value"))
@@ -306,8 +306,15 @@ class ExpressionTests extends FlatSpec with Matchers {
     attr1("value") should equal (CPIntValue(2))
     attr1("unit") should equal (CPStringValue("kg"))
 
-    val objRes2 = (new CPGetFromCollection(CPConstant(obj), CPConstant(CPStringValue("value")))).calculate(context).get
+    val objRes2 = (new CPGetFromCollection(CPConstant(obj), CPConstant(CPStringValue("value")) :: Nil)).calculate(context).get
     objRes2.getIntValue.get should equal (2)
+
+    val objList = new CPList(List(
+      new CPObjectValue(new CPObject("myobj", Map("name" -> CPStringValue("obj1"), "value" -> CPIntValue(1)), "value")),
+      new CPObjectValue(new CPObject("myobj", Map("name" -> CPStringValue("obj1"), "value" -> CPIntValue(2)), "value")),
+      new CPObjectValue(new CPObject("myobj", Map("name" -> CPStringValue("obj1"), "value" -> CPIntValue(3)), "value"))))
+    val objListRes1 = (new CPGetFromCollection(CPConstant(objList), CPConstant(CPIntValue(1)) :: CPConstant(CPStringValue("value")) :: Nil)).calculate(context).get
+    objListRes1.getIntValue.get should equal (2)
   }
 
   "Expressions" should "be compared correctly" in {

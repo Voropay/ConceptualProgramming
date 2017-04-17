@@ -163,12 +163,20 @@ class ParserTests  extends FlatSpec with Matchers {
 
     val getFromCollection1 = exprParser("myobj[1]").get.asInstanceOf[CPGetFromCollection]
     getFromCollection1.collection.asInstanceOf[CPVariable].name should equal ("myobj")
-    getFromCollection1.key.asInstanceOf[CPConstant].value.getIntValue.get should equal (1)
+    getFromCollection1.keys.size should equal (1)
+    getFromCollection1.keys.head.asInstanceOf[CPConstant].value.getIntValue.get should equal (1)
 
     val getFromCollection2 = exprParser("myconcept.myattr[\"name\"]").get.asInstanceOf[CPGetFromCollection]
     getFromCollection2.collection.asInstanceOf[CPAttribute].attrName.conceptName should equal ("myconcept")
     getFromCollection2.collection.asInstanceOf[CPAttribute].attrName.attributeName should equal ("myattr")
-    getFromCollection2.key.asInstanceOf[CPConstant].value.getStringValue.get should equal ("name")
+    getFromCollection2.keys.size should equal (1)
+    getFromCollection2.keys.head.asInstanceOf[CPConstant].value.getStringValue.get should equal ("name")
+
+    val getFromCollection3 = exprParser("myobjects[1][\"value\"]").get.asInstanceOf[CPGetFromCollection]
+    getFromCollection3.collection.asInstanceOf[CPVariable].name should equal ("myobjects")
+    getFromCollection3.keys.size should equal (2)
+    getFromCollection3.keys.head.asInstanceOf[CPConstant].value.getIntValue.get should equal (1)
+    getFromCollection3.keys.tail.head.asInstanceOf[CPConstant].value.getStringValue.get should equal ("value")
   }
 
   "Statements" should "be parsed correctly" in {
@@ -358,7 +366,7 @@ class ParserTests  extends FlatSpec with Matchers {
     val strictConceptsDependencies1 = strictConceptStmt1.attributesDependencies
     strictConceptsDependencies1.size should equal (2)
     strictConceptsDependencies1.contains(new CPExpressionDependency(CPOperation.createBinaryArithmeticExpression(CPAttribute("", "row"), CPAttribute("c", "row"), "=="), CPBooleanValue(true))) should be (true)
-    strictConceptsDependencies1.contains(new CPExpressionDependency(CPOperation.createBinaryArithmeticExpression(CPAttribute("c", "col"), CPConstant(CPFloatingValue(2)), "=="), CPBooleanValue(true))) should be (true)
+    strictConceptsDependencies1.contains(new CPExpressionDependency(CPOperation.createBinaryArithmeticExpression(CPAttribute("c", "col"), CPConstant(CPIntValue(2)), "=="), CPBooleanValue(true))) should be (true)
 
     val strictConceptStmt2 = stmtParser("concept profit (row, val == i.val - o.val) := income i(), outcome o(), _.row ~ i.row ~ o.row").get.asInstanceOf[ConceptDefinitionStatement].definition.asInstanceOf[CPStrictConcept]
     strictConceptStmt2.name should equal ("profit")
@@ -539,8 +547,8 @@ class ParserTests  extends FlatSpec with Matchers {
       """
     val program = ProgramParser(programStr).get.body
     program.size should equal (2)
-    program.head should equal (new VariableStatement("i", new CPConstant(CPFloatingValue(10))))
-    program.tail.head should equal (new VariableStatement("j", new CPConstant(CPFloatingValue(20))))
+    program.head should equal (new VariableStatement("i", new CPConstant(CPIntValue(10))))
+    program.tail.head should equal (new VariableStatement("j", new CPConstant(CPIntValue(20))))
 
     val programStr1 =
     """
@@ -556,12 +564,12 @@ class ParserTests  extends FlatSpec with Matchers {
     """
     val program1 = ProgramParser(programStr1).get.body
     program1.size should equal (3)
-    program1(0) should equal (new VariableStatement("maxNumber", new CPConstant(CPFloatingValue(50))))
+    program1(0) should equal (new VariableStatement("maxNumber", new CPConstant(CPIntValue(50))))
     val freeCconcept = program1(1).asInstanceOf[ConceptDefinitionStatement].definition.asInstanceOf[CPFreeConcept].steps
     val forStmt = freeCconcept(0).asInstanceOf[ForStatement]
-    forStmt.startOperator should equal (new VariableStatement("i", new CPConstant(CPFloatingValue(0))))
-    forStmt.condition should equal (new CPLess(new CPVariable("i"), CPConstant(CPFloatingValue(10))))
-    forStmt.endOperator should equal (new VariableStatement("i", new CPAdd(new CPVariable("i"), new CPConstant(CPFloatingValue(1)))))
+    forStmt.startOperator should equal (new VariableStatement("i", new CPConstant(CPIntValue(0))))
+    forStmt.condition should equal (new CPLess(new CPVariable("i"), CPConstant(CPIntValue(10))))
+    forStmt.endOperator should equal (new VariableStatement("i", new CPAdd(new CPVariable("i"), new CPConstant(CPIntValue(1)))))
     forStmt.body.asInstanceOf[CompositeStatement].body.head should equal (new AddObjectStatement(new CPObjectExpression("digit", Map("val" -> CPVariable("i")), None)))
     val numberConceptStmt = freeCconcept(1).asInstanceOf[ConceptDefinitionResolvingStatement]
     numberConceptStmt.queryExpr.size should equal (0)
@@ -580,7 +588,7 @@ class ParserTests  extends FlatSpec with Matchers {
         new CPAdd(
           new CPMul(
             CPAttribute("d1", "val"),
-            new CPConstant(CPFloatingValue(10))
+            new CPConstant(CPIntValue(10))
           ),
           CPAttribute("d0", "val")
         )),
