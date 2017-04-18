@@ -1,4 +1,5 @@
 target/
 out/
-project/
+project/*
+!project/plugins.sbt
 .idea/
