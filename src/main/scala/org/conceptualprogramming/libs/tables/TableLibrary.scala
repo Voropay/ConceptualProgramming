@@ -8,6 +8,8 @@ import org.concepualprogramming.core.datatypes.composite.CPList
 import org.concepualprogramming.core.statements.expressions.functions.BuiltInFunctionDefinition
 import org.concepualprogramming.core.statements.expressions.{CPExpression, CPFunctionDefinition}
 
+import scala.collection.mutable.ListBuffer
+
 /**
  * Created by oleksii.voropai on 4/25/2017.
  */
@@ -66,17 +68,18 @@ class TableLibrary extends StandardLibrary {
   }
 
   def readTableFromSCVFile(filePath: String, delimiter: String, readHeader: Boolean): Option[TableContent] = {
+    val tableRowParser = new TableRowParser(delimiter)
     val bufferedSource = io.Source.fromFile(filePath)
     val linesIterator =  bufferedSource.getLines
+
     if(!linesIterator.hasNext) {
       bufferedSource.close
       return None
     }
 
-    val tableRowParser = new TableRowParser(delimiter)
-
     val headers = if(readHeader) {
-      val headerContent = tableRowParser.parseRow(linesIterator.next)
+      val line = linesIterator.next
+      val headerContent = tableRowParser.parseRow(line)
       if(headerContent.isEmpty) {
         bufferedSource.close
         return None
@@ -90,15 +93,21 @@ class TableLibrary extends StandardLibrary {
       return None
     }
 
-    val parsedRows = for {
-      line <- linesIterator
-    } yield tableRowParser.parseRow(line)
-    if(parsedRows.contains(None)) {
-      bufferedSource.close
-      return None
+    val parsedRows = new ListBuffer[List[CPValue]]
+    while(linesIterator.hasNext) {
+      val line = linesIterator.next
+      val row = tableRowParser.parseRow(line)
+      if(row.isEmpty) {
+        bufferedSource.close
+        return None
+      } else {
+        parsedRows += row.get
+      }
     }
 
+    val res = Some(new TableContent(headers, parsedRows.toList))
     bufferedSource.close
-    Some(new TableContent(headers, parsedRows.map(_.get).toList))
+    res
   }
+
 }

@@ -3,6 +3,7 @@ package org.conceptualprogramming.core.statements
 import org.conceptualprogramming.core.RunPreferences
 import org.conceptualprogramming.core.datatypes.composite.{CPObjectValue, CPMap}
 import org.conceptualprogramming.core.statements.expressions.functions.ConsoleFunctions
+import org.conceptualprogramming.libs.tables.TableLibrary
 import org.conceptualprogramming.parser.{StatementsParser, ProgramParser}
 import org.concepualprogramming.core.statements.CPStatement
 import org.concepualprogramming.core.{CPDecisionNode, CPObject, CPExecutionContext}
@@ -19,7 +20,6 @@ class ProgramExecutor {
   def execute(programText: String, preferences: RunPreferences): String = {
     val programCode = ProgramParser(programText)
     if(programCode.isEmpty) {
-println("parsing failed")
       return ""
     }
     val context = initContext
@@ -44,6 +44,8 @@ println("parsing failed")
     CPList.register(context)
     CPMap.register(context)
     CPObjectValue.register(context)
+    val tableLibrary = new TableLibrary()
+    tableLibrary.register(context)
     context
   }
 

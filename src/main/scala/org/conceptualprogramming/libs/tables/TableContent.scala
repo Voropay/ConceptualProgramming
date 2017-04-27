@@ -15,7 +15,7 @@ case class TableContent(headers: List[CPValue], body: List[List[CPValue]]) {
   }
 
   def prepareHeaderObject(cell: (CPValue, Int)): CPObject = {
-    new CPObject("header", Map("column" -> CPIntValue(cell._2), "value" -> cell._1), "value")
+    new CPObject("Header", Map("column" -> CPIntValue(cell._2), "value" -> cell._1), "value")
   }
 
   def prepareRow(row: (List[CPValue], Int)): List[CPObject] = {
@@ -25,6 +25,6 @@ case class TableContent(headers: List[CPValue], body: List[List[CPValue]]) {
   }
 
   def prepareCellObject(cell: (CPValue, Int), rowIndex: Int): CPObject = {
-    new CPObject("cell", Map("row" -> CPIntValue(rowIndex),"column" -> CPIntValue(cell._2), "value" -> cell._1), "value")
+    new CPObject("Cell", Map("row" -> CPIntValue(rowIndex),"column" -> CPIntValue(cell._2), "value" -> cell._1), "value")
   }
 }

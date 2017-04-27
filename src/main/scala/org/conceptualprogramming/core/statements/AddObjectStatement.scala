@@ -3,6 +3,7 @@ package org.concepualprogramming.core.statements
 import org.conceptualprogramming.core.datatypes.composite.CPObjectValue
 import org.conceptualprogramming.core.statements.expressions.CPObjectExpression
 import org.concepualprogramming.core.datatypes.CPValue
+import org.concepualprogramming.core.datatypes.composite.CPList
 import org.concepualprogramming.core.statements.expressions.{CPFunctionDefinition, CPExpression}
 import org.concepualprogramming.core.{CPDecisionNode, CPExecutionContext, CPObject}
 
@@ -15,7 +16,8 @@ case class AddObjectStatement(expression: CPExpression) extends CPStatement {
     val exprValue = expression.calculate(context)
     if(exprValue.isDefined) {
       val objValue = exprValue.get match {
-        case obj: CPObjectValue => Some(obj.objectValue)
+        case obj: CPObjectValue => Some(List(obj.objectValue))
+        case objs: CPList => prepareObjectsFromList(objs.values)
         case _ => None
       }
       if(objValue.isDefined) {
@@ -23,6 +25,20 @@ case class AddObjectStatement(expression: CPExpression) extends CPStatement {
       }
     }
     context.nextStep
+  }
+
+  def prepareObjectsFromList(values: List[CPValue]): Option[List[CPObject]] = {
+    val objectValues = values.map(value => {
+      value match {
+        case obj: CPObjectValue => Some(obj.objectValue)
+        case _ => None
+      }
+    })
+    if(objectValues.contains(None)) {
+      return None
+    } else {
+      Some(objectValues.map(_.get))
+    }
   }
 
   override def createDecisionNode(context: CPExecutionContext): CPDecisionNode = null
