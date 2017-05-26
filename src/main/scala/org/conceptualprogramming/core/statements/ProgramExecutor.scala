@@ -1,15 +1,16 @@
 package org.conceptualprogramming.core.statements
 
+import main.scala.org.conceptualprogramming.libs.html.HTMLLibrary
 import org.conceptualprogramming.core.RunPreferences
-import org.conceptualprogramming.core.datatypes.composite.{CPObjectValue, CPMap}
+import org.conceptualprogramming.core.datatypes.composite.{CPMap, CPObjectValue}
 import org.conceptualprogramming.core.statements.expressions.functions.ConsoleFunctions
 import org.conceptualprogramming.libs.tables.TableLibrary
-import org.conceptualprogramming.parser.{StatementsParser, ProgramParser}
+import org.conceptualprogramming.parser.{ProgramParser, StatementsParser}
 import org.concepualprogramming.core.statements.CPStatement
-import org.concepualprogramming.core.{CPDecisionNode, CPObject, CPExecutionContext}
+import org.concepualprogramming.core.{CPDecisionNode, CPExecutionContext, CPObject}
 import org.concepualprogramming.core.datatypes.CPValue
 import org.concepualprogramming.core.datatypes.composite.CPList
-import org.concepualprogramming.core.statements.expressions.functions.{ObjectsFunctions, GroupingFunctions}
+import org.concepualprogramming.core.statements.expressions.functions.{GroupingFunctions, ObjectsFunctions}
 
 import scala.collection.mutable
 
@@ -46,6 +47,8 @@ class ProgramExecutor {
     CPObjectValue.register(context)
     val tableLibrary = new TableLibrary()
     tableLibrary.register(context)
+    val htmlLibrary = new HTMLLibrary()
+    htmlLibrary.register(context)
     context
   }
 

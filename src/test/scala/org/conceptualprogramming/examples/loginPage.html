@@ -1,0 +1,30 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+<head>
+    <meta name="ConceptualProgramming" content="ConceptualProgramming"/>
+    <title>CConceptualProgramming - Login example</title>
+    <link rel="stylesheet" type="text/css" href="loginExample.css"/>
+</head>
+<body>
+
+
+<div id="islabel"></div>
+<div id="login" data-testing-id="page-login">
+    <div class="wrapper">
+        <h3 id="toolName">Conceptual Programming</h3>
+        <h1 id="applicationName">Login page example</h1><div class="message">Your session has been closed for security reasons, probably because you did not use the system for over 30 min.<br/>Please logon again, sorry for any inconvenience.<br />
+    </div>
+    <form action="welcomePage.html" method="post" name="LoginForm">
+        <div class="login">
+            <div><input autocomplete="off" type="text" class="inputText" name="LoginForm_Login" id="LoginForm_Login" placeholder="Name" /></div>
+            <div><input autocomplete="off" type="password" class="inputText" name="LoginForm_Password" id="LoginForm_Password" placeholder="Password"/></div>
+            <div><input class="inputText" type="text" name="LoginForm_RegistrationDomain" id="LoginForm_RegistrationDomain" placeholder="Organization" /></div>
+        </div>
+        <div class="info2">If you have forgotten your password, or if you are experiencing problems, <a href="mailto:admin@conceptualprogramming.org" tabindex="-1">contact the administrator</a>.</div><div class="info3">conceptualprogramming.org</div>
+        <div class="buttons"><input type="submit" name="submit" value="Logon" class="loginbutton" data-testing-id="btn-login"/></div>
+    </form>
+    </div>
+</div>
+</body>
+</html>
