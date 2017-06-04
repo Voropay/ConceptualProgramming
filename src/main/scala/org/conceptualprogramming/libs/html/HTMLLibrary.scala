@@ -6,11 +6,11 @@ import org.conceptualprogramming.core.datatypes.composite.CPObjectValue
 import org.conceptualprogramming.libs.StandardLibrary
 import org.conceptualprogramming.libs.html.HTMLParser
 import org.concepualprogramming.core.{CPExecutionContext, CPObject}
-import org.concepualprogramming.core.datatypes.{CPStringValue, CPValue}
+import org.concepualprogramming.core.datatypes.CPValue
 import org.concepualprogramming.core.datatypes.composite.CPList
 import org.concepualprogramming.core.statements.expressions.functions.BuiltInFunctionDefinition
 import org.concepualprogramming.core.statements.expressions.{CPExpression, CPFunctionDefinition}
-import org.openqa.selenium.{By, WebDriver, WebElement}
+import org.openqa.selenium.WebDriver
 import org.openqa.selenium.chrome.ChromeDriver
 
 /**

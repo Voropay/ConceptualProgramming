@@ -4,7 +4,7 @@ import org.conceptualprogramming.core.datatypes.composite.CPMap
 import org.concepualprogramming.core.CPObject
 import org.concepualprogramming.core.datatypes.composite.CPList
 import org.concepualprogramming.core.datatypes.{CPBooleanValue, CPIntValue, CPStringValue, CPValue}
-import org.openqa.selenium.{By, WebDriver, WebElement}
+import org.openqa.selenium.{By, SearchContext, WebDriver, WebElement}
 
 import scala.collection.JavaConversions._
 import scala.collection.mutable.ListBuffer
@@ -14,76 +14,89 @@ import scala.collection.mutable.ListBuffer
   */
 object HTMLParser {
 
+  def findElementByXPath(element: SearchContext, xPath: String): Option[WebElement] = {
+    try {
+      Some(element.findElement(By.xpath(xPath)))
+    } catch {
+      case _: Throwable => None
+    }
+  }
+
   def parsePage(page: WebDriver, url: String): List[CPObject] = {
     val titleId = java.util.UUID.randomUUID.toString
-    val pageTitleElement = new PageElement("PageTitle", Map(
+    var pageTitleElement = new PageElement("PageTitle", Map(
       "page" -> CPStringValue(url),
       "value" -> CPStringValue(page.getTitle),
-      "meta" -> CPStringValue(page.findElement(By.xpath("//meta[@name='description']")).getAttribute("content")),
       "id"   -> CPStringValue(titleId)
     ))
+    val meta = findElementByXPath(page, "//meta[@name='description']")
+    if(meta.isDefined) {
+      pageTitleElement.attributes += ("meta" -> CPStringValue(meta.get.getAttribute("content")))
+    }
+
     val body = page.findElement(By.tagName("body"))
-    var nestedElements = body.findElements(By.xpath(".//*"))
-    val nestedObjects = parseNestedElements(nestedElements, Map("page" -> url, "xPath" -> "/html[1]/body[1]"))
+    var nestedElements = body.findElements(By.xpath("./*"))
+    val nestedObjects = parseNestedElements(pageTitleElement, nestedElements, Map("page" -> url, "xPath" -> "/html[1]/body[1]"))
     val objects = processCrossReferences(nestedObjects + (titleId -> pageTitleElement))
     objects.values.map(_.toCPObject).toList
   }
 
-  def parseNestedElements(nestedElements: java.util.List[WebElement], attributes: Map[String, String]): Map[String, PageElement] = {
-    val nestedElementsIndex = createXPathIndex(nestedElements.toList, attributes.getOrElse("xPath", "/"))
-    nestedElementsIndex.flatMap(parseNestedElement(_, attributes)).toMap
+  def parseNestedElements(parent: PageElement, nestedElements: java.util.List[WebElement], attributes: Map[String, String]): Map[String, PageElement] = {
+    val nestedElementsIndex = createXPathIndex(nestedElements.toList)
+    nestedElementsIndex.flatMap(parseNestedElement(parent, _, attributes + ("xPath" -> attributes.getOrElse("xPath", "/")))).toMap
   }
 
-  def createXPathIndex(elements: List[WebElement], rootXPath: String): List[(String, WebElement)] = {
+  def createXPathIndex(elements: List[WebElement]): List[(Int, WebElement)] = {
     val elementsCount = scala.collection.mutable.Map[String, Int]().withDefaultValue(0)
-    var indexed = ListBuffer[(String, WebElement)]()
+    var indexed = ListBuffer[(Int, WebElement)]()
     for(element <- elements) {
       val tag = element.getTagName
       elementsCount.update(tag, elementsCount(tag) + 1)
-      val xPath = rootXPath + "/" + element.getTagName + "[" + elementsCount(tag) + "]"
-      indexed.add((xPath, element))
+      indexed.add((elementsCount(tag), element))
     }
     indexed.toList
   }
 
-  def parseNestedElement(elementIndex: (String, WebElement), inputAttributes: Map[String, String]): Map[String, PageElement] = {
+  def parseNestedElement(parent: PageElement, elementIndex: (Int, WebElement), inputAttributes: Map[String, String]): Map[String, PageElement] = {
     val element = elementIndex._2
-    val xPath = elementIndex._1
-    val attributes = inputAttributes + ("xPath" -> xPath)
+    val pos = elementIndex._1
+    val xPath = inputAttributes.getOrElse("xPath", "") + "/" + element.getTagName + "[" + pos + "]"
+    val attributes = inputAttributes + ("xPath" -> xPath, "pos" -> pos.toString)
     element.getTagName match {
-      case "div" => parseDiv(element, attributes)
-      case "input" => parseInput(element, attributes)
-      case "form" => parseForm(element, attributes)
-      case "a" => parseLink(element, attributes)
-      case "b" => parseBold(element, attributes)
-      case "button" => parseButton(element, attributes)
-      case "caption" => parseCaption(element, attributes)
-      case "header" => parseHeader(element, attributes)
-      case "fieldset" => parseHeader(element, attributes)
-      case "footer" => parseFooter(element, attributes)
-      case "h1" | "h2" | "h3" | "h4" | "h5" | "h6" => parseHeading(element, attributes)
-      case "img" => parseImage(element, attributes)
-      case "label" => parseLabel(element, attributes)
-      case "legend" => parseLegend(element, attributes)
-      case "li" => parseListItem(element, attributes)
-      case "ol" => parseList(element, attributes)
-      case "optgroup" => parseOptGroup(element, attributes)
-      case "select" => parseSelect(element, attributes)
-      case "option" => parseOption(element, attributes)
-      case "p" => parseParagraph(element, attributes)
-      case "section" => parseSection(element, attributes)
-      case "small" => parseSmallText(element, attributes)
-      case "span" => parseSpan(element, attributes)
-      case "strong" => parseStrongText(element, attributes)
-      case "sub" => parseSubscriptedText(element, attributes)
-      case "table" => parseTable(element, attributes)
-      case "tbody" => parseTableBody(element, attributes)
-      case "td" => parseTableCell(element, attributes)
-      case "textarea" => parseTextArea(element, attributes)
-      case "th" => parseTableHeaderCell(element, attributes)
-      case "thead" => parseTableHeader(element, attributes)
-      case "tr" => parseTableRow(element, attributes)
-      case "ul" => parseList(element, attributes)
+      case "div" => parseDiv(parent, element, attributes)
+      case "input" => parseInput(parent, element, attributes)
+      case "form" => parseForm(parent, element, attributes)
+      case "a" => parseLink(parent, element, attributes)
+      case "b" => parseBold(parent, element, attributes)
+      case "button" => parseButton(parent, element, attributes)
+      case "caption" => parseCaption(parent, element, attributes)
+      case "header" => parseHeader(parent, element, attributes)
+      case "fieldset" => parseHeader(parent, element, attributes)
+      case "footer" => parseFooter(parent, element, attributes)
+      case "h1" | "h2" | "h3" | "h4" | "h5" | "h6" => parseHeading(parent, element, attributes)
+      case "img" => parseImage(parent, element, attributes)
+      case "label" => parseLabel(parent, element, attributes)
+      case "legend" => parseLegend(parent, element, attributes)
+      case "li" => parseListItem(parent, element, attributes)
+      case "ol" => parseList(parent, element, attributes)
+      case "optgroup" => parseOptGroup(parent, element, attributes)
+      case "select" => parseSelect(parent, element, attributes)
+      case "option" => parseOption(parent, element, attributes)
+      case "p" => parseParagraph(parent, element, attributes)
+      case "section" => parseSection(parent, element, attributes)
+      case "small" => parseSmallText(parent, element, attributes)
+      case "span" => parseSpan(parent, element, attributes)
+      case "strong" => parseStrongText(parent, element, attributes)
+      case "sub" => parseSubscriptedText(parent, element, attributes)
+      case "table" => parseTable(parent, element, attributes)
+      case "tbody" => parseTableBody(parent, element, attributes)
+      case "td" => parseTableCell(parent, element, attributes)
+      case "textarea" => parseTextArea(parent, element, attributes)
+      case "tfoot" => parseTableFooter(parent, element, attributes)
+      case "th" => parseTableHeaderCell(parent, element, attributes)
+      case "thead" => parseTableHeader(parent, element, attributes)
+      case "tr" => parseTableRow(parent, element, attributes)
+      case "ul" => parseList(parent, element, attributes)
       case _ => Map()
     }
   }
@@ -92,23 +105,25 @@ object HTMLParser {
     var map = Map[String, CPValue](
       "xPath" -> CPStringValue(attributes.getOrDefault("xPath", "")),
       "id" -> CPStringValue(extractId(element)),
-      "parent" -> CPStringValue(attributes.getOrDefault("parent", ""))
+      "parent" -> CPStringValue(attributes.getOrDefault("parent", "")),
+      "pos" -> CPIntValue(attributes.getOrDefault("pos", "0").toInt),
+      "page" -> CPStringValue(attributes.getOrDefault("page", ""))
     )
 
     val name = element.getAttribute("name")
-    if(name != null) {
+    if(name != null && !name.isEmpty) {
       map += ("name" -> CPStringValue(name))
     }
     val classes = element.getAttribute("class")
-    if(classes != null) {
+    if(classes != null && !classes.isEmpty) {
       map += ("class" -> CPStringValue(classes))
     }
-    val hidden = element.isDisplayed
-    if(hidden != null) {
+    val hidden = !element.isDisplayed
+    if(hidden) {
       map += ("hidden" -> CPBooleanValue(true))
     }
     val title = element.getAttribute("title")
-    if(title != null) {
+    if(title != null && !title.isEmpty) {
       map += ("title" -> CPStringValue(title))
     }
     val text = extractText(element)
@@ -141,6 +156,7 @@ object HTMLParser {
       map += ("fieldset" -> CPStringValue(attributes.get("fieldset").get))
     }
 
+    /*
     val rectangle = element.getRect
     if(rectangle != null) {
       val locationMap: Map[CPValue, CPValue] = Map(
@@ -151,7 +167,7 @@ object HTMLParser {
       )
       map += ("location" -> new CPMap(locationMap))
     }
-
+*/
     map = map ++ extractCSSAttributes(element, attributes)
 
     map
@@ -179,9 +195,19 @@ object HTMLParser {
 
   def extractCSSAttributes(element: WebElement, attributes: Map[String, String]): Map[String, CPValue] = {
     var map = Map[String, CPValue]()
+    val color = element.getCssValue("color")
+    if(color != null && !color.isEmpty) {
+      map += (
+        "color" -> CPStringValue(color),
+        "colorName" -> CPStringValue(ColorUtils.extractColorName(color))
+      )
+    }
     val bgColor = element.getCssValue("background-color")
-    if(bgColor != null) {
-      map += ("backgroundColor" -> CPStringValue(extractColor(bgColor)))
+    if(bgColor != null && !bgColor.isEmpty) {
+      map += (
+        "backgroundColor" -> CPStringValue(bgColor),
+        "backgroundColorName" -> CPStringValue(ColorUtils.extractColorName(bgColor))
+      )
     }
     val borderMap = extractBorder(element, attributes)
     map = map ++ borderMap
@@ -190,51 +216,61 @@ object HTMLParser {
     map
   }
 
-  def extractColor(bgColor: String): String = {
-    //TODO: return color name instead of RGB values
-    bgColor
-  }
-
   def extractBorder(element: WebElement, attributes: Map[String, String]): Map[String, CPValue] = {
     var map = Map[String, CPValue]()
     val borderBottomColor = element.getCssValue("border-bottom-color")
-    if(borderBottomColor != null) {
-      map += ("borderBottomColor" -> CPStringValue(extractColor(borderBottomColor)))
+    if(borderBottomColor != null && !borderBottomColor.isEmpty) {
+      map += (
+        "borderBottomColor" -> CPStringValue(borderBottomColor),
+        "borderBottomColorName" -> CPStringValue(ColorUtils.extractColorName(borderBottomColor))
+      )
     }
     val borderTopColor = element.getCssValue("border-top-color")
-    if(borderTopColor != null) {
-      map += ("borderTopColor" -> CPStringValue(extractColor(borderTopColor)))
+    if(borderTopColor != null && !borderTopColor.isEmpty) {
+      map += (
+        "borderTopColor" -> CPStringValue(borderTopColor),
+        "borderTopColorName" -> CPStringValue(ColorUtils.extractColorName(borderTopColor))
+      )
     }
     val borderLeftColor = element.getCssValue("border-left-color")
-    if(borderLeftColor != null) {
-      map += ("borderLeftColor" -> CPStringValue(extractColor(borderLeftColor)))
+    if(borderLeftColor != null && !borderLeftColor.isEmpty) {
+      map += (
+        "borderLeftColor" -> CPStringValue(borderLeftColor),
+        "borderLeftColorName" -> CPStringValue(ColorUtils.extractColorName(borderLeftColor))
+      )
     }
     val borderRightColor = element.getCssValue("border-right-color")
-    if(borderRightColor != null) {
-      map += ("borderRightColor" -> CPStringValue(extractColor(borderRightColor)))
+    if(borderRightColor != null && !borderRightColor.isEmpty) {
+      map += (
+        "borderRightColor" -> CPStringValue(borderRightColor),
+        "borderRightColorName" -> CPStringValue(ColorUtils.extractColorName(borderRightColor))
+      )
     }
-    if(borderBottomColor != null && borderBottomColor == borderTopColor && borderBottomColor == borderLeftColor && borderBottomColor == borderRightColor) {
-      map += ("borderColor" -> CPStringValue(extractColor(borderBottomColor)))
+    if(borderBottomColor != null && !borderBottomColor.isEmpty && borderBottomColor == borderTopColor && borderBottomColor == borderLeftColor && borderBottomColor == borderRightColor) {
+      map += (
+        "borderColor" -> CPStringValue(borderBottomColor),
+        "borderColorName" -> CPStringValue(ColorUtils.extractColorName(borderBottomColor))
+      )
     }
 
     val borderBottomWidth = element.getCssValue("border-bottom-width")
-    if(borderBottomWidth != null) {
-      map += ("borderBottomWidth" -> CPStringValue(borderBottomWidth))
+    if(borderBottomWidth != null && !borderBottomWidth.isEmpty) {
+      map += ("borderBottomWidth" -> CPStringValue(extractSize(borderBottomWidth)))
     }
     val borderTopWidth = element.getCssValue("border-top-width")
-    if(borderTopWidth != null) {
-      map += ("borderTopWidth" -> CPStringValue(borderTopWidth))
+    if(borderTopWidth != null && !borderTopWidth.isEmpty) {
+      map += ("borderTopWidth" -> CPStringValue(extractSize(borderTopWidth)))
     }
     val borderLeftWidth = element.getCssValue("border-left-width")
-    if(borderLeftWidth != null) {
-      map += ("borderLeftWidth" -> CPStringValue(borderLeftWidth))
+    if(borderLeftWidth != null && !borderLeftWidth.isEmpty) {
+      map += ("borderLeftWidth" -> CPStringValue(extractSize(borderLeftWidth)))
     }
     val borderRightWidth = element.getCssValue("border-right-width")
-    if(borderRightWidth != null) {
-      map += ("borderRightWidth" -> CPStringValue(borderRightWidth))
+    if(borderRightWidth != null && !borderRightWidth.isEmpty) {
+      map += ("borderRightWidth" -> CPStringValue(extractSize(borderRightWidth)))
     }
-    if(borderBottomWidth != null && borderBottomColor == borderTopWidth && borderBottomWidth == borderLeftWidth && borderBottomColor == borderRightWidth) {
-      map += ("borderWidth" -> CPStringValue(borderBottomWidth))
+    if(borderBottomWidth != null && !borderBottomWidth.isEmpty && borderBottomColor == borderTopWidth && borderBottomWidth == borderLeftWidth && borderBottomColor == borderRightWidth) {
+      map += ("borderWidth" -> CPStringValue(extractSize(borderBottomWidth)))
     }
 
     map
@@ -242,8 +278,11 @@ object HTMLParser {
 
   def extractFont(element: WebElement, attributes: Map[String, String]): Map[String, CPValue] = {
     var map = Map[String, CPValue]()
-    val fontFamily = element.getCssValue("font-family")
+    var fontFamily = element.getCssValue("font-family")
     if(fontFamily != null) {
+      if(fontFamily.startsWith("\"") && fontFamily.endsWith("\"")) {
+        fontFamily = fontFamily.substring(1, fontFamily.size - 1)
+      }
       map += ("fontFamily" -> CPStringValue(fontFamily))
     }
     val fontSize = element.getCssValue("font-size")
@@ -256,18 +295,26 @@ object HTMLParser {
     }
     val fontWeight = element.getCssValue("font-weight")
     if(fontWeight != null) {
-      map += ("fontWeight" -> extractFontWeight(fontWeight))
+      map += ("fontWeight" -> CPStringValue(extractFontWeight(fontWeight)))
     }
     map
   }
 
   def extractFontSize(fontSize: String): String = {
     //TODO: convert relative and inherited values
-    fontSize
+    extractSize(fontSize)
+  }
+
+  def extractSize(value: String): String = {
+    if(value.endsWith("px")) {
+      value.substring(0, value.size - 2)
+    } else {
+      value
+    }
   }
 
   def extractFontStyle(fontStyle: String, attributes: Map[String, String]): CPValue = {
-    val stylesArr = fontStyle.split("|")
+    val stylesArr = fontStyle.split("\\|")
     val stylesList: List[String] = if(attributes.contains("textStyle")) {
       attributes.get("textStyle").get :: stylesArr.toList
     } else {
@@ -281,36 +328,16 @@ object HTMLParser {
     fontWeight
   }
 
-
-  def getDefaultAttribute(attributes: Map[String, CPValue]): String = {
-    if(attributes.contains("value")) {
-      "value"
-    } else if(attributes.contains("value")) {
-      "value"
-    } else if(attributes.contains("scr")) {
-      "src"
-    } else if(attributes.contains("href")) {
-      "href"
-    } else if(attributes.contains("action")) {
-      "action"
-    } else if(attributes.contains("text")) {
-      "text"
-    } else if(attributes.contains("id")) {
-      "id"
-    } else if(attributes.contains("name")) {
-      "name"
-    } else if(attributes.contains("label")) {
-      "label"
-    } else{
-      ""
+  def processChildTags(parent: PageElement, element: WebElement, pageElement: PageElement, attributes: Map[String, String]): Map[String, PageElement] = {
+    val parentId = if(pageElement.attributes.contains("id") && pageElement.attributes("id").getStringValue.isDefined) {
+      pageElement.attributes("id").getStringValue.get
+    } else {
+      "unknown"
     }
-  }
-
-  def processChildTags(element: WebElement, pageElement: PageElement, attributes: Map[String, String]): Map[String, PageElement] = {
-    val attrs = attributes + ("parent" -> pageElement.attributes("id"))
-    val childTags = element.findElements(By.xpath(".//*"))
+    val attrs = attributes + ("parent" -> parentId)
+    val childTags = element.findElements(By.xpath("./*"))
     val childObjects = if(childTags != null && childTags.size > 0) {
-      parseNestedElements(childTags, attributes)
+      parseNestedElements(parent, childTags, attrs)
     } else {
       Map[String, PageElement]()
     }
@@ -318,13 +345,13 @@ object HTMLParser {
   }
 
   //TODO: add parent tag to an object as its attribute
-  def parseDiv(element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
+  def parseDiv(parent: PageElement, element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
     val tagAttributes = getStandardAttributes(element, attributes)
     val divObj = new PageElement("PageDivision", tagAttributes)
-    processChildTags(element, divObj, attributes)
+    processChildTags(divObj, element, divObj, attributes)
   }
 
-  def parseInput(element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
+  def parseInput(parent: PageElement, element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
     var tagAttributes = getStandardAttributes(element, attributes)
 
     val typeAttr = element.getAttribute("type")
@@ -357,7 +384,7 @@ object HTMLParser {
       tagAttributes += ("value" -> CPStringValue(value))
     }
     val inputObj = new PageElement("PageInput", tagAttributes)
-    processChildTags(element, inputObj, attributes)
+    processChildTags(inputObj, element, inputObj, attributes)
   }
 
   def extractForm(element: WebElement, attributes: Map[String, String]): Option[CPValue] = {
@@ -372,7 +399,7 @@ object HTMLParser {
     }
   }
 
-  def parseForm(element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
+  def parseForm(parent: PageElement, element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
     var tagAttributes = getStandardAttributes(element, attributes)
 
     val action = element.getAttribute("action")
@@ -385,10 +412,10 @@ object HTMLParser {
     }
     val formObj = new PageElement("PageForm", tagAttributes)
     val id = tagAttributes.get("id").get.getStringValue.get
-    processChildTags(element, formObj, attributes + ("form" -> id))
+    processChildTags(formObj, element, formObj, attributes + ("form" -> id))
   }
 
-  def parseLink(element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
+  def parseLink(parent: PageElement, element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
     var tagAttributes = getStandardAttributes(element, attributes)
 
     val href = element.getAttribute("href")
@@ -396,16 +423,16 @@ object HTMLParser {
       tagAttributes += ("href" -> CPStringValue(href))
     }
     val linkObj = new PageElement("PageLink", tagAttributes)
-    processChildTags(element, linkObj, attributes)
+    processChildTags(linkObj, element, linkObj, attributes)
   }
 
-  def parseBold(element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
+  def parseBold(parent: PageElement, element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
     val tagAttributes = getStandardAttributes(element, attributes)
     val boldObj = new PageElement("PageBoldText", tagAttributes)
-    processChildTags(element, boldObj, attributes + ("textStyle" -> "bold"))
+    processChildTags(boldObj, element, boldObj, attributes + ("textStyle" -> "bold"))
   }
 
-  def parseButton(element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
+  def parseButton(parent: PageElement, element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
     var tagAttributes = getStandardAttributes(element, attributes)
 
     val disabled = element.getAttribute("disabled")
@@ -417,10 +444,10 @@ object HTMLParser {
       tagAttributes += ("form" -> form.get)
     }
     val buttonObj = new PageElement("PageButton", tagAttributes)
-    processChildTags(element, buttonObj, attributes)
+    processChildTags(buttonObj, element, buttonObj, attributes)
   }
 
-  def parseFieldSet(element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
+  def parseFieldSet(parent: PageElement, element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
     var tagAttributes = getStandardAttributes(element, attributes)
 
     val disabled = element.getAttribute("disabled")
@@ -433,28 +460,28 @@ object HTMLParser {
     }
     val fieldsetObj = new PageElement("PageFieldSet", tagAttributes)
     val id = tagAttributes.get("id").get.getStringValue.get
-    processChildTags(element, fieldsetObj, attributes + ("fieldset" -> id))
+    processChildTags(fieldsetObj, element, fieldsetObj, attributes + ("fieldset" -> id))
   }
 
   //TODO: how to process text?
-  def parseHeader(element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
+  def parseHeader(parent: PageElement, element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
     val tagAttributes = getStandardAttributes(element, attributes)
     val headerObj = new PageElement("PageHeader", tagAttributes)
-    processChildTags(element, headerObj, attributes + ("header" -> "true"))
+    processChildTags(headerObj, element, headerObj, attributes + ("header" -> "true"))
   }
 
-  def parseFooter(element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
+  def parseFooter(parent: PageElement, element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
     val tagAttributes = getStandardAttributes(element, attributes)
     val footerObj = new PageElement("PageFooter", tagAttributes)
-    processChildTags(element, footerObj, attributes + ("footer" -> "true"))
+    processChildTags(footerObj, element, footerObj, attributes + ("footer" -> "true"))
   }
 
-  def parseHeading(element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
+  def parseHeading(parent: PageElement, element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
     var tagAttributes = getStandardAttributes(element, attributes)
     val headingValue = extractHeadingValue(element.getTagName)
     tagAttributes += ("headingValue" -> CPIntValue(headingValue))
-    val footerObj = new PageElement("PageHeading", tagAttributes)
-    processChildTags(element, footerObj, attributes + ("header" -> "true", "headingValue" -> headingValue.toString))
+    val headingObj = new PageElement("PageHeading", tagAttributes)
+    processChildTags(headingObj, element, headingObj, attributes + ("header" -> "true", "headingValue" -> headingValue.toString))
   }
 
   def extractHeadingValue(tagName: String): Int = {
@@ -469,7 +496,7 @@ object HTMLParser {
     }
   }
 
-  def parseImage(element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
+  def parseImage(parent: PageElement, element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
     var tagAttributes = getStandardAttributes(element, attributes)
 
     val alt = element.getAttribute("alt")
@@ -481,10 +508,10 @@ object HTMLParser {
       tagAttributes += ("src" -> CPStringValue(src))
     }
     val imgObj = new PageElement("PageImage", tagAttributes)
-    processChildTags(element, imgObj, attributes)
+    processChildTags(imgObj, element, imgObj, attributes)
   }
 
-  def parseLabel(element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
+  def parseLabel(parent: PageElement, element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
     var tagAttributes = getStandardAttributes(element, attributes)
 
     val forId = element.getAttribute("for")
@@ -493,10 +520,10 @@ object HTMLParser {
     }
 
     val labelObj = new PageElement("PageLabel", tagAttributes)
-    processChildTags(element, labelObj, attributes)
+    processChildTags(labelObj, element, labelObj, attributes)
   }
 
-  def parseLegend(element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
+  def parseLegend(parent: PageElement, element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
     var tagAttributes = getStandardAttributes(element, attributes)
 
     val form = extractForm(element, attributes)
@@ -509,10 +536,10 @@ object HTMLParser {
     }
 
     val legendObj = new PageElement("PageLegend", tagAttributes)
-    processChildTags(element, legendObj, attributes)
+    processChildTags(legendObj, element, legendObj, attributes)
   }
 
-  def parseListItem(element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
+  def parseListItem(parent: PageElement, element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
     var tagAttributes = getStandardAttributes(element, attributes)
 
     val list = attributes.get("list")
@@ -525,17 +552,17 @@ object HTMLParser {
     }
 
     val listItemObj = new PageElement("PageListItem", tagAttributes)
-    processChildTags(element, listItemObj, attributes)
+    processChildTags(listItemObj, element, listItemObj, attributes)
   }
 
-  def parseList(element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
+  def parseList(parent: PageElement, element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
     var tagAttributes = getStandardAttributes(element, attributes)
     val listObj = new PageElement("PageList", tagAttributes)
     val id = tagAttributes.get("id").get.getStringValue.get
-    processChildTags(element, listObj, attributes + ("list" -> id))
+    processChildTags(listObj, element, listObj, attributes + ("list" -> id))
   }
 
-  def parseOptGroup(element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
+  def parseOptGroup(parent: PageElement, element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
     var tagAttributes = getStandardAttributes(element, attributes)
     val list = attributes.get("list")
     if(list.isDefined) {
@@ -551,17 +578,17 @@ object HTMLParser {
     }
     val optgroupObj = new PageElement("PageOptGroup", tagAttributes)
     val id = tagAttributes.get("id").get.getStringValue.get
-    processChildTags(element, optgroupObj, attributes + ("optgroup" -> id))
+    processChildTags(optgroupObj, element, optgroupObj, attributes + ("optgroup" -> id))
   }
 
-  def parseSelect(element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
+  def parseSelect(parent: PageElement, element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
     var tagAttributes = getStandardAttributes(element, attributes)
     val selectObj = new PageElement("PageSelect", tagAttributes)
     val id = tagAttributes.get("id").get.getStringValue.get
-    processChildTags(element, selectObj, attributes + ("select" -> id))
+    processChildTags(selectObj, element, selectObj, attributes + ("select" -> id))
   }
 
-  def parseOption(element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
+  def parseOption(parent: PageElement, element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
     var tagAttributes = getStandardAttributes(element, attributes)
 
     val select = attributes.get("select")
@@ -570,75 +597,78 @@ object HTMLParser {
     }
 
     val optionObj = new PageElement("PageOption", tagAttributes)
-    processChildTags(element, optionObj, attributes)
+    processChildTags(optionObj, element, optionObj, attributes)
   }
 
-  def parseParagraph(element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
+  def parseParagraph(parent: PageElement, element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
     val tagAttributes = getStandardAttributes(element, attributes)
     val paragraphObj = new PageElement("PageParagraph", tagAttributes)
     val id = tagAttributes.get("id").get.getStringValue.get
-    processChildTags(element, paragraphObj, attributes + ("parent" -> id))
+    processChildTags(paragraphObj, element, paragraphObj, attributes + ("parent" -> id))
   }
 
-  def parseSection(element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
+  def parseSection(parent: PageElement, element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
     val tagAttributes = getStandardAttributes(element, attributes)
     val sectionObj = new PageElement("PageSection", tagAttributes)
     val id = tagAttributes.get("id").get.getStringValue.get
-    processChildTags(element, sectionObj, attributes + ("section" -> id))
+    processChildTags(sectionObj, element, sectionObj, attributes + ("section" -> id))
   }
 
-  def parseSmallText(element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
+  def parseSmallText(parent: PageElement, element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
     val tagAttributes = getStandardAttributes(element, attributes)
     val smallObj = new PageElement("PageSmallText", tagAttributes)
-    processChildTags(element, smallObj, attributes + ("textStyle" -> "small"))
+    processChildTags(smallObj, element, smallObj, attributes + ("textStyle" -> "small"))
   }
 
-  def parseSpan(element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
+  def parseSpan(parent: PageElement, element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
     val tagAttributes = getStandardAttributes(element, attributes)
     val spanObj = new PageElement("PageSpan", tagAttributes)
-    processChildTags(element, spanObj, attributes)
+    processChildTags(spanObj, element, spanObj, attributes)
   }
 
-  def parseStrongText(element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
+  def parseStrongText(parent: PageElement, element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
     val tagAttributes = getStandardAttributes(element, attributes)
     val strongObj = new PageElement("PageStrongText", tagAttributes)
-    processChildTags(element, strongObj, attributes + ("textStyle" -> "strong"))
+    processChildTags(strongObj, element, strongObj, attributes + ("textStyle" -> "strong"))
   }
 
-  def parseSubscriptedText(element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
+  def parseSubscriptedText(parent: PageElement, element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
     val tagAttributes = getStandardAttributes(element, attributes)
     val subscriptedObj = new PageElement("PageSubscriptedText", tagAttributes)
-    processChildTags(element, subscriptedObj, attributes + ("textStyle" -> "subscripted"))
+    processChildTags(subscriptedObj, element, subscriptedObj, attributes + ("textStyle" -> "subscripted"))
   }
 
-  def parseTable(element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
-    val tagAttributes = getStandardAttributes(element, attributes)
+  def parseTable(parent: PageElement, element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
+    var tagAttributes = getStandardAttributes(element, attributes)
+    tagAttributes += ("tableBody" -> new CPList(List()))
+    tagAttributes += ("tableHeader" -> new CPList(List()))
+    tagAttributes += ("tableFooter" -> new CPList(List()))
     val tableObj = new PageElement("PageTable", tagAttributes)
     val id = tagAttributes.get("id").get.getStringValue.get
-    processChildTags(element, tableObj, attributes + ("table" -> id))
+    processChildTags(tableObj, element, tableObj, attributes + ("table" -> id))
   }
 
-  def parseCaption(element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
+  def parseCaption(parent: PageElement, element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
     var tagAttributes = getStandardAttributes(element, attributes)
     val table = attributes.get("table")
     if(table.isDefined) {
       tagAttributes += ("table" -> CPStringValue(table.get))
     }
     val tableCaptionObj = new PageElement("PageTableCaption", tagAttributes)
-    processChildTags(element, tableCaptionObj, attributes)
+    processChildTags(tableCaptionObj, element, tableCaptionObj, attributes)
   }
 
-  def parseTableBody(element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
+  def parseTableBody(parent: PageElement, element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
     var tagAttributes = getStandardAttributes(element, attributes)
     val table = attributes.get("table")
     if(table.isDefined) {
       tagAttributes += ("table" -> CPStringValue(table.get))
     }
     val tableBodyObj = new PageElement("PageTableBody", tagAttributes)
-    processChildTags(element, tableBodyObj, attributes)
+    processChildTags(parent, element, tableBodyObj, attributes + ("tableBody" -> "true"))
   }
 
-  def parseTableCell(element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
+  def parseTableCell(parent: PageElement, element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
     var tagAttributes = getStandardAttributes(element, attributes)
     val table = attributes.get("table")
     if(table.isDefined) {
@@ -647,6 +677,16 @@ object HTMLParser {
     val row = attributes.get("row")
     if(row.isDefined) {
       tagAttributes += ("row" -> CPStringValue(row.get))
+    }
+    //TODO: Handle rowspan attribute
+    val rownum = attributes.get("rownum")
+    if(rownum.isDefined) {
+      tagAttributes += ("rownum" -> CPIntValue(rownum.get.toInt))
+    }
+    //TODO: Handle colspan attribute
+    val colnum = attributes.get("pos")
+    if(colnum.isDefined) {
+      tagAttributes += ("colnum" -> CPIntValue(colnum.get.toInt))
     }
     val colspan = element.getAttribute("colspan")
     if(colspan != null) {
@@ -659,10 +699,19 @@ object HTMLParser {
 
     val cellObj = new PageElement("PageTableCell", tagAttributes)
     val id = tagAttributes.get("id").get.getStringValue.get
-    processChildTags(element, cellObj, attributes + ("cell" -> id))
+
+    val cellsList = parent.attributes.get("rowCells")
+    if(cellsList.isDefined) {
+      val newList = cellsList.get match {
+        case value: CPList => CPStringValue(id) :: value.values
+        case value: CPValue  => CPStringValue(id) :: List(value)
+      }
+      parent.attributes.put("rowCells", new CPList(newList))
+    }
+    processChildTags(cellObj, element, cellObj, attributes + ("cell" -> id))
   }
 
-  def parseTextArea(element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
+  def parseTextArea(parent: PageElement, element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
     var tagAttributes = getStandardAttributes(element, attributes)
 
     val cols = element.getAttribute("cols")
@@ -696,10 +745,10 @@ object HTMLParser {
     }
 
     val textareaObj = new PageElement("PageTextArea", tagAttributes)
-    processChildTags(element, textareaObj, attributes)
+    processChildTags(textareaObj, element, textareaObj, attributes)
   }
 
-  def parseTableHeaderCell(element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
+  def parseTableHeaderCell(parent: PageElement, element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
     var tagAttributes = getStandardAttributes(element, attributes)
     val table = attributes.get("table")
     if(table.isDefined) {
@@ -720,25 +769,79 @@ object HTMLParser {
 
     val cellObj = new PageElement("PageTableHeaderCell", tagAttributes)
     val id = tagAttributes.get("id").get.getStringValue.get
-    processChildTags(element, cellObj, attributes + ("cell" -> id))
+    processChildTags(cellObj, element, cellObj, attributes + ("cell" -> id))
   }
 
-  def parseTableHeader(element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
+  def parseTableFooter(parent: PageElement, element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
+    var tagAttributes = getStandardAttributes(element, attributes)
+    val table = attributes.get("table")
+    if(table.isDefined) {
+      tagAttributes += ("table" -> CPStringValue(table.get))
+    }
+    val tableFooterObj = new PageElement("PageTableFooter", tagAttributes)
+    processChildTags(parent, element, tableFooterObj, attributes + ("tableFooter" -> "true"))
+  }
+
+  def parseTableHeader(parent: PageElement, element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
     var tagAttributes = getStandardAttributes(element, attributes)
     val table = attributes.get("table")
     if(table.isDefined) {
       tagAttributes += ("table" -> CPStringValue(table.get))
     }
     val tableHeaderObj = new PageElement("PageTableHeader", tagAttributes)
-    processChildTags(element, tableHeaderObj, attributes)
+    processChildTags(parent, element, tableHeaderObj, attributes + ("tableHeader" -> "true"))
   }
 
-  def parseTableRow(element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
-    val tagAttributes = getStandardAttributes(element, attributes)
+  def parseTableRow(parent: PageElement, element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
+    var tagAttributes = getStandardAttributes(element, attributes)
+    tagAttributes += ("rowCells" -> new CPList(List()))
+
     val tableRowObj = new PageElement("PageTableRow", tagAttributes)
     val id = tagAttributes.get("id").get.getStringValue.get
-    processChildTags(element, tableRowObj, attributes + ("row" -> id))
+    val sectionName = if(attributes.contains("tableHeader")) {
+      "tableHeader"
+    } else if(attributes.contains("tableFooter")) {
+      "tableFooter"
+    } else {
+      "tableBody"
+    }
+    val section = parent.attributes.get(sectionName)
+    if(section.isDefined) {
+      val rowList = section.get match {
+        case value: CPList => value.values
+        case value: CPValue  => List(value)
+      }
+      val newList = CPStringValue(id) :: rowList
+      parent.attributes.put(sectionName, new CPList(newList))
+    }
+
+    val res = processChildTags(tableRowObj, element, tableRowObj, attributes + ("row" -> id, "rownum" -> attributes("pos")))
+
+    val cells = tableRowObj.attributes.get("rowCells").get.asInstanceOf[CPList].values
+    if(!cells.isEmpty) {
+      val reversed = cells.reverse
+      tableRowObj.attributes.put("rowCells", new CPList(reversed))
+      var curCellNum = 1
+      reversed.foreach(curCellId => {
+        val curCell = res.get(curCellId.getStringValue.get)
+
+        if(curCell.isDefined) {
+          val colSpan = curCell.get.attributes.get("colSpan")
+          if(colSpan.isDefined && colSpan.get.getIntValue.isDefined) {
+            val colSpanInt = colSpan.get.getIntValue.get
+            val colNums = List.range(curCellNum, curCellNum + colSpanInt - 1).map(CPIntValue(_))
+            curCell.get.attributes.put("columnNum", new CPList(colNums))
+          } else {
+            curCell.get.attributes.put("columnNum", CPIntValue(curCellNum))
+          }
+        }
+        curCellNum += 1
+      })
+    }
+
+    res
   }
+
 
   def processCrossReferences(elements: Map[String, PageElement]): Map[String, PageElement] = {
     elements
