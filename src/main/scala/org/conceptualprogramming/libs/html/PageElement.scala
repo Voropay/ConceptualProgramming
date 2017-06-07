@@ -19,7 +19,7 @@ class PageElement(_name: String, _attributes: Map[String, CPValue]) {
       "value"
     } else if(attributes.contains("value")) {
       "value"
-    } else if(attributes.contains("scr")) {
+    } else if(attributes.contains("src")) {
       "src"
     } else if(attributes.contains("href")) {
       "href"
@@ -27,13 +27,13 @@ class PageElement(_name: String, _attributes: Map[String, CPValue]) {
       "action"
     } else if(attributes.contains("text")) {
       "text"
-    } else if(attributes.contains("id")) {
-      "id"
-    } else if(attributes.contains("name")) {
+    }  else if(attributes.contains("name")) {
       "name"
     } else if(attributes.contains("label")) {
       "label"
-    } else{
+    } else if(attributes.contains("id")) {
+      "id"
+    }else{
       ""
     }
   }

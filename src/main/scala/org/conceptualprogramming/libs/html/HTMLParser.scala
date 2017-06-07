@@ -175,7 +175,7 @@ object HTMLParser {
 
   def extractId(element: WebElement): String = {
     val id = element.getAttribute("id")
-    if(id != null) {
+    if(id != null && !id.isEmpty) {
       id
     } else {
       //TODO: make it unique
@@ -184,12 +184,27 @@ object HTMLParser {
   }
 
   def extractText(element: WebElement): Option[CPValue] = {
-    //TODO: improve text extraction
-    val nestedElements = element.findElements(By.xpath(".//*"))
+    val nestedElements = element.findElements(By.xpath("./*"))
     if(nestedElements.isEmpty) {
-      Some(CPStringValue(element.getText))
+      var text = element.getText
+      if(text == null || text.isEmpty) {
+        return None
+      } else {
+        Some(CPStringValue(element.getText.trim))
+      }
     } else {
-      None
+      var text = element.getAttribute("innerHTML")
+      if(text == null || text.isEmpty) {
+        return None
+      }
+      nestedElements.toList.foreach(childElement => {
+        text = text.replaceFirst(childElement.getAttribute("outerHTML"), "")
+      })
+      if(text.isEmpty) {
+        None
+      } else {
+        Some(CPStringValue(text.trim))
+      }
     }
   }
 
