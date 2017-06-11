@@ -71,7 +71,7 @@ object HTMLParser {
       case "button" => parseButton(parent, element, attributes)
       case "caption" => parseCaption(parent, element, attributes)
       case "header" => parseHeader(parent, element, attributes)
-      case "fieldset" => parseHeader(parent, element, attributes)
+      case "fieldset" => parseFieldSet(parent, element, attributes)
       case "footer" => parseFooter(parent, element, attributes)
       case "h1" | "h2" | "h3" | "h4" | "h5" | "h6" => parseHeading(parent, element, attributes)
       case "img" => parseImage(parent, element, attributes)
@@ -140,9 +140,6 @@ object HTMLParser {
     if(attributes.contains("section")) {
       map += ("section" -> CPStringValue(attributes.get("section").get))
     }
-    if(attributes.contains("paragraph")) {
-      map += ("paragraph" -> CPStringValue(attributes.get("paragraph").get))
-    }
     if(attributes.contains("table")) {
       map += ("table" -> CPStringValue(attributes.get("table").get))
     }
@@ -155,6 +152,8 @@ object HTMLParser {
     if(attributes.contains("fieldset")) {
       map += ("fieldset" -> CPStringValue(attributes.get("fieldset").get))
     }
+
+
 
     /*
     val rectangle = element.getRect
@@ -228,6 +227,8 @@ object HTMLParser {
     map = map ++ borderMap
     val fontMap = extractFont(element, attributes)
     map = map ++ fontMap
+    val positionMap = extractPosition(element, attributes)
+    map = map ++ positionMap
     map
   }
 
@@ -312,6 +313,24 @@ object HTMLParser {
     if(fontWeight != null) {
       map += ("fontWeight" -> CPStringValue(extractFontWeight(fontWeight)))
     }
+    map
+  }
+
+  def extractPosition(element: WebElement, attributes: Map[String, String]): Map[String, CPValue] = {
+    var map = Map[String, CPValue]()
+    val height = element.getCssValue("height")
+    if(height != null && !height.isEmpty && height != "auto") {
+      map += ("height" -> CPStringValue(extractSize(height)))
+    }
+    val width = element.getCssValue("width")
+    if(width != null && !width.isEmpty && width != "auto") {
+      map += ("width" -> CPStringValue(extractSize(width)))
+    }
+    val location = element.getLocation
+    if(location != null) {
+      map += ("positionX" -> CPIntValue(location.getX), "positiony" -> CPIntValue(location.getY))
+    }
+
     map
   }
 
@@ -473,6 +492,7 @@ object HTMLParser {
     if(form.isDefined) {
       tagAttributes += ("form" -> form.get)
     }
+    tagAttributes += ("legend" -> CPStringValue(""))
     val fieldsetObj = new PageElement("PageFieldSet", tagAttributes)
     val id = tagAttributes.get("id").get.getStringValue.get
     processChildTags(fieldsetObj, element, fieldsetObj, attributes + ("fieldset" -> id))
@@ -551,6 +571,9 @@ object HTMLParser {
     }
 
     val legendObj = new PageElement("PageLegend", tagAttributes)
+    if(parent.attributes.contains("legend")) {
+      parent.attributes.put("legend", legendObj.attributes.get("id").get)
+    }
     processChildTags(legendObj, element, legendObj, attributes)
   }
 
@@ -561,9 +584,15 @@ object HTMLParser {
     if(list.isDefined) {
       tagAttributes += ("list" -> CPStringValue(list.get))
     }
-    val optgroup = attributes.get("optgroup")
-    if(optgroup.isDefined) {
-      tagAttributes += ("optgroup" -> CPStringValue(optgroup.get))
+
+    val id = tagAttributes.get("id").get.getStringValue.get
+    val listItems = parent.attributes.get("listItems")
+    if(listItems.isDefined) {
+      val newList = listItems.get match {
+        case value: CPList => CPStringValue(id) :: value.values
+        case value: CPValue  => CPStringValue(id) :: List(value)
+      }
+      parent.attributes.put("listItems", new CPList(newList))
     }
 
     val listItemObj = new PageElement("PageListItem", tagAttributes)
@@ -572,9 +601,16 @@ object HTMLParser {
 
   def parseList(parent: PageElement, element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
     var tagAttributes = getStandardAttributes(element, attributes)
+    tagAttributes += ("listItems" -> new CPList(List()))
     val listObj = new PageElement("PageList", tagAttributes)
     val id = tagAttributes.get("id").get.getStringValue.get
-    processChildTags(listObj, element, listObj, attributes + ("list" -> id))
+    val res = processChildTags(listObj, element, listObj, attributes + ("list" -> id))
+
+    val items = listObj.attributes.get("listItems").get.asInstanceOf[CPList].values
+    if(!items.isEmpty) {
+      listObj.attributes.put("listItems", new CPList(items.reverse))
+    }
+    res
   }
 
   def parseOptGroup(parent: PageElement, element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
@@ -591,24 +627,86 @@ object HTMLParser {
     if(label != null) {
       tagAttributes += ("label" -> CPStringValue(label))
     }
+    tagAttributes += ("listItems" -> new CPList(Nil))
     val optgroupObj = new PageElement("PageOptGroup", tagAttributes)
     val id = tagAttributes.get("id").get.getStringValue.get
-    processChildTags(optgroupObj, element, optgroupObj, attributes + ("optgroup" -> id))
+
+    val groupItems = parent.attributes.get("listGroups")
+    if(groupItems.isDefined) {
+      val newList = groupItems.get match {
+        case value: CPList => CPStringValue(id) :: value.values
+        case value: CPValue  => CPStringValue(id) :: List(value)
+      }
+      parent.attributes.put("listGroups", new CPList(newList))
+    }
+
+    val res = processChildTags(optgroupObj, element, optgroupObj, attributes + ("optgroup" -> id))
+
+    val listItems = optgroupObj.attributes.get("listItems").get.asInstanceOf[CPList].values
+    if(!listItems.isEmpty) {
+      optgroupObj.attributes.put("listItems", new CPList(listItems.reverse))
+
+      val parentListItems = parent.attributes.get("listItems")
+      if(parentListItems.isDefined) {
+        val newList = parentListItems.get match {
+          case value: CPList => listItems ::: value.values
+          case value: CPValue  => listItems ::: List(value)
+        }
+        parent.attributes.put("listItems", new CPList(newList))
+      }
+    }
+
+    res
   }
 
   def parseSelect(parent: PageElement, element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
     var tagAttributes = getStandardAttributes(element, attributes)
+    tagAttributes += ("listItems" -> CPList(Nil))
+    tagAttributes += ("listGroups" -> CPList(Nil))
+    val form = extractForm(element, attributes)
+    if(form.isDefined) {
+      tagAttributes += ("form" -> form.get)
+    }
+
     val selectObj = new PageElement("PageSelect", tagAttributes)
     val id = tagAttributes.get("id").get.getStringValue.get
-    processChildTags(selectObj, element, selectObj, attributes + ("select" -> id))
+    val res = processChildTags(selectObj, element, selectObj, attributes + ("list" -> id))
+
+    val listItems = selectObj.attributes.get("listItems").get.asInstanceOf[CPList].values
+    if(!listItems.isEmpty) {
+      selectObj.attributes.put("listItems", new CPList(listItems.reverse))
+    }
+    val groupItems = selectObj.attributes.get("listGroups").get.asInstanceOf[CPList].values
+    if(!groupItems.isEmpty) {
+      selectObj.attributes.put("listGroups", new CPList(groupItems.reverse))
+    }
+
+    res
   }
 
   def parseOption(parent: PageElement, element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
     var tagAttributes = getStandardAttributes(element, attributes)
-
-    val select = attributes.get("select")
+    val optgroup = attributes.get("optgroup")
+    if(optgroup.isDefined) {
+      tagAttributes += ("optgroup" -> CPStringValue(optgroup.get))
+    }
+    val value = element.getAttribute("value")
+    if(value != null) {
+      tagAttributes += ("value" -> CPStringValue(value))
+    }
+    val select = attributes.get("list")
     if(select.isDefined) {
-      tagAttributes += ("select" -> CPStringValue(select.get))
+      tagAttributes += ("list" -> CPStringValue(select.get))
+    }
+
+    val id = tagAttributes.get("id").get.getStringValue.get
+    val listItems = parent.attributes.get("listItems")
+    if(listItems.isDefined) {
+      val newList = listItems.get match {
+        case value: CPList => CPStringValue(id) :: value.values
+        case value: CPValue  => CPStringValue(id) :: List(value)
+      }
+      parent.attributes.put("listItems", new CPList(newList))
     }
 
     val optionObj = new PageElement("PageOption", tagAttributes)
@@ -730,11 +828,11 @@ object HTMLParser {
     var tagAttributes = getStandardAttributes(element, attributes)
 
     val cols = element.getAttribute("cols")
-    if(cols != null) {
+    if(cols != null && !cols.isEmpty) {
       tagAttributes += ("cols" -> CPStringValue(cols))
     }
     val disabled = element.getAttribute("disabled")
-    if(disabled != null) {
+    if(disabled != null && !disabled.isEmpty) {
       tagAttributes += ("disabled" -> CPStringValue(disabled))
     }
     val form = extractForm(element, attributes)
@@ -743,15 +841,15 @@ object HTMLParser {
     }
     //TODO: extract froms objects and add the links
     val readonly = element.getAttribute("readonly")
-    if(readonly != null) {
+    if(readonly != null && !readonly.isEmpty) {
       tagAttributes += ("readonly" -> CPStringValue(readonly))
     }
     val placeholder = element.getAttribute("placeholder")
-    if(placeholder != null) {
+    if(placeholder != null && !placeholder.isEmpty) {
       tagAttributes += ("placeholder" -> CPStringValue(placeholder))
     }
     val rows = element.getAttribute("rows")
-    if(rows != null) {
+    if(rows != null && !rows.isEmpty) {
       tagAttributes += ("rows" -> CPStringValue(rows))
     }
     val value = tagAttributes.get("text")
@@ -859,6 +957,19 @@ object HTMLParser {
 
 
   def processCrossReferences(elements: Map[String, PageElement]): Map[String, PageElement] = {
+    elements.foreach(entry => {
+      val id = entry._1
+      val el = entry._2
+      if(el.name == "PageLabel") {
+        if(el.attributes.contains("for") && el.attributes.get("for").isDefined) {
+          val forId = el.attributes.get("for").get.getStringValue.get
+          if(elements.contains(forId)) {
+            val formElement = elements.get(forId).get
+            formElement.attributes.put("label", CPStringValue(id))
+          }
+        }
+      }
+    })
     elements
   }
 }
