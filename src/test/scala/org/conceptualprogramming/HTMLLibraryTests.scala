@@ -244,7 +244,7 @@ class HTMLLibraryTests extends FlatSpec with Matchers {
 
     driver.close
   }
-*/
+
   "form tags" should "be parsed correctly" in {
     val url = "file:///C:/projects/AI/ConceptualProgramming/src/test/scala/org/conceptualprogramming/examples/html/form.html"
     val driver: WebDriver = new ChromeDriver
@@ -438,10 +438,291 @@ class HTMLLibraryTests extends FlatSpec with Matchers {
     developersList(0) should equal (CPStringValue(seniorId))
     developersList(1) should equal (CPStringValue(juniorId))
 
+    val analistObj = pageObjects.filter(_.attributes.getOrElse("xPath", CPBooleanValue(false)) == CPStringValue("/html[1]/body[1]/form[1]/select[2]/optgroup[2]/option[1]")).head
+    analistObj.attributes("pos").getIntValue.get should equal (3)
+    analistObj.name should equal ("PageOption")
+    analistObj.attributes("parent").getStringValue.get should equal (managerGroupId)
+    analistObj.attributes("list").getStringValue.get should equal (roleId)
+    analistObj.attributes("optgroup").getStringValue.get should equal (managerGroupId)
+    analistObj.attributes("value").getStringValue.get should equal ("analist")
+    analistObj.attributes("text").getStringValue.get should equal ("Business analist")
+    val analistId = analistObj.attributes("id").getStringValue.get
+
+    val pmObj = pageObjects.filter(_.attributes.getOrElse("xPath", CPBooleanValue(false)) == CPStringValue("/html[1]/body[1]/form[1]/select[2]/optgroup[2]/option[2]")).head
+    pmObj.attributes("pos").getIntValue.get should equal (4)
+    pmObj.name should equal ("PageOption")
+    pmObj.attributes("parent").getStringValue.get should equal (managerGroupId)
+    pmObj.attributes("list").getStringValue.get should equal (roleId)
+    pmObj.attributes("optgroup").getStringValue.get should equal (managerGroupId)
+    pmObj.attributes("value").getStringValue.get should equal ("pm")
+    pmObj.attributes("text").getStringValue.get should equal ("Project manager")
+    val pmId = pmObj.attributes("id").getStringValue.get
+
+    val managersList = managerGroupObj.attributes("listItems").asInstanceOf[CPList].values
+    managersList.size should equal (2)
+    managersList(0) should equal (CPStringValue(analistId))
+    managersList(1) should equal (CPStringValue(pmId))
+
+    val rolesList = roleObj.attributes("listItems").asInstanceOf[CPList].values
+    rolesList.size should equal (4)
+    rolesList(0) should equal (CPStringValue(seniorId))
+    rolesList(1) should equal (CPStringValue(juniorId))
+    rolesList(2) should equal (CPStringValue(analistId))
+    rolesList(3) should equal (CPStringValue(pmId))
+
     driver.close
   }
+*/
 
+  "table tags" should "be parsed correctly" in {
+    val url = "file:///C:/projects/AI/ConceptualProgramming/src/test/scala/org/conceptualprogramming/examples/html/table.html"
+    val driver: WebDriver = new ChromeDriver
+    driver.get(url)
+    val pageObjects = HTMLParser.parsePage(driver, url)
+    println(pageObjects)
+    pageObjects.size should equal(40)
 
+    val incomeTableObj = pageObjects.filter(_.attributes.getOrElse("xPath", CPBooleanValue(false)) == CPStringValue("/html[1]/body[1]/table[1]")).head
+    incomeTableObj.attributes("pos").getIntValue.get should equal(1)
+    incomeTableObj.name should equal("PageTable")
+    val incomeTableId = incomeTableObj.attributes("id").getStringValue.get
+
+    val incomeTableHeaderObj = pageObjects.filter(_.attributes.getOrElse("xPath", CPBooleanValue(false)) == CPStringValue("/html[1]/body[1]/table[1]/thead[1]")).head
+    incomeTableHeaderObj.attributes("pos").getIntValue.get should equal(1)
+    incomeTableHeaderObj.name should equal("PageTableHeader")
+    incomeTableHeaderObj.attributes("parent").getStringValue.get should equal(incomeTableId)
+    incomeTableHeaderObj.attributes("table").getStringValue.get should equal(incomeTableId)
+    val incomeTableHeaderId = incomeTableHeaderObj.attributes("id").getStringValue.get
+
+    val incomeTableHeaderRowObj = pageObjects.filter(_.attributes.getOrElse("xPath", CPBooleanValue(false)) == CPStringValue("/html[1]/body[1]/table[1]/thead[1]/tr[1]")).head
+    incomeTableHeaderRowObj.attributes("pos").getIntValue.get should equal(1)
+    incomeTableHeaderRowObj.name should equal("PageTableRow")
+    incomeTableHeaderRowObj.attributes("parent").getStringValue.get should equal(incomeTableHeaderId)
+    incomeTableHeaderRowObj.attributes("table").getStringValue.get should equal(incomeTableId)
+    incomeTableHeaderRowObj.attributes("tableSection").getStringValue.get should equal("header")
+    val incomeTableHeaderRowId = incomeTableHeaderRowObj.attributes("id").getStringValue.get
+
+    val incomeTableHeaderCell1Obj = pageObjects.filter(_.attributes.getOrElse("xPath", CPBooleanValue(false)) == CPStringValue("/html[1]/body[1]/table[1]/thead[1]/tr[1]/th[1]")).head
+    incomeTableHeaderCell1Obj.attributes("pos").getIntValue.get should equal(1)
+    incomeTableHeaderCell1Obj.name should equal("PageTableHeaderCell")
+    incomeTableHeaderCell1Obj.attributes("parent").getStringValue.get should equal(incomeTableHeaderRowId)
+    incomeTableHeaderCell1Obj.attributes("table").getStringValue.get should equal(incomeTableId)
+    incomeTableHeaderCell1Obj.attributes("tableSection").getStringValue.get should equal("header")
+    incomeTableHeaderCell1Obj.attributes("row").getStringValue.get should equal(incomeTableHeaderRowId)
+    incomeTableHeaderCell1Obj.attributes("text").getStringValue.get should equal("Month")
+    incomeTableHeaderCell1Obj.attributes("rownum").getIntValue.get should equal(1)
+    val incomeTableHeaderCell1Id = incomeTableHeaderCell1Obj.attributes("id").getStringValue.get
+
+    val incomeTableHeaderCell2Obj = pageObjects.filter(_.attributes.getOrElse("xPath", CPBooleanValue(false)) == CPStringValue("/html[1]/body[1]/table[1]/thead[1]/tr[1]/th[2]")).head
+    incomeTableHeaderCell2Obj.attributes("pos").getIntValue.get should equal(2)
+    incomeTableHeaderCell2Obj.name should equal("PageTableHeaderCell")
+    incomeTableHeaderCell2Obj.attributes("parent").getStringValue.get should equal(incomeTableHeaderRowId)
+    incomeTableHeaderCell2Obj.attributes("table").getStringValue.get should equal(incomeTableId)
+    incomeTableHeaderCell2Obj.attributes("tableSection").getStringValue.get should equal("header")
+    incomeTableHeaderCell2Obj.attributes("row").getStringValue.get should equal(incomeTableHeaderRowId)
+    incomeTableHeaderCell2Obj.attributes("text").getStringValue.get should equal("Income")
+    incomeTableHeaderCell2Obj.attributes("rownum").getIntValue.get should equal(1)
+    val incomeTableHeaderCell2Id = incomeTableHeaderCell2Obj.attributes("id").getStringValue.get
+
+    val incomeTableHeaderCell3Obj = pageObjects.filter(_.attributes.getOrElse("xPath", CPBooleanValue(false)) == CPStringValue("/html[1]/body[1]/table[1]/thead[1]/tr[1]/th[3]")).head
+    incomeTableHeaderCell3Obj.attributes("pos").getIntValue.get should equal(3)
+    incomeTableHeaderCell3Obj.name should equal("PageTableHeaderCell")
+    incomeTableHeaderCell3Obj.attributes("parent").getStringValue.get should equal(incomeTableHeaderRowId)
+    incomeTableHeaderCell3Obj.attributes("table").getStringValue.get should equal(incomeTableId)
+    incomeTableHeaderCell3Obj.attributes("tableSection").getStringValue.get should equal("header")
+    incomeTableHeaderCell3Obj.attributes("row").getStringValue.get should equal(incomeTableHeaderRowId)
+    incomeTableHeaderCell3Obj.attributes("text").getStringValue.get should equal("Outcome")
+    incomeTableHeaderCell3Obj.attributes("rownum").getIntValue.get should equal(1)
+    val incomeTableHeaderCell3Id = incomeTableHeaderCell3Obj.attributes("id").getStringValue.get
+
+    val incomeTableHeaderCellsList = incomeTableHeaderRowObj.attributes("rowCells").asInstanceOf[CPList].values
+    incomeTableHeaderCellsList.size should equal(3)
+    incomeTableHeaderCellsList(0) should equal(CPStringValue(incomeTableHeaderCell1Id))
+    incomeTableHeaderCellsList(1) should equal(CPStringValue(incomeTableHeaderCell2Id))
+    incomeTableHeaderCellsList(2) should equal(CPStringValue(incomeTableHeaderCell3Id))
+
+    //Footer
+
+    val incomeTableFooterObj = pageObjects.filter(_.attributes.getOrElse("xPath", CPBooleanValue(false)) == CPStringValue("/html[1]/body[1]/table[1]/tfoot[1]")).head
+    incomeTableFooterObj.name should equal("PageTableFooter")
+    incomeTableFooterObj.attributes("table").getStringValue.get should equal(incomeTableId)
+    val incomeTableFooterId = incomeTableFooterObj.attributes("id").getStringValue.get
+
+    val incomeTableFooterRowObj = pageObjects.filter(_.attributes.getOrElse("xPath", CPBooleanValue(false)) == CPStringValue("/html[1]/body[1]/table[1]/tfoot[1]/tr[1]")).head
+    incomeTableFooterRowObj.name should equal("PageTableRow")
+    incomeTableFooterRowObj.attributes("table").getStringValue.get should equal(incomeTableId)
+    incomeTableFooterRowObj.attributes("tableSection").getStringValue.get should equal("footer")
+    val incomeTableFooterRowId = incomeTableFooterRowObj.attributes("id").getStringValue.get
+
+    val incomeTableFooterCell1Obj = pageObjects.filter(_.attributes.getOrElse("xPath", CPBooleanValue(false)) == CPStringValue("/html[1]/body[1]/table[1]/tfoot[1]/tr[1]/td[1]")).head
+    incomeTableFooterCell1Obj.attributes("pos").getIntValue.get should equal(1)
+    incomeTableFooterCell1Obj.name should equal("PageTableCell")
+    incomeTableFooterCell1Obj.attributes("table").getStringValue.get should equal(incomeTableId)
+    incomeTableFooterCell1Obj.attributes("tableSection").getStringValue.get should equal("footer")
+    incomeTableFooterCell1Obj.attributes("row").getStringValue.get should equal(incomeTableFooterRowId)
+    incomeTableFooterCell1Obj.attributes("text").getStringValue.get should equal("Sum")
+    incomeTableFooterCell1Obj.attributes("rownum").getIntValue.get should equal(1)
+    val incomeTableFooterCell1Id = incomeTableFooterCell1Obj.attributes("id").getStringValue.get
+
+    val incomeTableFooterCell2Obj = pageObjects.filter(_.attributes.getOrElse("xPath", CPBooleanValue(false)) == CPStringValue("/html[1]/body[1]/table[1]/tfoot[1]/tr[1]/td[2]")).head
+    incomeTableFooterCell2Obj.attributes("pos").getIntValue.get should equal(2)
+    incomeTableFooterCell2Obj.name should equal("PageTableCell")
+    incomeTableFooterCell2Obj.attributes("text").getStringValue.get should equal("340")
+    incomeTableFooterCell2Obj.attributes("rownum").getIntValue.get should equal(1)
+    val incomeTableFooterCell2Id = incomeTableFooterCell2Obj.attributes("id").getStringValue.get
+
+    val incomeTableFooterCell3Obj = pageObjects.filter(_.attributes.getOrElse("xPath", CPBooleanValue(false)) == CPStringValue("/html[1]/body[1]/table[1]/tfoot[1]/tr[1]/td[3]")).head
+    incomeTableFooterCell3Obj.attributes("pos").getIntValue.get should equal(3)
+    incomeTableFooterCell3Obj.attributes("text").getStringValue.get should equal("270")
+    incomeTableFooterCell3Obj.attributes("rownum").getIntValue.get should equal(1)
+    val incomeTableFooterCell3Id = incomeTableFooterCell3Obj.attributes("id").getStringValue.get
+
+    val incomeTableFooterCellsList = incomeTableFooterRowObj.attributes("rowCells").asInstanceOf[CPList].values
+    incomeTableFooterCellsList.size should equal(3)
+    incomeTableFooterCellsList(0) should equal(CPStringValue(incomeTableFooterCell1Id))
+    incomeTableFooterCellsList(1) should equal(CPStringValue(incomeTableFooterCell2Id))
+    incomeTableFooterCellsList(2) should equal(CPStringValue(incomeTableFooterCell3Id))
+
+    // body
+
+    val incomeTableBodyObj = pageObjects.filter(_.attributes.getOrElse("xPath", CPBooleanValue(false)) == CPStringValue("/html[1]/body[1]/table[1]/tbody[1]")).head
+    incomeTableBodyObj.name should equal("PageTableBody")
+    incomeTableBodyObj.attributes("table").getStringValue.get should equal(incomeTableId)
+    val incomeTableBodyId = incomeTableBodyObj.attributes("id").getStringValue.get
+
+    val incomeTableBodyRow1Obj = pageObjects.filter(_.attributes.getOrElse("xPath", CPBooleanValue(false)) == CPStringValue("/html[1]/body[1]/table[1]/tbody[1]/tr[1]")).head
+    incomeTableBodyRow1Obj.name should equal("PageTableRow")
+    incomeTableBodyRow1Obj.attributes("pos").getIntValue.get should equal(1)
+    incomeTableBodyRow1Obj.attributes("tableSection").getStringValue.get should equal("body")
+    val incomeTableBodyRow1Id = incomeTableBodyRow1Obj.attributes("id").getStringValue.get
+
+    val incomeTableCell11Obj = pageObjects.filter(_.attributes.getOrElse("xPath", CPBooleanValue(false)) == CPStringValue("/html[1]/body[1]/table[1]/tbody[1]/tr[1]/td[1]")).head
+    incomeTableCell11Obj.attributes("pos").getIntValue.get should equal(1)
+    incomeTableCell11Obj.name should equal("PageTableCell")
+    incomeTableCell11Obj.attributes("tableSection").getStringValue.get should equal("body")
+    incomeTableCell11Obj.attributes("row").getStringValue.get should equal(incomeTableBodyRow1Id)
+    incomeTableCell11Obj.attributes("text").getStringValue.get should equal("January")
+    incomeTableCell11Obj.attributes("rownum").getIntValue.get should equal(1)
+    val incomeTableCell11Id = incomeTableCell11Obj.attributes("id").getStringValue.get
+
+    val incomeTableCell12Obj = pageObjects.filter(_.attributes.getOrElse("xPath", CPBooleanValue(false)) == CPStringValue("/html[1]/body[1]/table[1]/tbody[1]/tr[1]/td[2]")).head
+    incomeTableCell12Obj.attributes("pos").getIntValue.get should equal(2)
+    incomeTableCell12Obj.name should equal("PageTableCell")
+    incomeTableCell12Obj.attributes("tableSection").getStringValue.get should equal("body")
+    incomeTableCell12Obj.attributes("row").getStringValue.get should equal(incomeTableBodyRow1Id)
+    incomeTableCell12Obj.attributes("text").getStringValue.get should equal("100")
+    incomeTableCell12Obj.attributes("rownum").getIntValue.get should equal(1)
+    val incomeTableCell12Id = incomeTableCell12Obj.attributes("id").getStringValue.get
+
+    val incomeTableCell13Obj = pageObjects.filter(_.attributes.getOrElse("xPath", CPBooleanValue(false)) == CPStringValue("/html[1]/body[1]/table[1]/tbody[1]/tr[1]/td[3]")).head
+    incomeTableCell13Obj.attributes("pos").getIntValue.get should equal(3)
+    incomeTableCell13Obj.name should equal("PageTableCell")
+    incomeTableCell13Obj.attributes("tableSection").getStringValue.get should equal("body")
+    incomeTableCell13Obj.attributes("row").getStringValue.get should equal(incomeTableBodyRow1Id)
+    incomeTableCell13Obj.attributes("text").getStringValue.get should equal("120")
+    incomeTableCell13Obj.attributes("rownum").getIntValue.get should equal(1)
+    val incomeTableCell13Id = incomeTableCell13Obj.attributes("id").getStringValue.get
+
+    val incomeTableRow1CellsList = incomeTableBodyRow1Obj.attributes("rowCells").asInstanceOf[CPList].values
+    incomeTableRow1CellsList.size should equal(3)
+    incomeTableRow1CellsList(0) should equal(CPStringValue(incomeTableCell11Id))
+    incomeTableRow1CellsList(1) should equal(CPStringValue(incomeTableCell12Id))
+    incomeTableRow1CellsList(2) should equal(CPStringValue(incomeTableCell13Id))
+
+    val incomeTableBodyRow2Obj = pageObjects.filter(_.attributes.getOrElse("xPath", CPBooleanValue(false)) == CPStringValue("/html[1]/body[1]/table[1]/tbody[1]/tr[2]")).head
+    incomeTableBodyRow2Obj.name should equal("PageTableRow")
+    incomeTableBodyRow2Obj.attributes("pos").getIntValue.get should equal(2)
+    incomeTableBodyRow2Obj.attributes("tableSection").getStringValue.get should equal("body")
+    val incomeTableBodyRow2Id = incomeTableBodyRow2Obj.attributes("id").getStringValue.get
+
+    val incomeTableCell21Obj = pageObjects.filter(_.attributes.getOrElse("xPath", CPBooleanValue(false)) == CPStringValue("/html[1]/body[1]/table[1]/tbody[1]/tr[2]/td[1]")).head
+    incomeTableCell21Obj.attributes("pos").getIntValue.get should equal(1)
+    incomeTableCell21Obj.name should equal("PageTableCell")
+    incomeTableCell21Obj.attributes("tableSection").getStringValue.get should equal("body")
+    incomeTableCell21Obj.attributes("row").getStringValue.get should equal(incomeTableBodyRow2Id)
+    incomeTableCell21Obj.attributes("text").getStringValue.get should equal("February")
+    incomeTableCell21Obj.attributes("rownum").getIntValue.get should equal(2)
+    val incomeTableCell21Id = incomeTableCell21Obj.attributes("id").getStringValue.get
+
+    val incomeTableCell22Obj = pageObjects.filter(_.attributes.getOrElse("xPath", CPBooleanValue(false)) == CPStringValue("/html[1]/body[1]/table[1]/tbody[1]/tr[2]/td[2]")).head
+    incomeTableCell22Obj.attributes("pos").getIntValue.get should equal(2)
+    incomeTableCell22Obj.name should equal("PageTableCell")
+    incomeTableCell22Obj.attributes("tableSection").getStringValue.get should equal("body")
+    incomeTableCell22Obj.attributes("row").getStringValue.get should equal(incomeTableBodyRow2Id)
+    incomeTableCell22Obj.attributes("text").getStringValue.get should equal("80")
+    incomeTableCell22Obj.attributes("rownum").getIntValue.get should equal(2)
+    val incomeTableCell22Id = incomeTableCell22Obj.attributes("id").getStringValue.get
+
+    val incomeTableCell23Obj = pageObjects.filter(_.attributes.getOrElse("xPath", CPBooleanValue(false)) == CPStringValue("/html[1]/body[1]/table[1]/tbody[1]/tr[2]/td[3]")).head
+    incomeTableCell23Obj.attributes("pos").getIntValue.get should equal(3)
+    incomeTableCell23Obj.name should equal("PageTableCell")
+    incomeTableCell23Obj.attributes("tableSection").getStringValue.get should equal("body")
+    incomeTableCell23Obj.attributes("row").getStringValue.get should equal(incomeTableBodyRow2Id)
+    incomeTableCell23Obj.attributes("text").getStringValue.get should equal("30")
+    incomeTableCell23Obj.attributes("rownum").getIntValue.get should equal(2)
+    val incomeTableCell23Id = incomeTableCell23Obj.attributes("id").getStringValue.get
+
+    val incomeTableRow2CellsList = incomeTableBodyRow2Obj.attributes("rowCells").asInstanceOf[CPList].values
+    incomeTableRow2CellsList.size should equal(3)
+    incomeTableRow2CellsList(0) should equal(CPStringValue(incomeTableCell21Id))
+    incomeTableRow2CellsList(1) should equal(CPStringValue(incomeTableCell22Id))
+    incomeTableRow2CellsList(2) should equal(CPStringValue(incomeTableCell23Id))
+
+    val incomeTableBodyRow3Obj = pageObjects.filter(_.attributes.getOrElse("xPath", CPBooleanValue(false)) == CPStringValue("/html[1]/body[1]/table[1]/tbody[1]/tr[3]")).head
+    incomeTableBodyRow3Obj.name should equal("PageTableRow")
+    incomeTableBodyRow3Obj.attributes("pos").getIntValue.get should equal(3)
+    incomeTableBodyRow3Obj.attributes("tableSection").getStringValue.get should equal("body")
+    val incomeTableBodyRow3Id = incomeTableBodyRow3Obj.attributes("id").getStringValue.get
+
+    val incomeTableCell31Obj = pageObjects.filter(_.attributes.getOrElse("xPath", CPBooleanValue(false)) == CPStringValue("/html[1]/body[1]/table[1]/tbody[1]/tr[3]/td[1]")).head
+    incomeTableCell31Obj.attributes("pos").getIntValue.get should equal(1)
+    incomeTableCell31Obj.name should equal("PageTableCell")
+    incomeTableCell31Obj.attributes("tableSection").getStringValue.get should equal("body")
+    incomeTableCell31Obj.attributes("row").getStringValue.get should equal(incomeTableBodyRow3Id)
+    incomeTableCell31Obj.attributes("text").getStringValue.get should equal("March")
+    incomeTableCell31Obj.attributes("rownum").getIntValue.get should equal(3)
+    val incomeTableCell31Id = incomeTableCell31Obj.attributes("id").getStringValue.get
+
+    val incomeTableCell32Obj = pageObjects.filter(_.attributes.getOrElse("xPath", CPBooleanValue(false)) == CPStringValue("/html[1]/body[1]/table[1]/tbody[1]/tr[3]/td[2]")).head
+    incomeTableCell32Obj.attributes("pos").getIntValue.get should equal(2)
+    incomeTableCell32Obj.name should equal("PageTableCell")
+    incomeTableCell32Obj.attributes("tableSection").getStringValue.get should equal("body")
+    incomeTableCell32Obj.attributes("row").getStringValue.get should equal(incomeTableBodyRow3Id)
+    incomeTableCell32Obj.attributes("text").getStringValue.get should equal("160")
+    incomeTableCell32Obj.attributes("rownum").getIntValue.get should equal(3)
+    val incomeTableCell32Id = incomeTableCell32Obj.attributes("id").getStringValue.get
+
+    val incomeTableCell33Obj = pageObjects.filter(_.attributes.getOrElse("xPath", CPBooleanValue(false)) == CPStringValue("/html[1]/body[1]/table[1]/tbody[1]/tr[3]/td[3]")).head
+    incomeTableCell33Obj.attributes("pos").getIntValue.get should equal(3)
+    incomeTableCell33Obj.name should equal("PageTableCell")
+    incomeTableCell33Obj.attributes("tableSection").getStringValue.get should equal("body")
+    incomeTableCell33Obj.attributes("row").getStringValue.get should equal(incomeTableBodyRow3Id)
+    incomeTableCell33Obj.attributes("text").getStringValue.get should equal("120")
+    incomeTableCell33Obj.attributes("rownum").getIntValue.get should equal(3)
+    val incomeTableCell33Id = incomeTableCell33Obj.attributes("id").getStringValue.get
+
+    val incomeTableRow3CellsList = incomeTableBodyRow3Obj.attributes("rowCells").asInstanceOf[CPList].values
+    incomeTableRow3CellsList.size should equal(3)
+    incomeTableRow3CellsList(0) should equal(CPStringValue(incomeTableCell31Id))
+    incomeTableRow3CellsList(1) should equal(CPStringValue(incomeTableCell32Id))
+    incomeTableRow3CellsList(2) should equal(CPStringValue(incomeTableCell33Id))
+
+    val incomeTableHeaderList = incomeTableObj.attributes("headerRows").asInstanceOf[CPList].values
+    incomeTableHeaderList.size should equal(1)
+    incomeTableHeaderList(0) should equal(CPStringValue(incomeTableHeaderRowId))
+
+    val incomeTableFooterList = incomeTableObj.attributes("footerRows").asInstanceOf[CPList].values
+    incomeTableFooterList.size should equal(1)
+    incomeTableFooterList(0) should equal(CPStringValue(incomeTableFooterRowId))
+
+    val incomeTableBodyList = incomeTableObj.attributes("bodyRows").asInstanceOf[CPList].values
+    incomeTableBodyList.size should equal(3)
+    incomeTableBodyList(0) should equal(CPStringValue(incomeTableBodyRow1Id))
+    incomeTableBodyList(1) should equal(CPStringValue(incomeTableBodyRow2Id))
+    incomeTableBodyList(2) should equal(CPStringValue(incomeTableBodyRow3Id))
+
+    driver.close
+  }
 
   /*
 

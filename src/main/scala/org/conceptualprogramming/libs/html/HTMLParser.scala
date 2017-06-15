@@ -149,6 +149,9 @@ object HTMLParser {
     if(attributes.contains("cell")) {
       map += ("cell" -> CPStringValue(attributes.get("cell").get))
     }
+    if(attributes.contains("tableSection")) {
+      map += ("tableSection" -> CPStringValue(attributes.get("tableSection").get))
+    }
     if(attributes.contains("fieldset")) {
       map += ("fieldset" -> CPStringValue(attributes.get("fieldset").get))
     }
@@ -674,7 +677,17 @@ object HTMLParser {
 
     val listItems = selectObj.attributes.get("listItems").get.asInstanceOf[CPList].values
     if(!listItems.isEmpty) {
-      selectObj.attributes.put("listItems", new CPList(listItems.reverse))
+      val reversed = listItems.reverse
+      selectObj.attributes.put("listItems", new CPList(reversed))
+      var index = 1
+      reversed.foreach(item => {
+        val id = item.getStringValue.get
+        if(res.contains(id)) {
+          val curOption = res.get(id).get
+          curOption.attributes.put("pos", CPIntValue(index))
+          index += 1
+        }
+      })
     }
     val groupItems = selectObj.attributes.get("listGroups").get.asInstanceOf[CPList].values
     if(!groupItems.isEmpty) {
@@ -753,12 +766,27 @@ object HTMLParser {
 
   def parseTable(parent: PageElement, element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
     var tagAttributes = getStandardAttributes(element, attributes)
-    tagAttributes += ("tableBody" -> new CPList(List()))
-    tagAttributes += ("tableHeader" -> new CPList(List()))
-    tagAttributes += ("tableFooter" -> new CPList(List()))
+    tagAttributes += ("bodyRows" -> new CPList(List()))
+    tagAttributes += ("headerRows" -> new CPList(List()))
+    tagAttributes += ("footerRows" -> new CPList(List()))
     val tableObj = new PageElement("PageTable", tagAttributes)
     val id = tagAttributes.get("id").get.getStringValue.get
-    processChildTags(tableObj, element, tableObj, attributes + ("table" -> id))
+    val res = processChildTags(tableObj, element, tableObj, attributes + ("table" -> id))
+
+    val headerRows = tableObj.attributes.get("headerRows").get.asInstanceOf[CPList].values
+    if(!headerRows.isEmpty) {
+      tableObj.attributes.put("headerRows", new CPList(headerRows.reverse))
+    }
+    val bodyRows = tableObj.attributes.get("bodyRows").get.asInstanceOf[CPList].values
+    if(!bodyRows.isEmpty) {
+      tableObj.attributes.put("bodyRows", new CPList(bodyRows.reverse))
+    }
+    val footerRows = tableObj.attributes.get("footerRows").get.asInstanceOf[CPList].values
+    if(!footerRows.isEmpty) {
+      tableObj.attributes.put("footerRows", new CPList(footerRows.reverse))
+    }
+
+    res
   }
 
   def parseCaption(parent: PageElement, element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
@@ -773,24 +801,12 @@ object HTMLParser {
 
   def parseTableBody(parent: PageElement, element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
     var tagAttributes = getStandardAttributes(element, attributes)
-    val table = attributes.get("table")
-    if(table.isDefined) {
-      tagAttributes += ("table" -> CPStringValue(table.get))
-    }
     val tableBodyObj = new PageElement("PageTableBody", tagAttributes)
-    processChildTags(parent, element, tableBodyObj, attributes + ("tableBody" -> "true"))
+    processChildTags(parent, element, tableBodyObj, attributes + ("tableSection" -> "body"))
   }
 
   def parseTableCell(parent: PageElement, element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
     var tagAttributes = getStandardAttributes(element, attributes)
-    val table = attributes.get("table")
-    if(table.isDefined) {
-      tagAttributes += ("table" -> CPStringValue(table.get))
-    }
-    val row = attributes.get("row")
-    if(row.isDefined) {
-      tagAttributes += ("row" -> CPStringValue(row.get))
-    }
     //TODO: Handle rowspan attribute
     val rownum = attributes.get("rownum")
     if(rownum.isDefined) {
@@ -863,13 +879,9 @@ object HTMLParser {
 
   def parseTableHeaderCell(parent: PageElement, element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
     var tagAttributes = getStandardAttributes(element, attributes)
-    val table = attributes.get("table")
-    if(table.isDefined) {
-      tagAttributes += ("table" -> CPStringValue(table.get))
-    }
-    val row = attributes.get("row")
-    if(row.isDefined) {
-      tagAttributes += ("row" -> CPStringValue(row.get))
+    val rownum = attributes.get("rownum")
+    if(rownum.isDefined) {
+      tagAttributes += ("rownum" -> CPIntValue(rownum.get.toInt))
     }
     val colspan = element.getAttribute("colspan")
     if(colspan != null) {
@@ -879,56 +891,56 @@ object HTMLParser {
     if(rowspan != null) {
       tagAttributes += ("rowspan" -> CPStringValue(rowspan))
     }
+    tagAttributes += ("tableSection" -> CPStringValue("header"))
 
     val cellObj = new PageElement("PageTableHeaderCell", tagAttributes)
     val id = tagAttributes.get("id").get.getStringValue.get
-    processChildTags(cellObj, element, cellObj, attributes + ("cell" -> id))
+
+    val cellsList = parent.attributes.get("rowCells")
+    if(cellsList.isDefined) {
+      val newList = cellsList.get match {
+        case value: CPList => CPStringValue(id) :: value.values
+        case value: CPValue  => CPStringValue(id) :: List(value)
+      }
+      parent.attributes.put("rowCells", new CPList(newList))
+    }
+
+    processChildTags(cellObj, element, cellObj, attributes + ("cell" -> id, "tableSection" -> "header"))
   }
 
   def parseTableFooter(parent: PageElement, element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
     var tagAttributes = getStandardAttributes(element, attributes)
-    val table = attributes.get("table")
-    if(table.isDefined) {
-      tagAttributes += ("table" -> CPStringValue(table.get))
-    }
     val tableFooterObj = new PageElement("PageTableFooter", tagAttributes)
-    processChildTags(parent, element, tableFooterObj, attributes + ("tableFooter" -> "true"))
+    processChildTags(parent, element, tableFooterObj, attributes + ("tableSection" -> "footer"))
   }
 
   def parseTableHeader(parent: PageElement, element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
     var tagAttributes = getStandardAttributes(element, attributes)
-    val table = attributes.get("table")
-    if(table.isDefined) {
-      tagAttributes += ("table" -> CPStringValue(table.get))
-    }
     val tableHeaderObj = new PageElement("PageTableHeader", tagAttributes)
-    processChildTags(parent, element, tableHeaderObj, attributes + ("tableHeader" -> "true"))
+    processChildTags(parent, element, tableHeaderObj, attributes + ("tableSection" -> "header"))
   }
 
   def parseTableRow(parent: PageElement, element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
     var tagAttributes = getStandardAttributes(element, attributes)
+
     tagAttributes += ("rowCells" -> new CPList(List()))
+    val tableSection = attributes.getOrDefault("tableSection", "body")
+    tagAttributes += ("tableSection" -> CPStringValue(tableSection))
 
     val tableRowObj = new PageElement("PageTableRow", tagAttributes)
     val id = tagAttributes.get("id").get.getStringValue.get
-    val sectionName = if(attributes.contains("tableHeader")) {
-      "tableHeader"
-    } else if(attributes.contains("tableFooter")) {
-      "tableFooter"
-    } else {
-      "tableBody"
-    }
-    val section = parent.attributes.get(sectionName)
+
+    val section = parent.attributes.get(tableSection + "Rows")
     if(section.isDefined) {
       val rowList = section.get match {
         case value: CPList => value.values
         case value: CPValue  => List(value)
       }
       val newList = CPStringValue(id) :: rowList
-      parent.attributes.put(sectionName, new CPList(newList))
+      parent.attributes.put(tableSection + "Rows", new CPList(newList))
     }
 
-    val res = processChildTags(tableRowObj, element, tableRowObj, attributes + ("row" -> id, "rownum" -> attributes("pos")))
+    val res = processChildTags(tableRowObj, element, tableRowObj, attributes + ("row" -> id, "rownum" -> tagAttributes.getOrDefault("pos", CPStringValue("0")).getStringValue.get))
 
     val cells = tableRowObj.attributes.get("rowCells").get.asInstanceOf[CPList].values
     if(!cells.isEmpty) {
