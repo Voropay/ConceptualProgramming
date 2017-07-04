@@ -473,13 +473,12 @@ class HTMLLibraryTests extends FlatSpec with Matchers {
     driver.close
   }
 */
-
+/*
   "table tags" should "be parsed correctly" in {
     val url = "file:///C:/projects/AI/ConceptualProgramming/src/test/scala/org/conceptualprogramming/examples/html/table.html"
     val driver: WebDriver = new ChromeDriver
     driver.get(url)
     val pageObjects = HTMLParser.parsePage(driver, url)
-    println(pageObjects)
     pageObjects.size should equal(40)
 
     val incomeTableObj = pageObjects.filter(_.attributes.getOrElse("xPath", CPBooleanValue(false)) == CPStringValue("/html[1]/body[1]/table[1]")).head
@@ -720,6 +719,235 @@ class HTMLLibraryTests extends FlatSpec with Matchers {
     incomeTableBodyList(0) should equal(CPStringValue(incomeTableBodyRow1Id))
     incomeTableBodyList(1) should equal(CPStringValue(incomeTableBodyRow2Id))
     incomeTableBodyList(2) should equal(CPStringValue(incomeTableBodyRow3Id))
+
+
+    //Earnings table
+
+    val earningsTableObj = pageObjects.filter(_.attributes.getOrElse("xPath", CPBooleanValue(false)) == CPStringValue("/html[1]/body[1]/table[2]")).head
+    earningsTableObj.attributes("pos").getIntValue.get should equal(2)
+    earningsTableObj.name should equal("PageTable")
+    val earningsTableId = earningsTableObj.attributes("id").getStringValue.get
+
+    val earningsTableCaptionObj = pageObjects.filter(_.attributes.getOrElse("xPath", CPBooleanValue(false)) == CPStringValue("/html[1]/body[1]/table[2]/caption[1]")).head
+    earningsTableCaptionObj.attributes("pos").getIntValue.get should equal(1)
+    earningsTableCaptionObj.name should equal("PageTableCaption")
+    earningsTableCaptionObj.attributes("text").getStringValue.get should equal("Monthly savings")
+    val earningsTableCaptionId = earningsTableCaptionObj.attributes("id").getStringValue.get
+    earningsTableObj.attributes("caption").getStringValue.get should equal(earningsTableCaptionId)
+
+    val earningsTableHeaderRowObj = pageObjects.filter(_.attributes.getOrElse("xPath", CPBooleanValue(false)) == CPStringValue("/html[1]/body[1]/table[2]/tbody[1]/tr[1]")).head
+    earningsTableHeaderRowObj.attributes("pos").getIntValue.get should equal(1)
+    earningsTableHeaderRowObj.name should equal("PageTableRow")
+    //earningsTableHeaderRowObj.attributes("parent").getStringValue.get should equal(earningsTableId)
+    earningsTableHeaderRowObj.attributes("table").getStringValue.get should equal(earningsTableId)
+    earningsTableHeaderRowObj.attributes("tableSection").getStringValue.get should equal("header")
+    val earningsTableHeaderRowId = earningsTableHeaderRowObj.attributes("id").getStringValue.get
+
+    val earningsTableHeaderCell1Obj = pageObjects.filter(_.attributes.getOrElse("xPath", CPBooleanValue(false)) == CPStringValue("/html[1]/body[1]/table[2]/tbody[1]/tr[1]/th[1]")).head
+    earningsTableHeaderCell1Obj.attributes("pos").getIntValue.get should equal(1)
+    earningsTableHeaderCell1Obj.name should equal("PageTableHeaderCell")
+    earningsTableHeaderCell1Obj.attributes("parent").getStringValue.get should equal(earningsTableHeaderRowId)
+    earningsTableHeaderCell1Obj.attributes("table").getStringValue.get should equal(earningsTableId)
+    earningsTableHeaderCell1Obj.attributes("tableSection").getStringValue.get should equal("header")
+    earningsTableHeaderCell1Obj.attributes("row").getStringValue.get should equal(earningsTableHeaderRowId)
+    earningsTableHeaderCell1Obj.attributes("text").getStringValue.get should equal("Month")
+    earningsTableHeaderCell1Obj.attributes("rownum").getIntValue.get should equal(1)
+    val earningsTableHeaderCell1Id = earningsTableHeaderCell1Obj.attributes("id").getStringValue.get
+
+    val earningsTableHeaderCell2Obj = pageObjects.filter(_.attributes.getOrElse("xPath", CPBooleanValue(false)) == CPStringValue("/html[1]/body[1]/table[2]/tbody[1]/tr[1]/th[2]")).head
+    earningsTableHeaderCell2Obj.attributes("pos").getIntValue.get should equal(2)
+    earningsTableHeaderCell2Obj.name should equal("PageTableHeaderCell")
+    earningsTableHeaderCell2Obj.attributes("parent").getStringValue.get should equal(earningsTableHeaderRowId)
+    earningsTableHeaderCell2Obj.attributes("table").getStringValue.get should equal(earningsTableId)
+    earningsTableHeaderCell2Obj.attributes("tableSection").getStringValue.get should equal("header")
+    earningsTableHeaderCell2Obj.attributes("row").getStringValue.get should equal(earningsTableHeaderRowId)
+    earningsTableHeaderCell2Obj.attributes("text").getStringValue.get should equal("Savings")
+    earningsTableHeaderCell2Obj.attributes("rownum").getIntValue.get should equal(1)
+    val earningsTableHeaderCell2Id = earningsTableHeaderCell2Obj.attributes("id").getStringValue.get
+
+    val earningsTableHeaderRowCellsList = earningsTableHeaderRowObj.attributes("rowCells").asInstanceOf[CPList].values
+    earningsTableHeaderRowCellsList.size should equal(2)
+    earningsTableHeaderRowCellsList(0) should equal(CPStringValue(earningsTableHeaderCell1Id))
+    earningsTableHeaderRowCellsList(1) should equal(CPStringValue(earningsTableHeaderCell2Id))
+
+    val earningsTableRow1Obj = pageObjects.filter(_.attributes.getOrElse("xPath", CPBooleanValue(false)) == CPStringValue("/html[1]/body[1]/table[2]/tbody[1]/tr[2]")).head
+    earningsTableRow1Obj.attributes("pos").getIntValue.get should equal(1)
+    earningsTableRow1Obj.name should equal("PageTableRow")
+    //earningsTableRow1Obj.attributes("parent").getStringValue.get should equal(earningsTableId)
+    earningsTableRow1Obj.attributes("table").getStringValue.get should equal(earningsTableId)
+    earningsTableRow1Obj.attributes("tableSection").getStringValue.get should equal("body")
+    val earningsTableRow1Id = earningsTableRow1Obj.attributes("id").getStringValue.get
+
+    val earningsTableCell11Obj = pageObjects.filter(_.attributes.getOrElse("xPath", CPBooleanValue(false)) == CPStringValue("/html[1]/body[1]/table[2]/tbody[1]/tr[2]/td[1]")).head
+    earningsTableCell11Obj.attributes("pos").getIntValue.get should equal(1)
+    earningsTableCell11Obj.name should equal("PageTableCell")
+    earningsTableCell11Obj.attributes("parent").getStringValue.get should equal(earningsTableRow1Id)
+    earningsTableCell11Obj.attributes("table").getStringValue.get should equal(earningsTableId)
+    earningsTableCell11Obj.attributes("tableSection").getStringValue.get should equal("body")
+    earningsTableCell11Obj.attributes("row").getStringValue.get should equal(earningsTableRow1Id)
+    earningsTableCell11Obj.attributes("text").getStringValue.get should equal("January")
+    earningsTableCell11Obj.attributes("rownum").getIntValue.get should equal(1)
+    val earningsTableCell11Id = earningsTableCell11Obj.attributes("id").getStringValue.get
+
+    val earningsTableCell12Obj = pageObjects.filter(_.attributes.getOrElse("xPath", CPBooleanValue(false)) == CPStringValue("/html[1]/body[1]/table[2]/tbody[1]/tr[2]/td[2]")).head
+    earningsTableCell12Obj.attributes("pos").getIntValue.get should equal(2)
+    earningsTableCell12Obj.name should equal("PageTableCell")
+    earningsTableCell12Obj.attributes("parent").getStringValue.get should equal(earningsTableRow1Id)
+    earningsTableCell12Obj.attributes("table").getStringValue.get should equal(earningsTableId)
+    earningsTableCell12Obj.attributes("tableSection").getStringValue.get should equal("body")
+    earningsTableCell12Obj.attributes("row").getStringValue.get should equal(earningsTableRow1Id)
+    earningsTableCell12Obj.attributes("text").getStringValue.get should equal("-20")
+    earningsTableCell12Obj.attributes("rownum").getIntValue.get should equal(1)
+    val earningsTableCell12Id = earningsTableCell12Obj.attributes("id").getStringValue.get
+
+    val earningsTableRow1CellsList = earningsTableRow1Obj.attributes("rowCells").asInstanceOf[CPList].values
+    earningsTableRow1CellsList.size should equal(2)
+    earningsTableRow1CellsList(0) should equal(CPStringValue(earningsTableCell11Id))
+    earningsTableRow1CellsList(1) should equal(CPStringValue(earningsTableCell12Id))
+
+    val earningsTableRow2Obj = pageObjects.filter(_.attributes.getOrElse("xPath", CPBooleanValue(false)) == CPStringValue("/html[1]/body[1]/table[2]/tbody[1]/tr[3]")).head
+    earningsTableRow2Obj.attributes("pos").getIntValue.get should equal(2)
+    earningsTableRow2Obj.name should equal("PageTableRow")
+    //earningsTableRow2Obj.attributes("parent").getStringValue.get should equal(earningsTableId)
+    earningsTableRow2Obj.attributes("table").getStringValue.get should equal(earningsTableId)
+    earningsTableRow2Obj.attributes("tableSection").getStringValue.get should equal("body")
+    val earningsTableRow2Id = earningsTableRow2Obj.attributes("id").getStringValue.get
+
+    val earningsTableCell21Obj = pageObjects.filter(_.attributes.getOrElse("xPath", CPBooleanValue(false)) == CPStringValue("/html[1]/body[1]/table[2]/tbody[1]/tr[3]/td[1]")).head
+    earningsTableCell21Obj.attributes("pos").getIntValue.get should equal(1)
+    earningsTableCell21Obj.name should equal("PageTableCell")
+    earningsTableCell21Obj.attributes("parent").getStringValue.get should equal(earningsTableRow2Id)
+    earningsTableCell21Obj.attributes("table").getStringValue.get should equal(earningsTableId)
+    earningsTableCell21Obj.attributes("tableSection").getStringValue.get should equal("body")
+    earningsTableCell21Obj.attributes("row").getStringValue.get should equal(earningsTableRow2Id)
+    earningsTableCell21Obj.attributes("text").getStringValue.get should equal("February")
+    earningsTableCell21Obj.attributes("rownum").getIntValue.get should equal(2)
+    val earningsTableCell21Id = earningsTableCell21Obj.attributes("id").getStringValue.get
+
+    val earningsTableCell22Obj = pageObjects.filter(_.attributes.getOrElse("xPath", CPBooleanValue(false)) == CPStringValue("/html[1]/body[1]/table[2]/tbody[1]/tr[3]/td[2]")).head
+    earningsTableCell22Obj.attributes("pos").getIntValue.get should equal(2)
+    earningsTableCell22Obj.name should equal("PageTableCell")
+    earningsTableCell22Obj.attributes("parent").getStringValue.get should equal(earningsTableRow2Id)
+    earningsTableCell22Obj.attributes("table").getStringValue.get should equal(earningsTableId)
+    earningsTableCell22Obj.attributes("tableSection").getStringValue.get should equal("body")
+    earningsTableCell22Obj.attributes("row").getStringValue.get should equal(earningsTableRow2Id)
+    earningsTableCell22Obj.attributes("text").getStringValue.get should equal("50")
+    earningsTableCell22Obj.attributes("rownum").getIntValue.get should equal(2)
+    val earningsTableCell22Id = earningsTableCell22Obj.attributes("id").getStringValue.get
+
+    val earningsTableRow2CellsList = earningsTableRow2Obj.attributes("rowCells").asInstanceOf[CPList].values
+    earningsTableRow2CellsList.size should equal(2)
+    earningsTableRow2CellsList(0) should equal(CPStringValue(earningsTableCell21Id))
+    earningsTableRow2CellsList(1) should equal(CPStringValue(earningsTableCell22Id))
+
+    val earningsTableRow3Obj = pageObjects.filter(_.attributes.getOrElse("xPath", CPBooleanValue(false)) == CPStringValue("/html[1]/body[1]/table[2]/tbody[1]/tr[4]")).head
+    earningsTableRow3Obj.attributes("pos").getIntValue.get should equal(3)
+    earningsTableRow3Obj.name should equal("PageTableRow")
+    //earningsTableRow3Obj.attributes("parent").getStringValue.get should equal(earningsTableId)
+    earningsTableRow3Obj.attributes("table").getStringValue.get should equal(earningsTableId)
+    earningsTableRow3Obj.attributes("tableSection").getStringValue.get should equal("body")
+    val earningsTableRow3Id = earningsTableRow3Obj.attributes("id").getStringValue.get
+
+    val earningsTableCell31Obj = pageObjects.filter(_.attributes.getOrElse("xPath", CPBooleanValue(false)) == CPStringValue("/html[1]/body[1]/table[2]/tbody[1]/tr[4]/td[1]")).head
+    earningsTableCell31Obj.attributes("pos").getIntValue.get should equal(1)
+    earningsTableCell31Obj.name should equal("PageTableCell")
+    earningsTableCell31Obj.attributes("parent").getStringValue.get should equal(earningsTableRow3Id)
+    earningsTableCell31Obj.attributes("table").getStringValue.get should equal(earningsTableId)
+    earningsTableCell31Obj.attributes("tableSection").getStringValue.get should equal("body")
+    earningsTableCell31Obj.attributes("row").getStringValue.get should equal(earningsTableRow3Id)
+    earningsTableCell31Obj.attributes("text").getStringValue.get should equal("March")
+    earningsTableCell31Obj.attributes("rownum").getIntValue.get should equal(3)
+    val earningsTableCell31Id = earningsTableCell31Obj.attributes("id").getStringValue.get
+
+    val earningsTableCell32Obj = pageObjects.filter(_.attributes.getOrElse("xPath", CPBooleanValue(false)) == CPStringValue("/html[1]/body[1]/table[2]/tbody[1]/tr[4]/td[2]")).head
+    earningsTableCell32Obj.attributes("pos").getIntValue.get should equal(2)
+    earningsTableCell32Obj.name should equal("PageTableCell")
+    earningsTableCell32Obj.attributes("parent").getStringValue.get should equal(earningsTableRow3Id)
+    earningsTableCell32Obj.attributes("table").getStringValue.get should equal(earningsTableId)
+    earningsTableCell32Obj.attributes("tableSection").getStringValue.get should equal("body")
+    earningsTableCell32Obj.attributes("row").getStringValue.get should equal(earningsTableRow3Id)
+    earningsTableCell32Obj.attributes("text").getStringValue.get should equal("40")
+    earningsTableCell32Obj.attributes("rownum").getIntValue.get should equal(3)
+    val earningsTableCell32Id = earningsTableCell32Obj.attributes("id").getStringValue.get
+
+    val earningsTableRow3CellsList = earningsTableRow3Obj.attributes("rowCells").asInstanceOf[CPList].values
+    earningsTableRow3CellsList.size should equal(2)
+    earningsTableRow3CellsList(0) should equal(CPStringValue(earningsTableCell31Id))
+    earningsTableRow3CellsList(1) should equal(CPStringValue(earningsTableCell32Id))
+
+    val earningsTableHeaderList = earningsTableObj.attributes("headerRows").asInstanceOf[CPList].values
+    earningsTableHeaderList.size should equal(1)
+    earningsTableHeaderList(0) should equal(CPStringValue(earningsTableHeaderRowId))
+
+    val earningsTableBodyList = earningsTableObj.attributes("bodyRows").asInstanceOf[CPList].values
+    earningsTableBodyList.size should equal(3)
+    earningsTableBodyList(0) should equal(CPStringValue(earningsTableRow1Id))
+    earningsTableBodyList(1) should equal(CPStringValue(earningsTableRow2Id))
+    earningsTableBodyList(2) should equal(CPStringValue(earningsTableRow3Id))
+
+    driver.close
+  }
+  */
+
+  "text tags" should "be parsed correctly" in {
+    val url = "file:///C:/projects/AI/ConceptualProgramming/src/test/scala/org/conceptualprogramming/examples/html/text.html"
+    val driver: WebDriver = new ChromeDriver
+    driver.get(url)
+    val pageObjects = HTMLParser.parsePage(driver, url)
+    println(pageObjects)
+    pageObjects.size should equal (7)
+
+    val sectionObj = pageObjects.filter(_.attributes.getOrElse("xPath", CPBooleanValue(false)) == CPStringValue("/html[1]/body[1]/section[1]")).head
+    sectionObj.name should equal ("PageSection")
+    sectionObj.attributes("page").getStringValue.get should equal ("file:///C:/projects/AI/ConceptualProgramming/src/test/scala/org/conceptualprogramming/examples/html/text.html")
+    sectionObj.attributes("pos").getIntValue.get should equal (1)
+    val sectionId = sectionObj.attributes("id").getStringValue.get
+
+    val strongObj = pageObjects.filter(_.attributes.getOrElse("xPath", CPBooleanValue(false)) == CPStringValue("/html[1]/body[1]/section[1]/strong[1]")).head
+    strongObj.name should equal ("PageStrongText")
+    strongObj.attributes("page").getStringValue.get should equal ("file:///C:/projects/AI/ConceptualProgramming/src/test/scala/org/conceptualprogramming/examples/html/text.html")
+    strongObj.attributes("pos").getIntValue.get should equal (1)
+    strongObj.attributes("text").getStringValue.get should equal ("Strong text example")
+    strongObj.attributes("parent").getStringValue.get should equal (sectionId)
+    strongObj.attributes("fontStyle").asInstanceOf[CPList].values.contains(CPStringValue("strong")) should be (true)
+    strongObj.attributes("section").getStringValue.get should equal (sectionId)
+
+    val boldObj = pageObjects.filter(_.attributes.getOrElse("xPath", CPBooleanValue(false)) == CPStringValue("/html[1]/body[1]/section[1]/b[1]")).head
+    boldObj.name should equal ("PageBoldText")
+    boldObj.attributes("page").getStringValue.get should equal ("file:///C:/projects/AI/ConceptualProgramming/src/test/scala/org/conceptualprogramming/examples/html/text.html")
+    boldObj.attributes("pos").getIntValue.get should equal (1)
+    boldObj.attributes("text").getStringValue.get should equal ("Bold text example")
+    boldObj.attributes("parent").getStringValue.get should equal (sectionId)
+    boldObj.attributes("fontStyle").asInstanceOf[CPList].values.contains(CPStringValue("bold")) should be (true)
+    boldObj.attributes("section").getStringValue.get should equal (sectionId)
+
+    val smallObj = pageObjects.filter(_.attributes.getOrElse("xPath", CPBooleanValue(false)) == CPStringValue("/html[1]/body[1]/section[1]/small[1]")).head
+    smallObj.name should equal ("PageSmallText")
+    smallObj.attributes("page").getStringValue.get should equal ("file:///C:/projects/AI/ConceptualProgramming/src/test/scala/org/conceptualprogramming/examples/html/text.html")
+    smallObj.attributes("pos").getIntValue.get should equal (1)
+    smallObj.attributes("text").getStringValue.get should equal ("Small text example")
+    smallObj.attributes("parent").getStringValue.get should equal (sectionId)
+    smallObj.attributes("fontStyle").asInstanceOf[CPList].values.contains(CPStringValue("small")) should be (true)
+    smallObj.attributes("section").getStringValue.get should equal (sectionId)
+
+    val subObj = pageObjects.filter(_.attributes.getOrElse("xPath", CPBooleanValue(false)) == CPStringValue("/html[1]/body[1]/section[1]/sub[1]")).head
+    subObj.name should equal ("PageSubscriptedText")
+    subObj.attributes("page").getStringValue.get should equal ("file:///C:/projects/AI/ConceptualProgramming/src/test/scala/org/conceptualprogramming/examples/html/text.html")
+    subObj.attributes("pos").getIntValue.get should equal (1)
+    subObj.attributes("text").getStringValue.get should equal ("Subscript text example")
+    subObj.attributes("parent").getStringValue.get should equal (sectionId)
+    subObj.attributes("fontStyle").asInstanceOf[CPList].values.contains(CPStringValue("subscripted")) should be (true)
+    subObj.attributes("section").getStringValue.get should equal (sectionId)
+
+    val buttonObj = pageObjects.filter(_.attributes.getOrElse("xPath", CPBooleanValue(false)) == CPStringValue("/html[1]/body[1]/section[1]/button[1]")).head
+    buttonObj.name should equal ("PageButton")
+    buttonObj.attributes("page").getStringValue.get should equal ("file:///C:/projects/AI/ConceptualProgramming/src/test/scala/org/conceptualprogramming/examples/html/text.html")
+    buttonObj.attributes("pos").getIntValue.get should equal (1)
+    buttonObj.attributes("text").getStringValue.get should equal ("Save")
+    buttonObj.attributes("parent").getStringValue.get should equal (sectionId)
+    buttonObj.attributes("name").getStringValue.get should equal ("btnSave")
+    buttonObj.attributes("type").getStringValue.get should equal ("button")
+    buttonObj.attributes("section").getStringValue.get should equal (sectionId)
 
     driver.close
   }

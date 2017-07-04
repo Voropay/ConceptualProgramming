@@ -464,9 +464,10 @@ object HTMLParser {
   }
 
   def parseBold(parent: PageElement, element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
-    val tagAttributes = getStandardAttributes(element, attributes)
+    val attrs = attributes + ("textStyle" -> "bold")
+    val tagAttributes = getStandardAttributes(element, attrs)
     val boldObj = new PageElement("PageBoldText", tagAttributes)
-    processChildTags(boldObj, element, boldObj, attributes + ("textStyle" -> "bold"))
+    processChildTags(boldObj, element, boldObj, attrs)
   }
 
   def parseButton(parent: PageElement, element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
@@ -479,6 +480,14 @@ object HTMLParser {
     val form = extractForm(element, attributes)
     if(form.isDefined) {
       tagAttributes += ("form" -> form.get)
+    }
+    val typeAttr = element.getAttribute("type")
+    if(typeAttr != null) {
+      tagAttributes += ("type" -> CPStringValue(typeAttr))
+    }
+    val value = element.getAttribute("value")
+    if(value != null) {
+      tagAttributes += ("value" -> CPStringValue(value))
     }
     val buttonObj = new PageElement("PageButton", tagAttributes)
     processChildTags(buttonObj, element, buttonObj, attributes)
@@ -741,9 +750,10 @@ object HTMLParser {
   }
 
   def parseSmallText(parent: PageElement, element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
-    val tagAttributes = getStandardAttributes(element, attributes)
+    val attrs = attributes + ("textStyle" -> "small")
+    val tagAttributes = getStandardAttributes(element, attrs)
     val smallObj = new PageElement("PageSmallText", tagAttributes)
-    processChildTags(smallObj, element, smallObj, attributes + ("textStyle" -> "small"))
+    processChildTags(smallObj, element, smallObj, attrs)
   }
 
   def parseSpan(parent: PageElement, element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
@@ -753,15 +763,17 @@ object HTMLParser {
   }
 
   def parseStrongText(parent: PageElement, element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
-    val tagAttributes = getStandardAttributes(element, attributes)
+    val attrs = attributes + ("textStyle" -> "strong")
+    val tagAttributes = getStandardAttributes(element, attrs)
     val strongObj = new PageElement("PageStrongText", tagAttributes)
-    processChildTags(strongObj, element, strongObj, attributes + ("textStyle" -> "strong"))
+    processChildTags(strongObj, element, strongObj, attrs)
   }
 
   def parseSubscriptedText(parent: PageElement, element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
-    val tagAttributes = getStandardAttributes(element, attributes)
+    val attrs = attributes + ("textStyle" -> "subscripted")
+    val tagAttributes = getStandardAttributes(element, attrs)
     val subscriptedObj = new PageElement("PageSubscriptedText", tagAttributes)
-    processChildTags(subscriptedObj, element, subscriptedObj, attributes + ("textStyle" -> "subscripted"))
+    processChildTags(subscriptedObj, element, subscriptedObj, attrs)
   }
 
   def parseTable(parent: PageElement, element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
@@ -773,18 +785,7 @@ object HTMLParser {
     val id = tagAttributes.get("id").get.getStringValue.get
     val res = processChildTags(tableObj, element, tableObj, attributes + ("table" -> id))
 
-    val headerRows = tableObj.attributes.get("headerRows").get.asInstanceOf[CPList].values
-    if(!headerRows.isEmpty) {
-      tableObj.attributes.put("headerRows", new CPList(headerRows.reverse))
-    }
-    val bodyRows = tableObj.attributes.get("bodyRows").get.asInstanceOf[CPList].values
-    if(!bodyRows.isEmpty) {
-      tableObj.attributes.put("bodyRows", new CPList(bodyRows.reverse))
-    }
-    val footerRows = tableObj.attributes.get("footerRows").get.asInstanceOf[CPList].values
-    if(!footerRows.isEmpty) {
-      tableObj.attributes.put("footerRows", new CPList(footerRows.reverse))
-    }
+    numberTableRows(tableObj, res)
 
     res
   }
@@ -796,6 +797,7 @@ object HTMLParser {
       tagAttributes += ("table" -> CPStringValue(table.get))
     }
     val tableCaptionObj = new PageElement("PageTableCaption", tagAttributes)
+    parent.attributes.put("caption", tagAttributes.get("id").get)
     processChildTags(tableCaptionObj, element, tableCaptionObj, attributes)
   }
 
@@ -807,16 +809,7 @@ object HTMLParser {
 
   def parseTableCell(parent: PageElement, element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
     var tagAttributes = getStandardAttributes(element, attributes)
-    //TODO: Handle rowspan attribute
-    val rownum = attributes.get("rownum")
-    if(rownum.isDefined) {
-      tagAttributes += ("rownum" -> CPIntValue(rownum.get.toInt))
-    }
-    //TODO: Handle colspan attribute
-    val colnum = attributes.get("pos")
-    if(colnum.isDefined) {
-      tagAttributes += ("colnum" -> CPIntValue(colnum.get.toInt))
-    }
+
     val colspan = element.getAttribute("colspan")
     if(colspan != null) {
       tagAttributes += ("colspan" -> CPStringValue(colspan))
@@ -824,6 +817,10 @@ object HTMLParser {
     val rowspan = element.getAttribute("rowspan")
     if(rowspan != null) {
       tagAttributes += ("rowspan" -> CPStringValue(rowspan))
+    }
+    val tableSection = parent.attributes.getOrDefault("tableSection", CPStringValue("body"))
+    if(!parent.attributes.contains("tableSection")) {
+      parent.attributes.put("tableSection", tableSection)
     }
 
     val cellObj = new PageElement("PageTableCell", tagAttributes)
@@ -837,7 +834,7 @@ object HTMLParser {
       }
       parent.attributes.put("rowCells", new CPList(newList))
     }
-    processChildTags(cellObj, element, cellObj, attributes + ("cell" -> id))
+    processChildTags(cellObj, element, cellObj, attributes + ("cell" -> id, "tableSection" -> tableSection.getStringValue.get))
   }
 
   def parseTextArea(parent: PageElement, element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
@@ -879,10 +876,7 @@ object HTMLParser {
 
   def parseTableHeaderCell(parent: PageElement, element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
     var tagAttributes = getStandardAttributes(element, attributes)
-    val rownum = attributes.get("rownum")
-    if(rownum.isDefined) {
-      tagAttributes += ("rownum" -> CPIntValue(rownum.get.toInt))
-    }
+
     val colspan = element.getAttribute("colspan")
     if(colspan != null) {
       tagAttributes += ("colspan" -> CPStringValue(colspan))
@@ -892,6 +886,7 @@ object HTMLParser {
       tagAttributes += ("rowspan" -> CPStringValue(rowspan))
     }
     tagAttributes += ("tableSection" -> CPStringValue("header"))
+    parent.attributes.put("tableSection", CPStringValue("header"))
 
     val cellObj = new PageElement("PageTableHeaderCell", tagAttributes)
     val id = tagAttributes.get("id").get.getStringValue.get
@@ -930,38 +925,18 @@ object HTMLParser {
     val tableRowObj = new PageElement("PageTableRow", tagAttributes)
     val id = tagAttributes.get("id").get.getStringValue.get
 
-    val section = parent.attributes.get(tableSection + "Rows")
+    val res = processChildTags(tableRowObj, element, tableRowObj, attributes + ("row" -> id, "rownum" -> tagAttributes.getOrDefault("pos", CPStringValue("0")).getStringValue.get))
+
+    val tableSectionUpd = tableRowObj.attributes.get("tableSection").get.getStringValue.get
+
+    val section = parent.attributes.get(tableSectionUpd + "Rows")
     if(section.isDefined) {
       val rowList = section.get match {
         case value: CPList => value.values
         case value: CPValue  => List(value)
       }
       val newList = CPStringValue(id) :: rowList
-      parent.attributes.put(tableSection + "Rows", new CPList(newList))
-    }
-
-    val res = processChildTags(tableRowObj, element, tableRowObj, attributes + ("row" -> id, "rownum" -> tagAttributes.getOrDefault("pos", CPStringValue("0")).getStringValue.get))
-
-    val cells = tableRowObj.attributes.get("rowCells").get.asInstanceOf[CPList].values
-    if(!cells.isEmpty) {
-      val reversed = cells.reverse
-      tableRowObj.attributes.put("rowCells", new CPList(reversed))
-      var curCellNum = 1
-      reversed.foreach(curCellId => {
-        val curCell = res.get(curCellId.getStringValue.get)
-
-        if(curCell.isDefined) {
-          val colSpan = curCell.get.attributes.get("colSpan")
-          if(colSpan.isDefined && colSpan.get.getIntValue.isDefined) {
-            val colSpanInt = colSpan.get.getIntValue.get
-            val colNums = List.range(curCellNum, curCellNum + colSpanInt - 1).map(CPIntValue(_))
-            curCell.get.attributes.put("columnNum", new CPList(colNums))
-          } else {
-            curCell.get.attributes.put("columnNum", CPIntValue(curCellNum))
-          }
-        }
-        curCellNum += 1
-      })
+      parent.attributes.put(tableSectionUpd + "Rows", new CPList(newList))
     }
 
     res
@@ -983,5 +958,53 @@ object HTMLParser {
       }
     })
     elements
+  }
+
+  def numberTableRows(table: PageElement, elements: Map[String, PageElement]): Unit = {
+    numberTableRowsForSection(table, elements, "headerRows")
+    numberTableRowsForSection(table, elements, "bodyRows")
+    numberTableRowsForSection(table, elements, "footerRows")
+  }
+
+  def numberTableRowsForSection(table: PageElement, elements: Map[String, PageElement], sectionName: String): Unit = {
+    val rows = table.attributes.get(sectionName).get.asInstanceOf[CPList].values
+    if(!rows.isEmpty) {
+      val reversed = rows.reverse
+      table.attributes.put(sectionName, new CPList(reversed))
+      var index = 1
+      reversed.foreach(rowId => {
+        val row = elements.get(rowId.getStringValue.get)
+        if(row.isDefined) {
+          row.get.attributes.put("pos", CPIntValue(index))
+          numberRowCells(row.get, elements)
+          index += 1
+        }
+      })
+    }
+  }
+
+  def numberRowCells(row: PageElement, elements: Map[String, PageElement]): Unit = {
+    val cells = row.attributes.get("rowCells").get.asInstanceOf[CPList].values
+    if(!cells.isEmpty) {
+      val reversed = cells.reverse
+      row.attributes.put("rowCells", new CPList(reversed))
+      var index = 1
+      reversed.foreach(cellId => {
+        val curCell = elements.get(cellId.getStringValue.get)
+
+        if(curCell.isDefined) {
+          curCell.get.attributes.put("rownum", row.attributes.getOrDefault("pos", CPIntValue(0)))
+          val colSpan = curCell.get.attributes.get("colSpan")
+          if(colSpan.isDefined && colSpan.get.getIntValue.isDefined) {
+            val colSpanInt = colSpan.get.getIntValue.get
+            val colNums = List.range(index, index + colSpanInt - 1).map(CPIntValue(_))
+            curCell.get.attributes.put("columnNum", new CPList(colNums))
+          } else {
+            curCell.get.attributes.put("columnNum", CPIntValue(index))
+          }
+        }
+        index += 1
+      })
+    }
   }
 }
