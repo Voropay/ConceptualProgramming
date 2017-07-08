@@ -2,6 +2,8 @@ package org.conceptualprogramming
 
 import java.io.File
 
+import org.conceptualprogramming.core.datatypes.composite.CPObjectValue
+import org.conceptualprogramming.core.statements.ProgramExecutor
 import org.conceptualprogramming.libs.html.{ColorUtils, HTMLParser}
 import org.concepualprogramming.core.datatypes.composite.CPList
 import org.concepualprogramming.core.datatypes.{CPBooleanValue, CPStringValue}
@@ -17,7 +19,7 @@ class HTMLLibraryTests extends FlatSpec with Matchers {
 
   val driverFilePath = new File("resources/chromedriver.exe")
   System.setProperty("webdriver.chrome.driver", driverFilePath.getAbsolutePath)
-/*
+
   "color extraction" should "work correctly" in {
     ColorUtils.extractColorName("rgba(255, 0, 0, 1)") should equal ("Red")
   }
@@ -194,7 +196,6 @@ class HTMLLibraryTests extends FlatSpec with Matchers {
     val driver: WebDriver = new ChromeDriver
     driver.get(url)
     val pageObjects = HTMLParser.parsePage(driver, url)
-    println(pageObjects)
     pageObjects.size should equal (9)
 
     val ulObj = pageObjects.filter(_.attributes.getOrElse("xPath", CPBooleanValue(false)) == CPStringValue("/html[1]/body[1]/ul[1]")).head
@@ -250,7 +251,6 @@ class HTMLLibraryTests extends FlatSpec with Matchers {
     val driver: WebDriver = new ChromeDriver
     driver.get(url)
     val pageObjects = HTMLParser.parsePage(driver, url)
-    println(pageObjects)
     pageObjects.size should equal (23)
 
     val formObj = pageObjects.filter(_.attributes.getOrElse("xPath", CPBooleanValue(false)) == CPStringValue("/html[1]/body[1]/form[1]")).head
@@ -472,8 +472,7 @@ class HTMLLibraryTests extends FlatSpec with Matchers {
 
     driver.close
   }
-*/
-/*
+
   "table tags" should "be parsed correctly" in {
     val url = "file:///C:/projects/AI/ConceptualProgramming/src/test/scala/org/conceptualprogramming/examples/html/table.html"
     val driver: WebDriver = new ChromeDriver
@@ -887,14 +886,13 @@ class HTMLLibraryTests extends FlatSpec with Matchers {
 
     driver.close
   }
-  */
+
 
   "text tags" should "be parsed correctly" in {
     val url = "file:///C:/projects/AI/ConceptualProgramming/src/test/scala/org/conceptualprogramming/examples/html/text.html"
     val driver: WebDriver = new ChromeDriver
     driver.get(url)
     val pageObjects = HTMLParser.parsePage(driver, url)
-    println(pageObjects)
     pageObjects.size should equal (7)
 
     val sectionObj = pageObjects.filter(_.attributes.getOrElse("xPath", CPBooleanValue(false)) == CPStringValue("/html[1]/body[1]/section[1]")).head
@@ -952,14 +950,21 @@ class HTMLLibraryTests extends FlatSpec with Matchers {
     driver.close
   }
 
-  /*
-
   "openWebPage and closeWebPage functions" should "work correctly" in {
     val url = CPConstant(CPStringValue("file:///C:/projects/AI/ConceptualProgramming/src/test/scala/org/conceptualprogramming/examples/html/loginPage.html"))
     val readFunc = new CPFunctionCall("HTML.openWebPage", url :: Nil)
     val pe = new ProgramExecutor
     val context = pe.initContext
-    readFunc.calculate(context)
+    val objects = readFunc.calculate(context).get.asInstanceOf[CPList].values.map(_.asInstanceOf[CPObjectValue].objectValue)
+    context.knowledgeBase.add(objects)
+    context.knowledgeBase.getObjects("PageInput", Map("name" -> CPStringValue("LoginForm_Login"))).size should equal (1)
+    context.knowledgeBase.getObjects("PageInput", Map("name" -> CPStringValue("LoginForm_Password"))).size should equal (1)
+    context.knowledgeBase.getObjects("PageInput", Map("name" -> CPStringValue("submit"))).size should equal (1)
+
+    val closeFunc = new CPFunctionCall("HTML.closeWebPage", url :: CPConstant(CPBooleanValue(true)) :: Nil)
+    closeFunc.calculate(context).get.getBooleanValue.get should be (true)
+    context.knowledgeBase.getObjects("PageInput", Map("name" -> CPStringValue("LoginForm_Login"))).size should equal (0)
+    context.knowledgeBase.getObjects("PageInput", Map("name" -> CPStringValue("LoginForm_Password"))).size should equal (0)
+    context.knowledgeBase.getObjects("PageInput", Map("name" -> CPStringValue("submit"))).size should equal (0)
   }
-  */
 }

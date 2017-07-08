@@ -1,4 +1,4 @@
-object Table.readFromCSVFile("src/test/scala/org/conceptualprogramming/profitExample.csv", ",", true);
+object Table.readFromCSVFile("src/test/scala/org/conceptualprogramming/examples/profitExample.csv", ",", true);
 
 concept Name() :> Cell(*column == 0);
 concept Income() :> Cell(*column == 1);

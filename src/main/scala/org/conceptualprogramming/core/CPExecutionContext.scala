@@ -272,5 +272,13 @@ class CPExecutionContext {
         objects.foreach(baseFrame.get.knowledgeBase.add(_))
       }
     }
+
+    override def deleteObjects(query: Map[String, CPValue]): Int = {
+      var deleted = 0
+      for(frame <- frameStack) {
+        deleted += frame.knowledgeBase.deleteObjects(query)
+      }
+      deleted
+    }
   }
 }

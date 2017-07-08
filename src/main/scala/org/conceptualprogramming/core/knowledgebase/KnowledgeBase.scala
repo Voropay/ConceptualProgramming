@@ -17,6 +17,7 @@ trait KnowledgeBase {
   def contains(obj: CPObject): Boolean
   def containsObjects(name: String): Boolean
   def containsConcepts(name: String): Boolean
+  def deleteObjects(query: Map[String, CPValue]): Int
   def clear
 }
 

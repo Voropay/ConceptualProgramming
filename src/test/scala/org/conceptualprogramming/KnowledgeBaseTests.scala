@@ -32,7 +32,7 @@ class KnowledgeBaseTests extends FlatSpec with Matchers {
   }
 
   "InMemory Knowledge Base" should "add and return concepts correctly" in {
-    val kb= new InMemoryKnowledgeBaseImpl
+    val kb = new InMemoryKnowledgeBaseImpl
 
     val c1 = new CPStrictConcept(
       "c1",
@@ -68,6 +68,30 @@ class KnowledgeBaseTests extends FlatSpec with Matchers {
     concepts.size should equal (2)
     concepts should contain (c1)
     concepts should contain (c2)
+  }
+
+  "InMemory Knowledge Base" should "delete objects correctly" in {
+    val kb = new InMemoryKnowledgeBaseImpl
+    val cpObject1 = new CPObject("SomeValue", Map("source" -> CPStringValue("test"), "value" -> CPIntValue(10)), "value")
+    val cpObject2 = new CPObject("SomeValue", Map("source" -> CPStringValue("test"), "value" -> CPIntValue(11)), "value")
+    val cpObject3 = new CPObject("SomeValue", Map("value" -> CPIntValue(11), "source" -> CPStringValue("page")), "value")
+    val cpObject4 = new CPObject("SomeOtherValue", Map("value" -> CPIntValue(12), "source" -> CPStringValue("page")), "value")
+    kb.add(cpObject1) should be (true)
+    kb.add(cpObject2) should be (true)
+    kb.add(cpObject3) should be (true)
+    kb.add(cpObject4) should be (true)
+
+    val filteredObjects1 = kb.getObjects("SomeValue", Map("source" -> CPStringValue("page")))
+    filteredObjects1.size should equal (1)
+    filteredObjects1 should contain (cpObject3)
+
+    val filteredObjects2 = kb.getObjects("SomeOtherValue", Map("source" -> CPStringValue("page")))
+    filteredObjects2.size should equal (1)
+    filteredObjects2 should contain (cpObject4)
+
+    kb.deleteObjects(Map("source" -> CPStringValue("page"))) should equal (2)
+    kb.getObjects("SomeValue", Map("source" -> CPStringValue("page"))).isEmpty should be (true)
+    kb.getObjects("SomeOtherValue", Map("source" -> CPStringValue("page"))).isEmpty should be (true)
   }
 
   "KnowledgeBase singleton" should "correctly return instance of KnowledgeBase" in {
