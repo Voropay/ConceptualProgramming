@@ -9,8 +9,8 @@ import scala.collection.immutable.TreeMap
  * Created by oleksii.voropai on 8/14/2016.
  */
 class InMemoryKnowledgeBaseImpl extends KnowledgeBase {
-  var objectsIndex: Map[String, List[CPObject]] = TreeMap()
-  var conceptsIndex: Map[String, List[CPConcept]] = TreeMap()
+  var objectsIndex = TreeMap[String, List[CPObject]]()
+  var conceptsIndex = TreeMap[String, List[CPConcept]]()
 
   override def add(concept: CPConcept): Boolean = {
     if(contains(concept)) {
@@ -77,4 +77,26 @@ class InMemoryKnowledgeBaseImpl extends KnowledgeBase {
   override def containsConcepts(name: String): Boolean = conceptsIndex.contains(name)
 
   override def add(objects: List[CPObject]): Unit = objects.foreach(add(_))
+
+  override def deleteObjects(query: Map[String, CPValue]): Int = {
+    var deleted = 0
+    for(key <- objectsIndex.keys) {
+      val objects = objectsIndex.get(key).get
+      val objectsLeft = objects.filter(obj => {
+        val notMatchedQuery = query.find(entry => {
+          obj.attributes.get(entry._1).isEmpty || obj.attributes.get(entry._1).get != entry._2
+        })
+        notMatchedQuery.isDefined
+      })
+      if(objectsLeft.size != objects.size) {
+        deleted += objects.size - objectsLeft.size
+        if(objectsLeft.isEmpty) {
+          objectsIndex = objectsIndex - key
+        } else {
+          objectsIndex = objectsIndex + (key -> objectsLeft)
+        }
+      }
+    }
+    deleted
+  }
 }

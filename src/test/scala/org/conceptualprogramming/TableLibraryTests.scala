@@ -14,7 +14,7 @@ import org.scalatest.{Matchers, FlatSpec}
  */
 class TableLibraryTests extends FlatSpec with Matchers {
   "readFromCSVFile Function" should "work correctly" in {
-    val filePath = CPConstant(CPStringValue("src/test/scala/org/conceptualprogramming/profitExample.csv"))
+    val filePath = CPConstant(CPStringValue("src/test/scala/org/conceptualprogramming/examples/profitExample.csv"))
     val delimiter = CPConstant(CPStringValue(","))
     val readHeader = CPConstant(CPBooleanValue(true))
     val readFunc = new CPFunctionCall("Table.readFromCSVFile", filePath :: delimiter :: readHeader :: Nil)

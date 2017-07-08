@@ -602,7 +602,7 @@ class TestExamples extends FlatSpec with Matchers {
     val res1 = program.execute(westExample, new RunPreferences(Map("RESOLVE_TYPE" -> RunPreferences.DECISION_TREE_RESOLVE_TYPE)))
     res1 should equal ("West is criminal")
 
-    val preferences = RunPreferences(Array("-sourceFile=src/test/scala/org/conceptualprogramming/profitExample.cp"))
+    val preferences = RunPreferences(Array("-sourceFile=src/test/scala/org/conceptualprogramming/examples/profitExample.cp"))
     val executor = new ProgramExecutor
     val source = scala.io.Source.fromFile(preferences.getSourceFile)
     val sourceCode = try source.mkString finally source.close()

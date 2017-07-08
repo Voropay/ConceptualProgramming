@@ -3,6 +3,7 @@ package org.concepualprogramming.core
 import org.concepualprogramming.core.datatypes.CPValue
 import org.concepualprogramming.core.statements.expressions.CPFunctionDefinition
 import org.concepualprogramming.core.knowledgebase.KnowledgeBase
+import org.openqa.selenium.WebDriver
 
 import scala.collection.mutable
 
@@ -134,6 +135,29 @@ class CPExecutionContext {
   //TODO: add visibility through stack if needed
   def getSubstitutions: Option[CPSubstitutions] = frameStack.top.substitutions
 
+  def addPageDriver(url: String, driver: WebDriver): Unit = {
+    frameStack.top.pageDrivers.put(url, driver)
+  }
+
+  def getPageDriver(url: String): Option[WebDriver] = {
+    for(frame <- frameStack) {
+      val driver = frame.pageDrivers.get(url)
+      if(!driver.isEmpty) {
+        return driver
+      }
+    }
+    return None
+  }
+
+  def deletePageDriver(url: String): Unit = {
+    for(frame <- frameStack) {
+      val driver = frame.pageDrivers.get(url)
+      if(!driver.isEmpty) {
+        frame.pageDrivers.remove(url)
+        return
+      }
+    }
+  }
 
   class CPExecutionFrame {
     var depth: Integer = 0
@@ -146,6 +170,7 @@ class CPExecutionContext {
     var substitutionsList = List[CPSubstitutions]()
     var substitutions: Option[CPSubstitutions] = None
     var transparent = false
+    var pageDrivers = mutable.Map[String, WebDriver]()
   }
 
   class KnowledgeBaseStack extends KnowledgeBase {
@@ -246,6 +271,14 @@ class CPExecutionContext {
       if(baseFrame.isDefined) {
         objects.foreach(baseFrame.get.knowledgeBase.add(_))
       }
+    }
+
+    override def deleteObjects(query: Map[String, CPValue]): Int = {
+      var deleted = 0
+      for(frame <- frameStack) {
+        deleted += frame.knowledgeBase.deleteObjects(query)
+      }
+      deleted
     }
   }
 }
