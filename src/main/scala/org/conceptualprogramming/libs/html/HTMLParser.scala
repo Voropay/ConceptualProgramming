@@ -1,6 +1,5 @@
 package org.conceptualprogramming.libs.html
 
-import org.conceptualprogramming.core.datatypes.composite.CPMap
 import org.concepualprogramming.core.CPObject
 import org.concepualprogramming.core.datatypes.composite.CPList
 import org.concepualprogramming.core.datatypes.{CPBooleanValue, CPIntValue, CPStringValue, CPValue}
@@ -22,10 +21,12 @@ object HTMLParser {
     }
   }
 
-  def parsePage(page: WebDriver, url: String): List[CPObject] = {
+  def parsePage(page: WebDriver, pageName: String): List[CPObject] = {
     val titleId = java.util.UUID.randomUUID.toString
     var pageTitleElement = new PageElement("PageTitle", Map(
-      "page" -> CPStringValue(url),
+      "page" -> CPStringValue(pageName),
+      "pageHandle" -> CPStringValue(page.getWindowHandle),
+      "url" -> CPStringValue(page.getCurrentUrl),
       "value" -> CPStringValue(page.getTitle),
       "id"   -> CPStringValue(titleId)
     ))
@@ -36,7 +37,11 @@ object HTMLParser {
 
     val body = page.findElement(By.tagName("body"))
     var nestedElements = body.findElements(By.xpath("./*"))
-    val nestedObjects = parseNestedElements(pageTitleElement, nestedElements, Map("page" -> url, "xPath" -> "/html[1]/body[1]"))
+    val nestedObjects = parseNestedElements(pageTitleElement, nestedElements, Map(
+      "page" -> pageName,
+      "url" -> page.getCurrentUrl,
+      "pageHandle" -> page.getWindowHandle,
+      "xPath" -> "/html[1]/body[1]"))
     val objects = processCrossReferences(nestedObjects + (titleId -> pageTitleElement))
     objects.values.map(_.toCPObject).toList
   }
@@ -107,7 +112,9 @@ object HTMLParser {
       "id" -> CPStringValue(extractId(element)),
       "parent" -> CPStringValue(attributes.getOrDefault("parent", "")),
       "pos" -> CPIntValue(attributes.getOrDefault("pos", "0").toInt),
-      "page" -> CPStringValue(attributes.getOrDefault("page", ""))
+      "page" -> CPStringValue(attributes.getOrDefault("page", "")),
+      "pageHandle" -> CPStringValue(attributes.getOrDefault("pageHandle", "")),
+      "url" -> CPStringValue(attributes.getOrDefault("url", ""))
     )
 
     val name = element.getAttribute("name")
@@ -716,6 +723,10 @@ object HTMLParser {
     if(value != null) {
       tagAttributes += ("value" -> CPStringValue(value))
     }
+    val selectedStr = element.getAttribute("selected")
+    val selected = selectedStr != null && selectedStr == "true"
+    tagAttributes += ("selected" -> CPBooleanValue(selected))
+
     val select = attributes.get("list")
     if(select.isDefined) {
       tagAttributes += ("list" -> CPStringValue(select.get))

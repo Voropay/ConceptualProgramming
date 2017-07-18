@@ -135,27 +135,36 @@ class CPExecutionContext {
   //TODO: add visibility through stack if needed
   def getSubstitutions: Option[CPSubstitutions] = frameStack.top.substitutions
 
-  def addPageDriver(url: String, driver: WebDriver): Unit = {
-    frameStack.top.pageDrivers.put(url, driver)
+  def addPageHandle(url: String, pageHandle: (WebDriver, String)): Unit = {
+    frameStack.top.pageHandles.put(url, pageHandle)
   }
 
-  def getPageDriver(url: String): Option[WebDriver] = {
+  def getPageHandle(url: String): Option[(WebDriver, String)] = {
     for(frame <- frameStack) {
-      val driver = frame.pageDrivers.get(url)
-      if(!driver.isEmpty) {
-        return driver
+      val pageHandle = frame.pageHandles.get(url)
+      if(!pageHandle.isEmpty) {
+        return pageHandle
       }
     }
     return None
   }
 
-  def deletePageDriver(url: String): Unit = {
+  def deletePageHandle(url: String): Unit = {
     for(frame <- frameStack) {
-      val driver = frame.pageDrivers.get(url)
-      if(!driver.isEmpty) {
-        frame.pageDrivers.remove(url)
+      val pageHandle = frame.pageHandles.get(url)
+      if(pageHandle.isDefined) {
+        frame.pageHandles.remove(url)
         return
       }
+    }
+  }
+
+  def getOpenedHandle(): Option[(WebDriver, String)] = {
+    val openedPage = frameStack.find(!_.pageHandles.isEmpty)
+    if(openedPage.isDefined) {
+      Some(openedPage.get.pageHandles.head._2)
+    } else {
+      None
     }
   }
 
@@ -170,7 +179,7 @@ class CPExecutionContext {
     var substitutionsList = List[CPSubstitutions]()
     var substitutions: Option[CPSubstitutions] = None
     var transparent = false
-    var pageDrivers = mutable.Map[String, WebDriver]()
+    var pageHandles = mutable.Map[String, (WebDriver, String)]()
   }
 
   class KnowledgeBaseStack extends KnowledgeBase {
