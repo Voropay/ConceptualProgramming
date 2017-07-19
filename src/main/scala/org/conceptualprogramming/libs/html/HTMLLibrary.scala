@@ -5,16 +5,14 @@ import java.io.File
 import org.conceptualprogramming.core.datatypes.composite.CPObjectValue
 import org.conceptualprogramming.libs.StandardLibrary
 import org.conceptualprogramming.libs.html.HTMLParser
-import org.concepualprogramming.core.{CPExecutionContext, CPObject}
+import org.concepualprogramming.core.{CPExecutionContext, CPInheritedConcept, CPObject}
 import org.concepualprogramming.core.datatypes.{CPBooleanValue, CPStringValue, CPValue}
 import org.concepualprogramming.core.datatypes.composite.CPList
 import org.concepualprogramming.core.statements.expressions.functions.BuiltInFunctionDefinition
-import org.concepualprogramming.core.statements.expressions.{CPExpression, CPFunctionDefinition}
+import org.concepualprogramming.core.statements.expressions.{CPConstant, CPExpression, CPFunctionDefinition}
 import org.openqa.selenium.{By, Keys, WebDriver}
 import org.openqa.selenium.chrome.ChromeDriver
-import org.openqa.selenium.firefox.FirefoxDriver
 import org.openqa.selenium.interactions.Actions
-import org.openqa.selenium.support.ui.Select
 
 /**
   * Created by oleksii.voropai on 5/6/2017.
@@ -33,6 +31,8 @@ class HTMLLibrary extends StandardLibrary {
     context.addFunctionDefinition(openLinkNewWindowFunction)
     context.addFunctionDefinition(enterTextFunction)
     context.addFunctionDefinition(selectOptionFunction)
+
+    registerConcepts(context)
   }
 
   def openWebPageFunction: CPFunctionDefinition = {
@@ -508,5 +508,51 @@ class HTMLLibrary extends StandardLibrary {
       selectOption,
       CPFunctionDefinition.checkAttributesDefined
     )
+  }
+
+
+  def registerConcepts(context: CPExecutionContext): Unit = {
+    registerHierarchyConcepts(context)
+    registerSpatialConcepts(context)
+  }
+
+  def registerHierarchyConcepts(context: CPExecutionContext): Unit = {
+    context.knowledgeBase.add(new CPInheritedConcept("WebPageElement", List(("PageDivision", "e")), Map("pageElementName" -> new CPConstant(CPStringValue("PageDivision"))), Map(), Nil))
+    context.knowledgeBase.add(new CPInheritedConcept("WebPageElement", List(("PageInput", "e")), Map("pageElementName" -> new CPConstant(CPStringValue("PageInput"))), Map(), Nil))
+    context.knowledgeBase.add(new CPInheritedConcept("WebPageElement", List(("PageForm", "e")), Map("pageElementName" -> new CPConstant(CPStringValue("PageForm"))), Map(), Nil))
+    context.knowledgeBase.add(new CPInheritedConcept("WebPageElement", List(("PageLink", "e")), Map("pageElementName" -> new CPConstant(CPStringValue("PageLink"))), Map(), Nil))
+    context.knowledgeBase.add(new CPInheritedConcept("WebPageElement", List(("PageBoldText", "e")), Map("pageElementName" -> new CPConstant(CPStringValue("PageBoldText"))), Map(), Nil))
+    context.knowledgeBase.add(new CPInheritedConcept("WebPageElement", List(("PageButton", "e")), Map("pageElementName" -> new CPConstant(CPStringValue("PageButton"))), Map(), Nil))
+    context.knowledgeBase.add(new CPInheritedConcept("WebPageElement", List(("PageFieldSet", "e")), Map("pageElementName" -> new CPConstant(CPStringValue("PageFieldSet"))), Map(), Nil))
+    context.knowledgeBase.add(new CPInheritedConcept("WebPageElement", List(("PageHeader", "e")), Map("pageElementName" -> new CPConstant(CPStringValue("PageHeader"))), Map(), Nil))
+    context.knowledgeBase.add(new CPInheritedConcept("WebPageElement", List(("PageFooter", "e")), Map("pageElementName" -> new CPConstant(CPStringValue("PageFooter"))), Map(), Nil))
+    context.knowledgeBase.add(new CPInheritedConcept("WebPageElement", List(("PageHeading", "e")), Map("pageElementName" -> new CPConstant(CPStringValue("PageHeading"))), Map(), Nil))
+    context.knowledgeBase.add(new CPInheritedConcept("WebPageElement", List(("PageImage", "e")), Map("pageElementName" -> new CPConstant(CPStringValue("PageImage"))), Map(), Nil))
+    context.knowledgeBase.add(new CPInheritedConcept("WebPageElement", List(("PageLabel", "e")), Map("pageElementName" -> new CPConstant(CPStringValue("PageLabel"))), Map(), Nil))
+    context.knowledgeBase.add(new CPInheritedConcept("WebPageElement", List(("PageLegend", "e")), Map("pageElementName" -> new CPConstant(CPStringValue("PageLegend"))), Map(), Nil))
+    context.knowledgeBase.add(new CPInheritedConcept("WebPageElement", List(("PageListItem", "e")), Map("pageElementName" -> new CPConstant(CPStringValue("PageListItem"))), Map(), Nil))
+    context.knowledgeBase.add(new CPInheritedConcept("WebPageElement", List(("PageList", "e")), Map("pageElementName" -> new CPConstant(CPStringValue("PageList"))), Map(), Nil))
+    context.knowledgeBase.add(new CPInheritedConcept("WebPageElement", List(("PageOptGroup", "e")), Map("pageElementName" -> new CPConstant(CPStringValue("PageOptGroup"))), Map(), Nil))
+    context.knowledgeBase.add(new CPInheritedConcept("WebPageElement", List(("PageSelect", "e")), Map("pageElementName" -> new CPConstant(CPStringValue("PageSelect"))), Map(), Nil))
+    context.knowledgeBase.add(new CPInheritedConcept("WebPageElement", List(("PageOption", "e")), Map("pageElementName" -> new CPConstant(CPStringValue("PageOption"))), Map(), Nil))
+    context.knowledgeBase.add(new CPInheritedConcept("WebPageElement", List(("PageParagraph", "e")), Map("pageElementName" -> new CPConstant(CPStringValue("PageParagraph"))), Map(), Nil))
+    context.knowledgeBase.add(new CPInheritedConcept("WebPageElement", List(("PageSection", "e")), Map("pageElementName" -> new CPConstant(CPStringValue("PageSection"))), Map(), Nil))
+    context.knowledgeBase.add(new CPInheritedConcept("WebPageElement", List(("PageSmallText", "e")), Map("pageElementName" -> new CPConstant(CPStringValue("PageSmallText"))), Map(), Nil))
+    context.knowledgeBase.add(new CPInheritedConcept("WebPageElement", List(("PageSpan", "e")), Map("pageElementName" -> new CPConstant(CPStringValue("PageSpan"))), Map(), Nil))
+    context.knowledgeBase.add(new CPInheritedConcept("WebPageElement", List(("PageStrongText", "e")), Map("pageElementName" -> new CPConstant(CPStringValue("PageStrongText"))), Map(), Nil))
+    context.knowledgeBase.add(new CPInheritedConcept("WebPageElement", List(("PageSubscriptedText", "e")), Map("pageElementName" -> new CPConstant(CPStringValue("PageSubscriptedText"))), Map(), Nil))
+    context.knowledgeBase.add(new CPInheritedConcept("WebPageElement", List(("PageTable", "e")), Map("pageElementName" -> new CPConstant(CPStringValue("PageTable"))), Map(), Nil))
+    context.knowledgeBase.add(new CPInheritedConcept("WebPageElement", List(("PageTableCaption", "e")), Map("pageElementName" -> new CPConstant(CPStringValue("PageTableCaption"))), Map(), Nil))
+    context.knowledgeBase.add(new CPInheritedConcept("WebPageElement", List(("PageTableBody", "e")), Map("pageElementName" -> new CPConstant(CPStringValue("PageTableBody"))), Map(), Nil))
+    context.knowledgeBase.add(new CPInheritedConcept("WebPageElement", List(("PageTableCell", "e")), Map("pageElementName" -> new CPConstant(CPStringValue("PageTableCell"))), Map(), Nil))
+    context.knowledgeBase.add(new CPInheritedConcept("WebPageElement", List(("PageTextArea", "e")), Map("pageElementName" -> new CPConstant(CPStringValue("PageTextArea"))), Map(), Nil))
+    context.knowledgeBase.add(new CPInheritedConcept("WebPageElement", List(("PageTableHeaderCell", "e")), Map("pageElementName" -> new CPConstant(CPStringValue("PageTableHeaderCell"))), Map(), Nil))
+    context.knowledgeBase.add(new CPInheritedConcept("WebPageElement", List(("PageTableFooter", "e")), Map("pageElementName" -> new CPConstant(CPStringValue("PageTableFooter"))), Map(), Nil))
+    context.knowledgeBase.add(new CPInheritedConcept("WebPageElement", List(("PageTableHeader", "e")), Map("pageElementName" -> new CPConstant(CPStringValue("PageTableHeader"))), Map(), Nil))
+    context.knowledgeBase.add(new CPInheritedConcept("WebPageElement", List(("PageTableRow", "e")), Map("pageElementName" -> new CPConstant(CPStringValue("PageTableRow"))), Map(), Nil))
+  }
+
+  def registerSpatialConcepts(context: CPExecutionContext): Unit = {
+
   }
 }

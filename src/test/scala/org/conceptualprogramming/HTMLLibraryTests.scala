@@ -3,7 +3,8 @@ package org.conceptualprogramming
 import java.io.File
 
 import org.conceptualprogramming.core.datatypes.composite.CPObjectValue
-import org.conceptualprogramming.core.statements.ProgramExecutor
+import org.conceptualprogramming.core.statements.{ConceptResolvingStatement, ConceptResolvingToVariableStatement, ProgramExecutor}
+import org.concepualprogramming.core.CPInheritedConcept
 import org.concepualprogramming.core.datatypes.composite.CPList
 import org.concepualprogramming.core.datatypes.CPStringValue
 import org.concepualprogramming.core.statements.expressions.{CPConstant, CPFunctionCall}
@@ -173,6 +174,29 @@ class HTMLLibraryTests extends FlatSpec with Matchers {
     val lvNewObj = context.knowledgeBase.getObjects("PageOption", Map("value" -> CPStringValue("lv")))
     lvNewObj.size should equal (1)
     lvNewObj.head.attributes("selected").getBooleanValue.get should equal (true)
+
+    val closeFunc = new CPFunctionCall("HTML.closeWebPage", url :: Nil)
+    closeFunc.calculate(context).get.getBooleanValue.get should be (true)
+  }
+
+  "hierarchy concepts" should "work correctly" in {
+    val url = CPConstant(CPStringValue("file:///C:/projects/AI/ConceptualProgramming/src/test/scala/org/conceptualprogramming/examples/html/welcomePage.html"))
+    val readFunc = new CPFunctionCall("HTML.openWebPage", url :: Nil)
+    val pe = new ProgramExecutor
+    val context = pe.initContext
+    val objects = readFunc.calculate(context).get.asInstanceOf[CPList].values.map(_.asInstanceOf[CPObjectValue].objectValue)
+    context.knowledgeBase.add(objects)
+
+    val pageElementsStmt = new ConceptResolvingToVariableStatement("allElements", "WebPageElement", Map())
+    pageElementsStmt.execute(context)
+    val allElements = context.getVariable("allElements").get.asInstanceOf[CPList].values.map(_.asInstanceOf[CPObjectValue].objectValue)
+    allElements.size should equal (3)
+    val div = allElements.find(el => el.name == "WebPageElement" && el.attributes.contains("pageElementName") && el.attributes.get("pageElementName").get.getStringValue.get == "PageDivision")
+    div.isDefined should be (true)
+    val h1 = allElements.find(el => el.name == "WebPageElement" && el.attributes.contains("id") && el.attributes.get("id").get.getStringValue.get == "greetingMessage")
+    h1.isDefined should be (true)
+    val h3 = allElements.find(el => el.name == "WebPageElement" && el.attributes.contains("id") && el.attributes.get("id").get.getStringValue.get == "toolName")
+    h3.isDefined should be (true)
 
     val closeFunc = new CPFunctionCall("HTML.closeWebPage", url :: Nil)
     closeFunc.calculate(context).get.getBooleanValue.get should be (true)
