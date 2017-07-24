@@ -26,7 +26,7 @@ case class CPStrictConcept (
     case _ => false
   }
 
-  override def inferValues(attributesValues: Map[CPAttributeName, CPValue], context: CPExecutionContext): Option[Map[CPAttributeName, CPValue]] = inferValuesFromDependencies(attributesValues, attributesDependencies, context)
+  override def inferValues(query: CPSubstitutions, context: CPExecutionContext): Option[Map[CPAttributeName, CPValue]] = inferValuesFromDependencies(query, attributesDependencies, context)
 
   def prepareObjectFromAttributesValues(substitutions: CPSubstitutions): Option[CPObject] = {
     val attributesForCurrentConcept = substitutions.attributesValues.filter(entry => entry._1.conceptName == "")

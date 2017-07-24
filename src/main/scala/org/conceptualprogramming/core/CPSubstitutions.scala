@@ -7,7 +7,7 @@ import org.concepualprogramming.core.datatypes.CPValue
  */
 case class CPSubstitutions (
                            attributesValues: Map[CPAttributeName, CPValue],
-                           defaultAttributes: Map[String, String]
+                           objects: Map[String, CPObject]
                            ){
 }
 

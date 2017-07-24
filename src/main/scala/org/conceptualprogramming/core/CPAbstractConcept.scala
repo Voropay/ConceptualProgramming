@@ -10,13 +10,13 @@ abstract class CPAbstractConcept extends CPConcept{
 
   val childConcepts: List[(String, String)]
 
-  def inferValuesFromDependencies(attributesValues: Map[CPAttributeName, CPValue], dependencies: List[CPDependency], context: CPExecutionContext): Option[Map[CPAttributeName, CPValue]] = {
+  def inferValuesFromDependencies(query: CPSubstitutions, dependencies: List[CPDependency], context: CPExecutionContext): Option[Map[CPAttributeName, CPValue]] = {
     var found = true
-    var curAttrValues = Map() ++ attributesValues
+    var curAttrValues = Map() ++ query.attributesValues
     while(found) {
       found = false
       for(curDependency <- dependencies) {
-        context.setSubstitutions(Some(new CPSubstitutions(curAttrValues, Map())))
+        context.setSubstitutions(Some(new CPSubstitutions(curAttrValues, query.objects)))
         if(!curDependency.check(context)) {
           return None
         }
@@ -46,7 +46,7 @@ abstract class CPAbstractConcept extends CPConcept{
       return List(query)
     }
     val firstChild = conceptsList.head
-    val attributesValues = inferValues(query.attributesValues, context)
+    val attributesValues = inferValues(query, context)
     if(attributesValues.isEmpty) {
       return List()
     }
@@ -57,10 +57,10 @@ abstract class CPAbstractConcept extends CPConcept{
     if(!objects.isEmpty) {
       val resultsOpt = objects.map(obj => {
         val objResult = obj.getAttributes(firstChild._2) ++ query.attributesValues
-        val res = inferValues(objResult, context)
+        val childObjects = query.objects + (firstChild._2 -> obj)
+        val res = inferValues(new CPSubstitutions(objResult, childObjects), context)
         if(res.isDefined) {
-          val defAttrs = query.defaultAttributes + (obj.name -> obj.defaultAttribute)
-          Some(new CPSubstitutions(res.get, defAttrs))
+          Some(new CPSubstitutions(res.get, childObjects))
         } else {
           None
         }
@@ -75,10 +75,10 @@ abstract class CPAbstractConcept extends CPConcept{
         if(!conceptResults.isEmpty) {
           for(curResult <- conceptResults) {
             val res: Map[CPAttributeName, CPValue] = curResult.getAttributes(firstChild._2) ++ query.attributesValues
-            val inferredRes = inferValues(res, context)
+            val childObjects = query.objects + (firstChild._2 -> curResult)
+            val inferredRes = inferValues(new CPSubstitutions(res, childObjects), context)
             if(inferredRes.isDefined) {
-              val defAttrs = query.defaultAttributes + (curResult.name -> curResult.defaultAttribute)
-              results = new CPSubstitutions(inferredRes.get, defAttrs) :: results
+              results = new CPSubstitutions(inferredRes.get, childObjects) :: results
             }
           }
         }
@@ -102,7 +102,7 @@ abstract class CPAbstractConcept extends CPConcept{
     return finalResults
   }
 
-  def inferValues(attributesValues: Map[CPAttributeName, CPValue], context: CPExecutionContext): Option[Map[CPAttributeName, CPValue]]
+  def inferValues(attributesValues: CPSubstitutions, context: CPExecutionContext): Option[Map[CPAttributeName, CPValue]]
 
   def resolve(query: Map[String, CPValue], context: CPExecutionContext): List[CPObject] = {
     val convertedQuery = CPSubstitutions(query, "")
@@ -208,7 +208,7 @@ abstract class CPAbstractConcept extends CPConcept{
       val currentChild = childConcepts(curChildConceptNum)
       val currentQueriesStack = foundObjectsStack(curChildConceptNum)
       val query = currentQueriesStack(curObjectsStackPos(curChildConceptNum))
-      val attributesValues = inferValues(query.attributesValues, context)
+      val attributesValues = inferValues(query, context)
       if(attributesValues.isEmpty) {
         return None
       }
@@ -220,10 +220,10 @@ abstract class CPAbstractConcept extends CPConcept{
       if(!objects.isEmpty) {
         val resultsOpt = objects.map(obj => {
           val objResult = obj.getAttributes(currentChild._2) ++ query.attributesValues
-          val res = inferValues(objResult, context)
+          val childObjects = query.objects + (currentChild._2 -> obj)
+          val res = inferValues(new CPSubstitutions(objResult, childObjects), context)
           if(res.isDefined) {
-            val defAttrs = query.defaultAttributes + (obj.name -> obj.defaultAttribute)
-            Some(new CPSubstitutions(res.get, defAttrs))
+            Some(new CPSubstitutions(res.get, childObjects))
           } else {
             None
           }
@@ -254,10 +254,10 @@ abstract class CPAbstractConcept extends CPConcept{
         val query = currentQueriesStack(curObjectsStackPos(curChildConceptNum))
         for(curResult <- conceptResults) {
           val res: Map[CPAttributeName, CPValue] = curResult.getAttributes(currentChild._2) ++ query.attributesValues
-          val inferredRes = inferValues(res, context)
+          val childObjects = query.objects + (currentChild._2 -> curResult)
+          val inferredRes = inferValues(new CPSubstitutions(res, childObjects), context)
           if(inferredRes.isDefined) {
-            val defAttrs = query.defaultAttributes + (curResult.name -> curResult.defaultAttribute)
-            foundObjectsStack(curChildConceptNum + 1) = new CPSubstitutions(inferredRes.get, defAttrs) :: foundObjectsStack(curChildConceptNum + 1)
+            foundObjectsStack(curChildConceptNum + 1) = new CPSubstitutions(inferredRes.get, childObjects) :: foundObjectsStack(curChildConceptNum + 1)
           }
         }
       }

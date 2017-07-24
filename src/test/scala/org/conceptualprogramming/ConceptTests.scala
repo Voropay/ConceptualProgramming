@@ -122,27 +122,27 @@ class ConceptTests extends FlatSpec with Matchers {
       CPDependency(new CPConstant(CPIntValue(5)), new CPAttribute(CPAttributeName("", "sum")), ">") :: Nil)
     val subst1 = new CPSubstitutions(
       Map(new CPAttributeName("", "table") -> CPStringValue("A1"), new CPAttributeName("", "row") -> CPStringValue("1"), new CPAttributeName("t", "cell") -> CPStringValue("1"), new CPAttributeName("t", "val") -> CPIntValue(1)),
-      Map("t" -> "val")
+      Map()
     )
     val subst2 = new CPSubstitutions(
       Map(new CPAttributeName("", "table") -> CPStringValue("A1"), new CPAttributeName("", "row") -> CPStringValue("1"), new CPAttributeName("t", "cell") -> CPStringValue("2"), new CPAttributeName("t", "val") -> CPIntValue(2)),
-      Map("t" -> "val")
+      Map()
     )
     val subst3 = new CPSubstitutions(
       Map(new CPAttributeName("", "table") -> CPStringValue("A1"), new CPAttributeName("", "row") -> CPStringValue("2"), new CPAttributeName("t", "cell") -> CPStringValue("1"), new CPAttributeName("t", "val") -> CPIntValue(3)),
-      Map("t" -> "val")
+      Map()
     )
     val subst4 = new CPSubstitutions(
       Map(new CPAttributeName("", "table") -> CPStringValue("A1"), new CPAttributeName("", "row") -> CPStringValue("2"), new CPAttributeName("t", "cell") -> CPStringValue("2"), new CPAttributeName("t", "val") -> CPIntValue(4)),
-      Map("t" -> "val")
+      Map()
     )
     val subst5 = new CPSubstitutions(
       Map(new CPAttributeName("", "table") -> CPStringValue("A2"), new CPAttributeName("", "row") -> CPStringValue("1"), new CPAttributeName("t", "cell") -> CPStringValue("1"), new CPAttributeName("t", "val") -> CPIntValue(5)),
-      Map("t" -> "val")
+      Map()
     )
     val subst6 = new CPSubstitutions(
       Map(new CPAttributeName("", "table") -> CPStringValue("A2"), new CPAttributeName("", "row") -> CPStringValue("1"), new CPAttributeName("t", "cell") -> CPStringValue("2"), new CPAttributeName("t", "val") -> CPIntValue(6)),
-      Map("t" -> "val")
+      Map()
     )
     val grouped = concept.groupSubstitutions(subst1 :: subst2 :: subst3 :: subst4 :: subst5 :: subst6 :: Nil)
     grouped.size should equal (3)

@@ -1,5 +1,7 @@
 package org.conceptualprogramming
 
+import org.conceptualprogramming.core.datatypes.composite.CPObjectValue
+import org.conceptualprogramming.core.statements.expressions.CPChildObject
 import org.concepualprogramming.core.datatypes._
 import org.concepualprogramming.core._
 import org.concepualprogramming.core.statements.expressions.operations.CPEquals
@@ -7,8 +9,7 @@ import org.concepualprogramming.core.statements.expressions.operations._
 import org.concepualprogramming.core.dependencies.CPDependency
 import org.concepualprogramming.core.statements._
 import org.concepualprogramming.core.statements.expressions.{CPAttribute, CPConstant, CPVariable}
-
-import org.scalatest.{Matchers, FlatSpec}
+import org.scalatest.{FlatSpec, Matchers}
 
 /**
  * Created by oleksii.voropai on 8/16/2016.
@@ -83,7 +84,7 @@ class InferenceTests extends FlatSpec with Matchers {
 
     val concept = new CPStrictConcept("", Nil, "", Nil, Nil)
     val context = new CPExecutionContext
-    val inferredQuery = concept.inferValuesFromDependencies(query, d1 :: d2 :: d3 :: d4 :: Nil, context)
+    val inferredQuery = concept.inferValuesFromDependencies(new CPSubstitutions(query, Map()), d1 :: d2 :: d3 :: d4 :: Nil, context)
     inferredQuery.get.size should equal (5)
     inferredQuery.get.get(aval).get.getIntValue.get should equal (10)
     inferredQuery.get.get(arow).get.getIntValue.get should equal (1)
@@ -101,19 +102,19 @@ class InferenceTests extends FlatSpec with Matchers {
       Map(CPAttributeName("c", "col") -> CPConstant(CPIntValue(1))),
       Nil
     )
-    val q1: Map[CPAttributeName, CPValue] = Map()
+    val q1 = new CPSubstitutions(Map(), Map())
     val r1 = c.inferValues(q1, context).get
     r1.size should equal(1)
     r1.get(CPAttributeName("c", "col")).get should equal (CPIntValue(1))
 
-    val q2 = q1 + (CPAttributeName("", "row") -> CPIntValue(2))
+    val q2 = new CPSubstitutions(Map(CPAttributeName("", "row") -> CPIntValue(2)), Map())
     val r2 = c.inferValues(q2, context).get
     r2.size should equal(3)
     r2.get(CPAttributeName("c", "row")).get should equal (CPIntValue(2))
     r2.get(CPAttributeName("", "row")).get should equal (CPIntValue(2))
     r2.get(CPAttributeName("c", "col")).get should equal (CPIntValue(1))
 
-    val q3 = q2 + (CPAttributeName("c", "val") -> CPIntValue(10))
+    val q3 = new CPSubstitutions(q2.attributesValues + (CPAttributeName("c", "val") -> CPIntValue(10)), Map())
     val r3 = c.inferValues(q3, context).get
     r3.size should equal(5)
     r3.get(CPAttributeName("c", "row")).get should equal (CPIntValue(2))
@@ -129,22 +130,22 @@ class InferenceTests extends FlatSpec with Matchers {
       Map(),
       CPDependency(new CPConstant(CPIntValue(0)), new CPAttribute(CPAttributeName("", "val")), "<") :: Nil
     )
-    val q11: Map[CPAttributeName, CPValue] = Map()
+    val q11 = new CPSubstitutions(Map(), Map())
     val r11 = p.inferValues(q11, context).get
     r11.size should equal(0)
 
-    val q12 = q11 + (CPAttributeName("i", "row") -> CPIntValue(2), CPAttributeName("i", "val") -> CPIntValue(12))
+    val q12 = new CPSubstitutions(Map(CPAttributeName("i", "row") -> CPIntValue(2), CPAttributeName("i", "val") -> CPIntValue(12)), Map())
     val r12 = p.inferValues(q12, context).get
     r12.size should equal(4)
     r12.get(CPAttributeName("", "row")).get should equal (CPIntValue(2))
     r12.get(CPAttributeName("o", "row")).get should equal (CPIntValue(2))
 
-    val q13 = q12 + (CPAttributeName("o", "val") -> CPIntValue(8))
+    val q13 = new CPSubstitutions(q12.attributesValues + (CPAttributeName("o", "val") -> CPIntValue(8)), Map())
     val r13 = p.inferValues(q13, context).get
     r13.size should equal(6)
     r13.get(CPAttributeName("", "val")).get should equal (CPIntValue(4))
 
-    val q14 = q12 + (CPAttributeName("o", "val") -> CPIntValue(18))
+    val q14 = new CPSubstitutions(q12.attributesValues + (CPAttributeName("o", "val") -> CPIntValue(18)), Map())
     val r14 = p.inferValues(q14, context)
     r14.isEmpty should be (true)
   }
@@ -408,6 +409,48 @@ class InferenceTests extends FlatSpec with Matchers {
     objects2.head.name should equal ("Variables")
     objects2.head.get("val").get.getIntValue.get should equal (1)
 
+  }
+
+  "Nested concepts" should "be resolved correctly" in {
+
+    val context = new CPExecutionContext
+    val p1 = new CPObject("Point", Map("pos" -> CPIntValue(1)), "pos")
+    val p2 = new CPObject("Point", Map("pos" -> CPIntValue(2)), "pos")
+    val p3 = new CPObject("Point", Map("pos" -> CPIntValue(3)), "pos")
+    context.knowledgeBase.add(p1)
+    context.knowledgeBase.add(p2)
+    context.knowledgeBase.add(p3)
+
+    val left = new CPStrictConcept(
+      "leftOf",
+      "leftPoint" :: "rightPoint" :: Nil,
+      "leftPoint",
+      ("Point", "left") :: ("Point", "right") :: Nil,
+      CPDependency(
+        new CPAttribute(CPAttributeName("", "leftPoint")),
+        new CPChildObject("left"),
+        "="
+      ) ::
+        CPDependency(
+          new CPAttribute(CPAttributeName("", "rightPoint")),
+          new CPChildObject("right"),
+          "="
+        ) ::
+        CPDependency(
+          new CPAttribute(CPAttributeName("left", "pos")),
+          new CPAttribute(CPAttributeName("right", "pos")),
+          "<"
+        ) :: Nil
+    )
+    val leftObjects = left.resolve(Map(), context)
+    leftObjects.size should equal (3)
+    leftObjects.contains(new CPObject("leftOf", Map("leftPoint" -> new CPObjectValue(p1), "rightPoint" -> new CPObjectValue(p2)), "leftPoint")) should be (true)
+    leftObjects.contains(new CPObject("leftOf", Map("leftPoint" -> new CPObjectValue(p1), "rightPoint" -> new CPObjectValue(p3)), "leftPoint")) should be (true)
+    leftObjects.contains(new CPObject("leftOf", Map("leftPoint" -> new CPObjectValue(p2), "rightPoint" -> new CPObjectValue(p3)), "leftPoint")) should be (true)
+
+    val leftObjects1 = left.resolve(Map("leftPoint" -> new CPObjectValue(p2)), context)
+    leftObjects1.size should equal (1)
+    leftObjects.head should equal (new CPObject("leftOf", Map("leftPoint" -> new CPObjectValue(p2), "rightPoint" -> new CPObjectValue(p3)), "leftPoint"))
   }
 
 

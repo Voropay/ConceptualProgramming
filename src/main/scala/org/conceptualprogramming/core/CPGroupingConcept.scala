@@ -16,7 +16,7 @@ case class CPGroupingConcept (
                           groupedAttributes: Map[String, CPExpression],
                           groupedAttributesDependencies: List[CPDependency]) extends CPAbstractConcept with CPConcept {
 
-  override def inferValues(attributesValues: Map[CPAttributeName, CPValue], context: CPExecutionContext): Option[Map[CPAttributeName, CPValue]] = inferValuesFromDependencies(attributesValues, attributesDependencies, context)
+  override def inferValues(query: CPSubstitutions, context: CPExecutionContext): Option[Map[CPAttributeName, CPValue]] = inferValuesFromDependencies(query, attributesDependencies, context)
 
   override def prepareObjects(attributesValues: List[CPSubstitutions], context: CPExecutionContext): List[Option[CPObject]] = {
     val groupedSubstitutions: Map[Map[String, CPValue], List[CPSubstitutions]] = groupSubstitutions(attributesValues)
@@ -79,7 +79,7 @@ case class CPGroupingConcept (
       if(aggregatedValues.isDefined) {
         val aggregatedAttrValues = aggregatedValues.get.map(entry => {(new CPAttributeName("", entry._1) -> entry._2)})
         val newAttrValues = groupedAttrValues ++ aggregatedAttrValues
-        res = new CPSubstitutions(newAttrValues, entry._2.head.defaultAttributes) :: res
+        res = new CPSubstitutions(newAttrValues, entry._2.head.objects) :: res
       }
     }
     res

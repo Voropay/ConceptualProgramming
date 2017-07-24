@@ -1,18 +1,18 @@
 package org.conceptualprogramming
 
 import org.conceptualprogramming.core.datatypes.composite.CPObjectValue
-import org.conceptualprogramming.core.statements.expressions.{CPAddToCollection, CPObjectExpression}
+import org.conceptualprogramming.core.statements.expressions.{CPAddToCollection, CPChildObject, CPObjectExpression}
 import org.conceptualprogramming.core.statements._
 import org.conceptualprogramming.core.statements.expressions.functions.ConsoleFunctions
 import org.concepualprogramming.core.datatypes.composite.CPList
-import org.concepualprogramming.core.datatypes.{CPStringValue, CPBooleanValue, CPIntValue}
+import org.concepualprogramming.core.datatypes.{CPBooleanValue, CPIntValue, CPStringValue}
 import org.concepualprogramming.core.dependencies.{CPAttributesLinkDependency, CPDependency}
 import org.concepualprogramming.core.statements.expressions.operations.CPAdd
-import org.concepualprogramming.core.statements.expressions.{CPAttribute, CPFunctionCall, CPVariable, CPConstant}
+import org.concepualprogramming.core.statements.expressions.{CPAttribute, CPConstant, CPFunctionCall, CPVariable}
 import org.concepualprogramming.core.statements._
-import org.concepualprogramming.core.statements.expressions.functions.{GroupingFunctions, ObjectsFunctions, CPCompositeFunctionDefinition}
+import org.concepualprogramming.core.statements.expressions.functions.{CPCompositeFunctionDefinition, GroupingFunctions, ObjectsFunctions}
 import org.concepualprogramming.core._
-import org.scalatest.{Matchers, FlatSpec}
+import org.scalatest.{FlatSpec, Matchers}
 
 /**
  * Created by oleksii.voropai on 10/2/2016.
@@ -304,15 +304,15 @@ class ExecutionContextTests extends FlatSpec with Matchers {
       GroupingFunctions.register(context)
       val subst1 = new CPSubstitutions(
         Map(new CPAttributeName("c1", "name") -> CPStringValue("A1"), new CPAttributeName("c1", "val") -> CPIntValue(10)),
-        Map("c1" -> "val")
+        Map()
       )
       val subst2 = new CPSubstitutions(
         Map(new CPAttributeName("c1", "name") -> CPStringValue("A1"), new CPAttributeName("c1", "val") -> CPIntValue(12)),
-        Map("c1" -> "val")
+        Map()
       )
       val subst3 = new CPSubstitutions(
         Map(new CPAttributeName("c1", "name") -> CPStringValue("A1"), new CPAttributeName("c1", "val") -> CPIntValue(14)),
-        Map("c1" -> "val")
+        Map()
       )
       context.setSubstitutionsList(subst1 :: subst2 :: subst3 :: Nil)
       val expr = new CPAttribute(new CPAttributeName("c1", "val"))
@@ -421,13 +421,26 @@ class ExecutionContextTests extends FlatSpec with Matchers {
       val context = new CPExecutionContext
       val subst = new CPSubstitutions(
         Map(new CPAttributeName("c1", "name") -> CPStringValue("A1"), new CPAttributeName("c1", "val") -> CPIntValue(10)),
-        Map("c1" -> "val")
+        Map()
       )
       context.setSubstitutions(Some(subst))
       val attr = new CPAttribute(new CPAttributeName("c1", "name"))
       val res = attr.calculate(context)
       res.get.getStringValue.get should equal ("A1")
     }
+
+  "ChildObject variables" should "be executed correctly" in {
+    val context = new CPExecutionContext
+    val obj = new CPObject("Var", Map("name" -> CPStringValue("A1"), "val" -> CPIntValue(10)), "val")
+    val subst = new CPSubstitutions(
+      Map(new CPAttributeName("c1", "name") -> CPStringValue("A1"), new CPAttributeName("c1", "val") -> CPIntValue(10)),
+      Map("c1" -> obj)
+    )
+    context.setSubstitutions(Some(subst))
+    val attr = new CPChildObject("c1")
+    val res = attr.calculate(context)
+    res.get.asInstanceOf[CPObjectValue].objectValue should equal (obj)
+  }
 
   "AddToCollectionStatement" should "be executed correctly" in {
     val context = new CPExecutionContext

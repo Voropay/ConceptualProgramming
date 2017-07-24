@@ -76,7 +76,16 @@ class ParserTests  extends FlatSpec with Matchers {
       case _ => false
     }
     attribute should equal (true)
+/*
+    val attributeChain = exprParser("object.attr.name").get.asInstanceOf[CPAttribute]
+    attributeChain.attrName.conceptName should equal
 
+    match {
+      case res: CPAttribute => res.attrName.conceptName == "attr" && res.attrName.attributeName == "name"
+      case _ => false
+    }
+    attribute should equal (true)
+*/
     (exprParser("true").get.asInstanceOf[CPConstant]).value.getBooleanValue.get should equal (true)
     (exprParser("false").get.asInstanceOf[CPConstant]).value.getBooleanValue.get should equal (false)
     (exprParser("10").get.asInstanceOf[CPConstant]).value.getIntValue.get should equal (10)

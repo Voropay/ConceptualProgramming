@@ -18,7 +18,7 @@ case class CPInheritedConcept(
 
   val attributesDependencies: List[CPDependency] = prepareDependencies(overriddenAttributes, specifiedAttributes, filterDependencies)
 
-  override def inferValues(query: Map[CPAttributeName, CPValue], context: CPExecutionContext): Option[Map[CPAttributeName, CPValue]] = {
+  override def inferValues(query: CPSubstitutions, context: CPExecutionContext): Option[Map[CPAttributeName, CPValue]] = {
     val attributesValues = inferValuesFromDependencies(query, attributesDependencies, context)
     if(attributesValues.isEmpty) {
       return None
@@ -38,7 +38,7 @@ case class CPInheritedConcept(
         }
       }
     }
-    return inferValuesFromDependencies(newAttributes, attributesDependencies, context)
+    return inferValuesFromDependencies(new CPSubstitutions(newAttributes, query.objects), attributesDependencies, context)
   }
 
   def prepareDependencies(overriddenAttributes: Map[String, CPExpression],
@@ -72,7 +72,7 @@ case class CPInheritedConcept(
     if(attributesForCurrentConcept.isEmpty) {
       return None
     }
-    val defaultAttribute = substitutions.defaultAttributes.get(childConcepts.head._1).get
+    val defaultAttribute = substitutions.objects.get(childConcepts.head._2).get.defaultAttribute
     val conceptAttributesNames = attributesForCurrentConcept.map(entry => entry._1.attributeName -> entry._2)
     Some(CPObject(name, conceptAttributesNames, defaultAttribute))
   }
