@@ -17,7 +17,7 @@ case class CPAttribute(attrName: CPAttributeName) extends CPExpression {
 
   override def isDefined(context: CPExecutionContext): Boolean = {
     val subst = context.getSubstitutions
-    subst.isDefined && subst.get.attributesValues.contains(attrName)
+    subst.isDefined && (subst.get.objects.contains(attrName.conceptName) || subst.get.attributesValues.contains(attrName))
   }
 
   override def infer(result: CPValue, context: CPExecutionContext): Map[CPAttributeName, CPValue] = {

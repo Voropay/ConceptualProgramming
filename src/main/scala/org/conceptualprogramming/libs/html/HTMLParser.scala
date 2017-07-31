@@ -2,7 +2,7 @@ package org.conceptualprogramming.libs.html
 
 import org.concepualprogramming.core.CPObject
 import org.concepualprogramming.core.datatypes.composite.CPList
-import org.concepualprogramming.core.datatypes.{CPBooleanValue, CPIntValue, CPStringValue, CPValue}
+import org.concepualprogramming.core.datatypes._
 import org.openqa.selenium.{By, SearchContext, WebDriver, WebElement}
 
 import scala.collection.JavaConversions._
@@ -281,22 +281,22 @@ object HTMLParser {
 
     val borderBottomWidth = element.getCssValue("border-bottom-width")
     if(borderBottomWidth != null && !borderBottomWidth.isEmpty) {
-      map += ("borderBottomWidth" -> CPStringValue(extractSize(borderBottomWidth)))
+      map += ("borderBottomWidth" -> CPFloatingValue(extractSize(borderBottomWidth)))
     }
     val borderTopWidth = element.getCssValue("border-top-width")
     if(borderTopWidth != null && !borderTopWidth.isEmpty) {
-      map += ("borderTopWidth" -> CPStringValue(extractSize(borderTopWidth)))
+      map += ("borderTopWidth" -> CPFloatingValue(extractSize(borderTopWidth)))
     }
     val borderLeftWidth = element.getCssValue("border-left-width")
     if(borderLeftWidth != null && !borderLeftWidth.isEmpty) {
-      map += ("borderLeftWidth" -> CPStringValue(extractSize(borderLeftWidth)))
+      map += ("borderLeftWidth" -> CPFloatingValue(extractSize(borderLeftWidth)))
     }
     val borderRightWidth = element.getCssValue("border-right-width")
     if(borderRightWidth != null && !borderRightWidth.isEmpty) {
-      map += ("borderRightWidth" -> CPStringValue(extractSize(borderRightWidth)))
+      map += ("borderRightWidth" -> CPFloatingValue(extractSize(borderRightWidth)))
     }
     if(borderBottomWidth != null && !borderBottomWidth.isEmpty && borderBottomColor == borderTopWidth && borderBottomWidth == borderLeftWidth && borderBottomColor == borderRightWidth) {
-      map += ("borderWidth" -> CPStringValue(extractSize(borderBottomWidth)))
+      map += ("borderWidth" -> CPFloatingValue(extractSize(borderBottomWidth)))
     }
 
     map
@@ -313,7 +313,7 @@ object HTMLParser {
     }
     val fontSize = element.getCssValue("font-size")
     if(fontSize != null) {
-      map += ("fontSize" -> CPStringValue(extractFontSize(fontSize)))
+      map += ("fontSize" -> CPFloatingValue(extractFontSize(fontSize)))
     }
     val fontStyle = element.getCssValue("font-style")
     if(fontStyle != null) {
@@ -330,30 +330,39 @@ object HTMLParser {
     var map = Map[String, CPValue]()
     val height = element.getCssValue("height")
     if(height != null && !height.isEmpty && height != "auto") {
-      map += ("height" -> CPStringValue(extractSize(height)))
+      map += ("height" -> CPFloatingValue(extractSize(height)))
+    } else {
+      map += ("height" -> CPFloatingValue(0))
     }
     val width = element.getCssValue("width")
     if(width != null && !width.isEmpty && width != "auto") {
-      map += ("width" -> CPStringValue(extractSize(width)))
+      map += ("width" -> CPFloatingValue(extractSize(width)))
+    } else {
+      map += ("width" -> CPFloatingValue(0))
     }
     val location = element.getLocation
     if(location != null) {
-      map += ("positionX" -> CPIntValue(location.getX), "positiony" -> CPIntValue(location.getY))
+      map += ("positionX" -> CPFloatingValue(location.getX), "positionY" -> CPFloatingValue(location.getY))
     }
 
     map
   }
 
-  def extractFontSize(fontSize: String): String = {
+  def extractFontSize(fontSize: String): Double = {
     //TODO: convert relative and inherited values
     extractSize(fontSize)
   }
 
-  def extractSize(value: String): String = {
-    if(value.endsWith("px")) {
+  def extractSize(value: String): Double = {
+    val str = if(value.endsWith("px")) {
       value.substring(0, value.size - 2)
     } else {
       value
+    }
+    try {
+      str.toDouble
+    } catch {
+      case e: Exception => 0
     }
   }
 

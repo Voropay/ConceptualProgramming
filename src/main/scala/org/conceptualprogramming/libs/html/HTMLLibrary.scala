@@ -3,13 +3,16 @@ package main.scala.org.conceptualprogramming.libs.html
 import java.io.File
 
 import org.conceptualprogramming.core.datatypes.composite.CPObjectValue
+import org.conceptualprogramming.core.statements.expressions.CPChildObject
 import org.conceptualprogramming.libs.StandardLibrary
 import org.conceptualprogramming.libs.html.HTMLParser
-import org.concepualprogramming.core.{CPExecutionContext, CPInheritedConcept, CPObject}
+import org.concepualprogramming.core._
 import org.concepualprogramming.core.datatypes.{CPBooleanValue, CPStringValue, CPValue}
 import org.concepualprogramming.core.datatypes.composite.CPList
+import org.concepualprogramming.core.dependencies.{CPDependency, CPExpressionDependency}
 import org.concepualprogramming.core.statements.expressions.functions.BuiltInFunctionDefinition
-import org.concepualprogramming.core.statements.expressions.{CPConstant, CPExpression, CPFunctionDefinition}
+import org.concepualprogramming.core.statements.expressions.operations._
+import org.concepualprogramming.core.statements.expressions.{CPAttribute, CPConstant, CPExpression, CPFunctionDefinition}
 import org.openqa.selenium.{By, Keys, WebDriver}
 import org.openqa.selenium.chrome.ChromeDriver
 import org.openqa.selenium.interactions.Actions
@@ -553,6 +556,254 @@ class HTMLLibrary extends StandardLibrary {
   }
 
   def registerSpatialConcepts(context: CPExecutionContext): Unit = {
+    val left = new CPStrictConcept(
+      "leftOf",
+      "leftElement" :: "rightElement" :: Nil,
+      "leftElement",
+      ("WebPageElement", "left") :: ("WebPageElement", "right") :: Nil,
+      CPDependency(
+        new CPAttribute(CPAttributeName("", "leftElement")),
+        new CPChildObject("left"),
+        "="
+      ) ::
+        CPDependency(
+          new CPAttribute(CPAttributeName("", "rightElement")),
+          new CPChildObject("right"),
+          "="
+        ) ::
+        CPDependency(
+          new CPAdd(
+            new CPAttribute(CPAttributeName("left", "positionX")),
+            new CPAttribute(CPAttributeName("left", "width"))
+          ),
+          new CPAttribute(CPAttributeName("right", "positionX")),
+          "<"
+        ) ::
+        new CPExpressionDependency(
+
+          new CPOr(
+            new CPAnd(
+              new CPEqualsOrGreater(
+                new CPAttribute(CPAttributeName("left", "positionY")),
+                new CPAttribute(CPAttributeName("right", "positionY"))
+              ),
+              new CPEqualsOrLess(
+                new CPAdd(
+                  new CPAttribute(CPAttributeName("left", "positionY")),
+                  new CPAttribute(CPAttributeName("left", "height"))
+                ),
+                new CPAdd(
+                  new CPAttribute(CPAttributeName("right", "positionY")),
+                  new CPAttribute(CPAttributeName("right", "height"))
+                )
+              )
+            ),
+
+          new CPOr(
+            new CPAnd(
+              new CPEqualsOrLess(
+                new CPAttribute(CPAttributeName("left", "positionY")),
+                new CPAdd(
+                  new CPAttribute(CPAttributeName("right", "positionY")),
+                  new CPAttribute(CPAttributeName("right", "height"))
+                )
+              ),
+              new CPEqualsOrLess(
+                new CPAdd(
+                  new CPAttribute(CPAttributeName("right", "positionY")),
+                  new CPAttribute(CPAttributeName("right", "height"))
+                ),
+                new CPAdd(
+                  new CPAttribute(CPAttributeName("left", "positionY")),
+                  new CPAttribute(CPAttributeName("left", "height"))
+                )
+              )
+            ),
+            new CPAnd(
+              new CPEqualsOrLess(
+                new CPAttribute(CPAttributeName("left", "positionY")),
+                new CPAttribute(CPAttributeName("right", "positionY"))
+              ),
+              new CPEqualsOrLess(
+                new CPAttribute(CPAttributeName("right", "positionY")),
+                new CPAdd(
+                  new CPAttribute(CPAttributeName("left", "positionY")),
+                  new CPAttribute(CPAttributeName("left", "height"))
+                )
+              )
+            )
+          )
+          ),
+          CPBooleanValue(true)
+        ) :: Nil
+    )
+    context.knowledgeBase.add(left)
+
+    val right = new CPStrictConcept(
+      "rightOf",
+      "leftElement" :: "rightElement" :: Nil,
+      "rightElement",
+      ("WebPageElement", "left") :: ("WebPageElement", "right") :: Nil,
+      CPDependency(
+        new CPAttribute(CPAttributeName("", "leftElement")),
+        new CPChildObject("left"),
+        "="
+      ) ::
+        CPDependency(
+          new CPAttribute(CPAttributeName("", "rightElement")),
+          new CPChildObject("right"),
+          "="
+        ) ::
+        CPDependency(
+          new CPAdd(
+            new CPAttribute(CPAttributeName("left", "positionX")),
+            new CPAttribute(CPAttributeName("left", "width"))
+          ),
+          new CPAttribute(CPAttributeName("right", "positionX")),
+          "<"
+        ) ::
+        new CPExpressionDependency(
+
+          new CPOr(
+            new CPAnd(
+              new CPEqualsOrGreater(
+                new CPAttribute(CPAttributeName("left", "positionY")),
+                new CPAttribute(CPAttributeName("right", "positionY"))
+              ),
+              new CPEqualsOrLess(
+                new CPAdd(
+                  new CPAttribute(CPAttributeName("left", "positionY")),
+                  new CPAttribute(CPAttributeName("left", "height"))
+                ),
+                new CPAdd(
+                  new CPAttribute(CPAttributeName("right", "positionY")),
+                  new CPAttribute(CPAttributeName("right", "height"))
+                )
+              )
+            ),
+
+          new CPOr(
+            new CPAnd(
+              new CPEqualsOrLess(
+                new CPAttribute(CPAttributeName("left", "positionY")),
+                new CPAdd(
+                  new CPAttribute(CPAttributeName("right", "positionY")),
+                  new CPAttribute(CPAttributeName("right", "height"))
+                )
+              ),
+              new CPEqualsOrLess(
+                new CPAdd(
+                  new CPAttribute(CPAttributeName("right", "positionY")),
+                  new CPAttribute(CPAttributeName("right", "height"))
+                ),
+                new CPAdd(
+                  new CPAttribute(CPAttributeName("left", "positionY")),
+                  new CPAttribute(CPAttributeName("left", "height"))
+                )
+              )
+            ),
+            new CPAnd(
+              new CPEqualsOrLess(
+                new CPAttribute(CPAttributeName("left", "positionY")),
+                new CPAttribute(CPAttributeName("right", "positionY"))
+              ),
+              new CPEqualsOrLess(
+                new CPAttribute(CPAttributeName("right", "positionY")),
+                new CPAdd(
+                  new CPAttribute(CPAttributeName("left", "positionY")),
+                  new CPAttribute(CPAttributeName("left", "height"))
+                )
+              )
+            )
+          )
+          ),
+          CPBooleanValue(true)
+        ) :: Nil
+    )
+    context.knowledgeBase.add(right)
+
+    val over = new CPStrictConcept(
+      "over",
+      "aboveElement" :: "underElement" :: Nil,
+      "aboveElement",
+      ("WebPageElement", "above") :: ("WebPageElement", "under") :: Nil,
+      CPDependency(
+        new CPAttribute(CPAttributeName("", "aboveElement")),
+        new CPChildObject("above"),
+        "="
+      ) ::
+        CPDependency(
+          new CPAttribute(CPAttributeName("", "underElement")),
+          new CPChildObject("under"),
+          "="
+        ) ::
+        CPDependency(
+          new CPAdd(
+            new CPAttribute(CPAttributeName("above", "positionY")),
+            new CPAttribute(CPAttributeName("above", "height"))
+          ),
+          new CPAttribute(CPAttributeName("under", "positionY")),
+          "<"
+        ) ::
+        new CPExpressionDependency(
+
+          new CPOr(
+            new CPAnd(
+              new CPEqualsOrGreater(
+                new CPAttribute(CPAttributeName("under", "positionX")),
+                new CPAttribute(CPAttributeName("above", "positionX"))
+              ),
+              new CPEqualsOrLess(
+                new CPAdd(
+                  new CPAttribute(CPAttributeName("under", "positionX")),
+                  new CPAttribute(CPAttributeName("under", "width"))
+                ),
+                new CPAdd(
+                  new CPAttribute(CPAttributeName("above", "positionX")),
+                  new CPAttribute(CPAttributeName("above", "width"))
+                )
+              )
+            ),
+
+            new CPOr(
+              new CPAnd(
+                new CPEqualsOrLess(
+                  new CPAttribute(CPAttributeName("above", "positionX")),
+                  new CPAdd(
+                    new CPAttribute(CPAttributeName("under", "positionX")),
+                    new CPAttribute(CPAttributeName("under", "width"))
+                  )
+                ),
+                new CPEqualsOrLess(
+                  new CPAdd(
+                    new CPAttribute(CPAttributeName("under", "positionX")),
+                    new CPAttribute(CPAttributeName("under", "width"))
+                  ),
+                  new CPAdd(
+                    new CPAttribute(CPAttributeName("above", "positionX")),
+                    new CPAttribute(CPAttributeName("above", "width"))
+                  )
+                )
+              ),
+              new CPAnd(
+                new CPEqualsOrLess(
+                  new CPAttribute(CPAttributeName("above", "positionX")),
+                  new CPAttribute(CPAttributeName("under", "positionX"))
+                ),
+                new CPEqualsOrLess(
+                  new CPAttribute(CPAttributeName("under", "positionX")),
+                  new CPAdd(
+                    new CPAttribute(CPAttributeName("above", "positionX")),
+                    new CPAttribute(CPAttributeName("above", "width"))
+                  )
+                )
+              )
+            )
+          ),
+          CPBooleanValue(true)
+        ) :: Nil
+    )
+    context.knowledgeBase.add(over)
 
   }
 }

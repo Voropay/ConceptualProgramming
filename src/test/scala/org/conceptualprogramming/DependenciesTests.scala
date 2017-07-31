@@ -18,6 +18,7 @@ class DependenciesTests extends FlatSpec with Matchers {
     val a = new CPAttributeName("a", "val")
     val b = new CPAttributeName("b", "val")
     val c = new CPAttributeName("c", "val")
+
     val d = CPDependency(a :: b :: c :: Nil)
     val s1 = new CPSubstitutions(Map(a -> CPIntValue(1), b -> CPIntValue(1), c -> CPIntValue(1)), Map())
     context.setSubstitutions(Some(s1))

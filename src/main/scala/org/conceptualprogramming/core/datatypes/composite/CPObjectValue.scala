@@ -85,6 +85,7 @@ case class CPObjectValue(objectValue: CPObject) extends CPCompositeType {
       return false
     }
     other match {
+      case other: CPObjectValue => objectValue == other.objectValue
       case other: CPValue => {
         defaultValue.get ?= other
       }

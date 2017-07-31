@@ -4,9 +4,9 @@ import java.io.File
 
 import org.conceptualprogramming.core.datatypes.composite.CPObjectValue
 import org.conceptualprogramming.core.statements.{ConceptResolvingStatement, ConceptResolvingToVariableStatement, ProgramExecutor}
-import org.concepualprogramming.core.CPInheritedConcept
+import org.concepualprogramming.core.{CPInheritedConcept, CPObject}
 import org.concepualprogramming.core.datatypes.composite.CPList
-import org.concepualprogramming.core.datatypes.CPStringValue
+import org.concepualprogramming.core.datatypes.{CPStringValue, CPValue}
 import org.concepualprogramming.core.statements.expressions.{CPConstant, CPFunctionCall}
 import org.scalatest.{FlatSpec, Matchers}
 
@@ -197,6 +197,46 @@ class HTMLLibraryTests extends FlatSpec with Matchers {
     h1.isDefined should be (true)
     val h3 = allElements.find(el => el.name == "WebPageElement" && el.attributes.contains("id") && el.attributes.get("id").get.getStringValue.get == "toolName")
     h3.isDefined should be (true)
+
+    val closeFunc = new CPFunctionCall("HTML.closeWebPage", url :: Nil)
+    closeFunc.calculate(context).get.getBooleanValue.get should be (true)
+  }
+
+  "spatial concepts" should "work correctly" in {
+    val url = CPConstant(CPStringValue("file:///C:/projects/AI/ConceptualProgramming/src/test/scala/org/conceptualprogramming/examples/html/form.html"))
+    val readFunc = new CPFunctionCall("HTML.openWebPage", url :: Nil)
+    val pe = new ProgramExecutor
+    val context = pe.initContext
+    val objects = readFunc.calculate(context).get.asInstanceOf[CPList].values.map(_.asInstanceOf[CPObjectValue].objectValue)
+    context.knowledgeBase.add(objects)
+
+    val left = context.knowledgeBase.getConcepts("leftOf").head
+    val textarea = context.knowledgeBase.getObjects("PageTextArea").head
+    val textareaWebElement = new CPObject("WebPageElement", Map("pageElementName" ->CPStringValue("PageTextArea")) ++ textarea.attributes, textarea.defaultAttribute)
+    val leftObjects = left.resolve(Map("leftElement" -> new CPObjectValue(textareaWebElement)), context)
+
+    leftObjects.size should equal (5)
+    def checkObj(obj: CPObject, attrName: String, direction: String, attrValue: CPValue): Boolean = {
+      val rightObj = obj.attributes.get(direction).get.asInstanceOf[CPObjectValue].objectValue
+      rightObj.attributes.get(attrName) == Some(attrValue)
+    }
+    leftObjects.find(checkObj(_, "name", "rightElement", CPStringValue("country"))).isDefined should be (true)
+    leftObjects.find(checkObj(_, "name", "rightElement", CPStringValue("role"))).isDefined should be (true)
+    leftObjects.find(checkObj(_, "type", "rightElement", CPStringValue("submit"))).isDefined should be (true)
+
+    val right = context.knowledgeBase.getConcepts("rightOf").head
+    val rightObjects = right.resolve(Map("rightElement" -> new CPObjectValue(textareaWebElement)), context)
+    rightObjects.size should equal (1)
+    rightObjects.find(checkObj(_, "text", "leftElement", CPStringValue("Description:"))).isDefined should be (true)
+
+    val lname = context.knowledgeBase.getObjects("PageInput", Map("id" -> CPStringValue("lname"))).head
+    val lnameWebElement = new CPObject("WebPageElement", Map("pageElementName" ->CPStringValue("PageInput")) ++ lname.attributes, lname.defaultAttribute)
+
+    val over = context.knowledgeBase.getConcepts("over").head
+    val aboveObjects = over.resolve(Map("underElement" -> new CPObjectValue(lnameWebElement)), context)
+
+    aboveObjects.size should equal (1)
+    aboveObjects.find(checkObj(_, "id", "aboveElement", CPStringValue("fname"))).isDefined should be (true)
 
     val closeFunc = new CPFunctionCall("HTML.closeWebPage", url :: Nil)
     closeFunc.calculate(context).get.getBooleanValue.get should be (true)

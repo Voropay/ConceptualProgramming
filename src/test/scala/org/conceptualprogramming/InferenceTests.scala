@@ -453,5 +453,48 @@ class InferenceTests extends FlatSpec with Matchers {
     leftObjects.head should equal (new CPObject("leftOf", Map("leftPoint" -> new CPObjectValue(p2), "rightPoint" -> new CPObjectValue(p3)), "leftPoint"))
   }
 
+  "objects without needed attributes" should "not be resolved" in {
+    val context = new CPExecutionContext
+    context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(1), "col" -> CPIntValue(1), "val" -> CPStringValue("row1")), "val"))
+    context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(1), "col" -> CPIntValue(2), "val" -> CPFloatingValue(12)), "val"))
+    context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(1), "col" -> CPIntValue(3), "val" -> CPFloatingValue(10)), "val"))
+    context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(2), "col" -> CPIntValue(1), "val" -> CPStringValue("row2")), "val"))
+    context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(2), "col" -> CPIntValue(2), "val" -> CPFloatingValue(24)), "val"))
+    context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(2), "col" -> CPIntValue(3), "val" -> CPFloatingValue(26)), "val"))
+    context.knowledgeBase.add(new CPObject("Cell", Map("address" -> CPIntValue(1000), "val" -> CPIntValue(16)), "val"))
+
+    val leftOf = new CPStrictConcept(
+      "leftOf",
+      "leftCell" :: "rightCell" :: Nil,
+      "leftCell",
+      ("Cell", "left") :: ("Cell", "right") :: Nil,
+      CPDependency(
+        new CPAttribute(CPAttributeName("", "leftCell")),
+        new CPChildObject("left"),
+        "="
+      ) :: CPDependency(
+          new CPAttribute(CPAttributeName("", "rightCell")),
+          new CPChildObject("right"),
+          "="
+        ) :: CPDependency(
+          new CPAttribute(CPAttributeName("left", "row")),
+          new CPAttribute(CPAttributeName("right", "row")),
+          "="
+        ) :: CPDependency(
+        new CPAttribute(CPAttributeName("left", "col")),
+        new CPAttribute(CPAttributeName("right", "col")),
+        "<"
+      ) :: Nil
+    )
+
+    val cells = leftOf.resolve(Map("rightCell" -> new CPObjectValue(
+      new CPObject("Cell", Map("row" -> CPIntValue(1), "col" -> CPIntValue(2), "val" -> CPFloatingValue(12)), "val")
+    )), context)
+
+    cells.size should equal (1)
+    cells.head.attributes("leftCell").asInstanceOf[CPObjectValue].objectValue.attributes("val") should equal (CPStringValue("row1"))
+
+  }
+
 
 }
