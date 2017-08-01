@@ -1,12 +1,16 @@
 package org.conceptualprogramming
 
+import org.conceptualprogramming.core.CPFilteringConcept
+import org.conceptualprogramming.core.datatypes.composite.CPObjectValue
+import org.conceptualprogramming.core.statements.ConceptResolvingToVariableStatement
 import org.concepualprogramming.core.dependencies._
 import org.concepualprogramming.core.statements.expressions.functions.GroupingFunctions
 import org.concepualprogramming.core.statements.expressions.operations.{CPMul, CPSub}
-import org.concepualprogramming.core.statements.expressions.{CPConstant, CPFunctionCall, CPAttribute, CPExpression}
+import org.concepualprogramming.core.statements.expressions.{CPAttribute, CPConstant, CPExpression, CPFunctionCall}
 import org.concepualprogramming.core._
-import org.concepualprogramming.core.datatypes.{CPStringValue, CPValue, CPIntValue}
-import org.scalatest.{Matchers, FlatSpec}
+import org.concepualprogramming.core.datatypes.composite.CPList
+import org.concepualprogramming.core.datatypes.{CPIntValue, CPStringValue, CPValue}
+import org.scalatest.{FlatSpec, Matchers}
 
 /**
  * Created by oleksii.voropai on 8/15/2016.
@@ -111,7 +115,7 @@ class ConceptTests extends FlatSpec with Matchers {
 
   }
 
-  "Grouping context" should "prepare objects correctly" in {
+  "Grouping concept" should "prepare objects correctly" in {
     val concept = new CPGroupingConcept (
       "test",
       "table" :: "row" :: Nil,
@@ -194,4 +198,36 @@ class ConceptTests extends FlatSpec with Matchers {
     }).isDefined should be (true)
   }
 
+  "Filtering concept" should "prepare objects correctly" in {
+    val context = new CPExecutionContext
+    val a = new CPObject("ObjectA", Map("name" -> CPStringValue("A"), "val" -> CPIntValue(1)), "val")
+    val b = new CPObject("ObjectB", Map("name" -> CPStringValue("B"), "val" -> CPIntValue(2)), "val")
+    val c = new CPObject("ObjectC", Map("name" -> CPStringValue("C"), "val" -> CPIntValue(3)), "val")
+    context.knowledgeBase.add(a)
+    context.knowledgeBase.add(b)
+    context.knowledgeBase.add(c)
+
+    context.knowledgeBase.add(new CPFilteringConcept("ObjectsAB", ("ObjectA", "e"), Nil))
+    context.knowledgeBase.add(new CPFilteringConcept("ObjectsAB", ("ObjectB", "e"), Nil))
+
+    val stmt = new ConceptResolvingToVariableStatement("res", "ObjectsAB", Map())
+    stmt.execute(context)
+    val res = context.getVariable("res").get.asInstanceOf[CPList].values
+    res.size should equal (2)
+    res.contains(new CPObjectValue(a)) should equal (true)
+    res.contains(new CPObjectValue(b)) should equal (true)
+
+    context.knowledgeBase.add(new CPFilteringConcept("ObjectsABLessThen2", ("ObjectsAB", "o"), CPDependency(
+      new CPAttribute(new CPAttributeName("o", "val")),
+      new CPConstant(CPIntValue(2)),
+      "<"
+    ) :: Nil))
+
+    val stmt1 = new ConceptResolvingToVariableStatement("res1", "ObjectsABLessThen2", Map())
+    stmt1.execute(context)
+    val res1 = context.getVariable("res1").get.asInstanceOf[CPList].values
+    res1.size should equal (1)
+    res1.contains(new CPObjectValue(a)) should equal (true)
+
+  }
 }

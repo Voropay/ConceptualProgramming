@@ -191,11 +191,11 @@ class HTMLLibraryTests extends FlatSpec with Matchers {
     pageElementsStmt.execute(context)
     val allElements = context.getVariable("allElements").get.asInstanceOf[CPList].values.map(_.asInstanceOf[CPObjectValue].objectValue)
     allElements.size should equal (3)
-    val div = allElements.find(el => el.name == "WebPageElement" && el.attributes.contains("pageElementName") && el.attributes.get("pageElementName").get.getStringValue.get == "PageDivision")
+    val div = allElements.find(el => el.name == "PageDivision")
     div.isDefined should be (true)
-    val h1 = allElements.find(el => el.name == "WebPageElement" && el.attributes.contains("id") && el.attributes.get("id").get.getStringValue.get == "greetingMessage")
+    val h1 = allElements.find(_.attributes.get("id") == Some(CPStringValue("greetingMessage")))
     h1.isDefined should be (true)
-    val h3 = allElements.find(el => el.name == "WebPageElement" && el.attributes.contains("id") && el.attributes.get("id").get.getStringValue.get == "toolName")
+    val h3 = allElements.find(_.attributes.get("id") == Some(CPStringValue("toolName")))
     h3.isDefined should be (true)
 
     val closeFunc = new CPFunctionCall("HTML.closeWebPage", url :: Nil)
@@ -212,8 +212,7 @@ class HTMLLibraryTests extends FlatSpec with Matchers {
 
     val left = context.knowledgeBase.getConcepts("leftOf").head
     val textarea = context.knowledgeBase.getObjects("PageTextArea").head
-    val textareaWebElement = new CPObject("WebPageElement", Map("pageElementName" ->CPStringValue("PageTextArea")) ++ textarea.attributes, textarea.defaultAttribute)
-    val leftObjects = left.resolve(Map("leftElement" -> new CPObjectValue(textareaWebElement)), context)
+    val leftObjects = left.resolve(Map("leftElement" -> new CPObjectValue(textarea)), context)
 
     leftObjects.size should equal (5)
     def checkObj(obj: CPObject, attrName: String, direction: String, attrValue: CPValue): Boolean = {
@@ -225,15 +224,14 @@ class HTMLLibraryTests extends FlatSpec with Matchers {
     leftObjects.find(checkObj(_, "type", "rightElement", CPStringValue("submit"))).isDefined should be (true)
 
     val right = context.knowledgeBase.getConcepts("rightOf").head
-    val rightObjects = right.resolve(Map("rightElement" -> new CPObjectValue(textareaWebElement)), context)
+    val rightObjects = right.resolve(Map("rightElement" -> new CPObjectValue(textarea)), context)
     rightObjects.size should equal (1)
     rightObjects.find(checkObj(_, "text", "leftElement", CPStringValue("Description:"))).isDefined should be (true)
 
     val lname = context.knowledgeBase.getObjects("PageInput", Map("id" -> CPStringValue("lname"))).head
-    val lnameWebElement = new CPObject("WebPageElement", Map("pageElementName" ->CPStringValue("PageInput")) ++ lname.attributes, lname.defaultAttribute)
 
     val over = context.knowledgeBase.getConcepts("over").head
-    val aboveObjects = over.resolve(Map("underElement" -> new CPObjectValue(lnameWebElement)), context)
+    val aboveObjects = over.resolve(Map("underElement" -> new CPObjectValue(lname)), context)
 
     aboveObjects.size should equal (1)
     aboveObjects.find(checkObj(_, "id", "aboveElement", CPStringValue("fname"))).isDefined should be (true)
