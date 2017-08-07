@@ -1,5 +1,6 @@
 package org.conceptualprogramming
 
+import org.conceptualprogramming.core.RunPreferences
 import org.conceptualprogramming.core.datatypes.composite.CPObjectValue
 import org.conceptualprogramming.core.statements.expressions.{CPAddToCollection, CPChildObject, CPObjectExpression}
 import org.conceptualprogramming.core.statements._
@@ -20,7 +21,7 @@ import org.scalatest.{FlatSpec, Matchers}
 class ExecutionContextTests extends FlatSpec with Matchers {
 
   "Execution context" should "implement knowledge bases stack correctly" in {
-    val context = new CPExecutionContext
+    val context = new CPExecutionContext(new RunPreferences(Map()))
     context.knowledgeBase.add(new CPObject("Var", Map("val" -> CPIntValue(1)), "val"))
     val obj1 = context.knowledgeBase.getObjects("Var")
     obj1.size should equal (1)
@@ -39,7 +40,7 @@ class ExecutionContextTests extends FlatSpec with Matchers {
   }
 
   "Return statement" should "find objects correctly" in {
-    val context = new CPExecutionContext
+    val context = new CPExecutionContext(new RunPreferences(Map()))
     context.knowledgeBase.add(new CPObject("Var", Map("val" -> CPIntValue(1)), "val"))
     val step = new ReturnObjectsStatement(CPConstant(CPStringValue("Var")), Map())
     step.execute(context)
@@ -51,7 +52,7 @@ class ExecutionContextTests extends FlatSpec with Matchers {
   }
 
   "Resolve statement" should "resolve objects correctly" in {
-    val context = new CPExecutionContext
+    val context = new CPExecutionContext(new RunPreferences(Map()))
     context.knowledgeBase.add(new CPObject("Var", Map("val" -> CPIntValue(1)), "val"))
     context.knowledgeBase.add(new CPObject("Var", Map("val" -> CPIntValue(-1)), "val"))
     val step = new ConceptDefinitionResolvingStatement(
@@ -126,7 +127,7 @@ class ExecutionContextTests extends FlatSpec with Matchers {
   }
 
   "Resolve to variable statement" should "assign objects correctly" in {
-    val context = new CPExecutionContext
+    val context = new CPExecutionContext(new RunPreferences(Map()))
     context.knowledgeBase.add(new CPObject("Var", Map("val" -> CPIntValue(2)), "val"))
     context.knowledgeBase.add(new CPObject("Var", Map("val" -> CPIntValue(1)), "val"))
     context.knowledgeBase.add(new CPObject("Var", Map("val" -> CPIntValue(-1)), "val"))
@@ -170,7 +171,7 @@ class ExecutionContextTests extends FlatSpec with Matchers {
 
     "Variable statement" should "set variable value correctly" in {
       val v = new VariableStatement("a", new CPConstant(CPIntValue(1)))
-      val context = new CPExecutionContext
+      val context = new CPExecutionContext(new RunPreferences(Map()))
       v.execute(context)
       context.getVariable("a").get.getIntValue.get should equal (1)
     }
@@ -178,7 +179,7 @@ class ExecutionContextTests extends FlatSpec with Matchers {
     "Add object statement" should "work with variables correctly" in {
       val v = new VariableStatement("v", new CPObjectExpression("myobj", Map("name" -> CPConstant(CPStringValue("abc")), "value" -> CPConstant(CPIntValue(1))), Some("value")))
       val add = new AddObjectStatement(new CPVariable("v"))
-      val context = new CPExecutionContext
+      val context = new CPExecutionContext(new RunPreferences(Map()))
       v.execute(context)
       add.execute(context)
       val res = context.knowledgeBase.getObjects("myobj")
@@ -191,7 +192,7 @@ class ExecutionContextTests extends FlatSpec with Matchers {
 
     "Return value statement" should "return variable value correctly" in {
       var v = new ReturnValueStatement(new CPVariable("a"))
-      val context = new CPExecutionContext
+      val context = new CPExecutionContext(new RunPreferences(Map()))
       context.setVariable("a", CPIntValue(1))
       v.execute(context)
       context.getCurrentStep should equal (-1)
@@ -200,7 +201,7 @@ class ExecutionContextTests extends FlatSpec with Matchers {
     }
 
     "If statement" should "execute nested statements correctly" in {
-      val context = new CPExecutionContext
+      val context = new CPExecutionContext(new RunPreferences(Map()))
       context.knowledgeBase.add(new CPObject("Var", Map("val" -> CPIntValue(1)), "val"))
       context.knowledgeBase.add(new CPObject("Var", Map("val" -> CPIntValue(-1)), "val"))
       val stepThen = new ConceptDefinitionResolvingStatement(
@@ -267,7 +268,7 @@ class ExecutionContextTests extends FlatSpec with Matchers {
 
     "Function calls" should "be executed correctly" in {
 
-      val context = new CPExecutionContext
+      val context = new CPExecutionContext(new RunPreferences(Map()))
       context.knowledgeBase.add(new CPObject("Var", Map("val" -> CPIntValue(1)), "val"))
       context.knowledgeBase.add(new CPObject("Var", Map("val" -> CPIntValue(-1)), "val"))
       ObjectsFunctions.register(context)
@@ -336,7 +337,7 @@ class ExecutionContextTests extends FlatSpec with Matchers {
       val whileStep = new WhileStatement(exitCond, body)
       val returnStep = new ReturnObjectsStatement(CPConstant(CPStringValue("Var")), Map())
 
-      val context = new CPExecutionContext
+      val context = new CPExecutionContext(new RunPreferences(Map()))
       ObjectsFunctions.register(context)
       val concept = new CPFreeConcept("Values", iInit :: whileStep :: returnStep :: Nil)
 
@@ -361,7 +362,7 @@ class ExecutionContextTests extends FlatSpec with Matchers {
       val forStep = new ForStatement(iInit, exitCond, iInc, body)
       val returnStep = new ReturnObjectsStatement(CPConstant(CPStringValue("Var")), Map())
 
-      val context = new CPExecutionContext
+      val context = new CPExecutionContext(new RunPreferences(Map()))
       ObjectsFunctions.register(context)
       val concept = new CPFreeConcept("Values", forStep :: returnStep :: Nil)
 
@@ -379,13 +380,13 @@ class ExecutionContextTests extends FlatSpec with Matchers {
       val list = new CPList(List(CPIntValue(1), CPIntValue(2), CPIntValue(3)))
       val body = new VariableStatement("sum", new CPAdd(CPVariable("sum"), CPVariable("item")))
       val forStmt = new ForeachStatement("item", CPConstant(list), body)
-      val context = new CPExecutionContext
+      val context = new CPExecutionContext(new RunPreferences(Map()))
       val init = new VariableStatement("sum", new CPConstant(CPIntValue(0)))
       init.execute(context)
       forStmt.execute(context)
       context.getVariable("sum").get.getIntValue.get should equal (6)
 
-      val context1 = new CPExecutionContext
+      val context1 = new CPExecutionContext(new RunPreferences(Map()))
       GroupingFunctions.register(context1)
       context1.knowledgeBase.add(new CPObject("Var", Map("name" -> CPStringValue("n1"), "value" -> CPIntValue(1)), "value"))
       context1.knowledgeBase.add(new CPObject("Var", Map("name" -> CPStringValue("n2"), "value" -> CPIntValue(2)), "value"))
@@ -418,7 +419,7 @@ class ExecutionContextTests extends FlatSpec with Matchers {
     }
 
     "Attribute variables" should "be executed correctly" in {
-      val context = new CPExecutionContext
+      val context = new CPExecutionContext(new RunPreferences(Map()))
       val subst = new CPSubstitutions(
         Map(new CPAttributeName("c1", "name") -> CPStringValue("A1"), new CPAttributeName("c1", "val") -> CPIntValue(10)),
         Map()
@@ -430,7 +431,7 @@ class ExecutionContextTests extends FlatSpec with Matchers {
     }
 
   "ChildObject variables" should "be executed correctly" in {
-    val context = new CPExecutionContext
+    val context = new CPExecutionContext(new RunPreferences(Map()))
     val obj = new CPObject("Var", Map("name" -> CPStringValue("A1"), "val" -> CPIntValue(10)), "val")
     val subst = new CPSubstitutions(
       Map(new CPAttributeName("c1", "name") -> CPStringValue("A1"), new CPAttributeName("c1", "val") -> CPIntValue(10)),
@@ -443,7 +444,7 @@ class ExecutionContextTests extends FlatSpec with Matchers {
   }
 
   "AddToCollectionStatement" should "be executed correctly" in {
-    val context = new CPExecutionContext
+    val context = new CPExecutionContext(new RunPreferences(Map()))
     val list = new CPList(List(CPIntValue(1), CPIntValue(2), CPIntValue(3)))
     context.setVariable("myList", list)
     val stmt = new AddToCollectionStatement(new CPAddToCollection(new CPVariable("myList"), CPConstant(CPIntValue(4)), Some(CPConstant(CPIntValue(3)))))

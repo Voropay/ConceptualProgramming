@@ -18,7 +18,7 @@ import org.scalatest.{Matchers, FlatSpec}
 class TestExamples extends FlatSpec with Matchers {
 
   "Criminal West example" should "be performed correctly" in {
-    val context = new CPExecutionContext
+    val context = new CPExecutionContext(new RunPreferences(Map()))
     val criminal = new CPStrictConcept(
       "Criminal",
       "name" :: Nil,
@@ -85,7 +85,7 @@ class TestExamples extends FlatSpec with Matchers {
   }
 
   "Criminal West example" should "be performed correctly in non-recursive implementation" in {
-    val context = new CPExecutionContext
+    val context = new CPExecutionContext(new RunPreferences(Map()))
     val criminal = new CPStrictConcept(
       "Criminal",
       "name" :: Nil,
@@ -152,7 +152,7 @@ class TestExamples extends FlatSpec with Matchers {
   }
 
   def prepareContextForProfitExample: CPExecutionContext = {
-    val context = new CPExecutionContext
+    val context = new CPExecutionContext(new RunPreferences(Map()))
     context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(1), "col" -> CPIntValue(1), "val" -> CPStringValue("row1")), "val"))
     context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(1), "col" -> CPIntValue(2), "val" -> CPFloatingValue(12)), "val"))
     context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(1), "col" -> CPIntValue(3), "val" -> CPFloatingValue(10)), "val"))

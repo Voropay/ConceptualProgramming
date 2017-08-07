@@ -2,11 +2,13 @@ package org.conceptualprogramming
 
 import java.time.LocalDate
 
-import org.conceptualprogramming.core.datatypes.composite.{CPObjectValue, CPMap}
+import org.conceptualprogramming.core.CPFilteringConcept
+import org.conceptualprogramming.core.datatypes.composite.{CPMap, CPObjectValue}
+import org.conceptualprogramming.core.dependencies.CPExistDependency
 import org.conceptualprogramming.core.statements._
-import org.conceptualprogramming.core.statements.expressions.{CPGetFromCollection, CPObjectExpression, CPMapExpression, CPListExpression}
+import org.conceptualprogramming.core.statements.expressions._
 import org.conceptualprogramming.core.statements.expressions.operations.CPOperation
-import org.conceptualprogramming.parser.{ProgramParser, StatementsParser, ExpressionsParser, ConstantsParser}
+import org.conceptualprogramming.parser.{ConstantsParser, ExpressionsParser, ProgramParser, StatementsParser}
 import org.concepualprogramming.core.CPAttributeName
 import org.concepualprogramming.core.CPFreeConcept
 import org.concepualprogramming.core.CPInheritedConcept
@@ -30,7 +32,7 @@ import org.concepualprogramming.core.statements.expressions.CPExpression
 import org.concepualprogramming.core.statements.expressions.CPVariable
 import org.concepualprogramming.core.statements.expressions._
 import org.concepualprogramming.core.statements.expressions.operations._
-import org.scalatest.{Matchers, FlatSpec}
+import org.scalatest.{FlatSpec, Matchers}
 
 import scala.util.Success
 
@@ -72,20 +74,15 @@ class ParserTests  extends FlatSpec with Matchers {
     variable should equal (true)
 
     val attribute = exprParser("attr.name").get match {
-      case res: CPAttribute => res.attrName.conceptName == "attr" && res.attrName.attributeName == "name"
-      case _ => false
-    }
-    attribute should equal (true)
-/*
-    val attributeChain = exprParser("object.attr.name").get.asInstanceOf[CPAttribute]
-    attributeChain.attrName.conceptName should equal
 
-    match {
       case res: CPAttribute => res.attrName.conceptName == "attr" && res.attrName.attributeName == "name"
       case _ => false
     }
     attribute should equal (true)
-*/
+
+    val childObject = exprParser("$obj").get.asInstanceOf[CPChildObject]
+    childObject.childObject should equal ("obj")
+
     (exprParser("true").get.asInstanceOf[CPConstant]).value.getBooleanValue.get should equal (true)
     (exprParser("false").get.asInstanceOf[CPConstant]).value.getBooleanValue.get should equal (false)
     (exprParser("10").get.asInstanceOf[CPConstant]).value.getIntValue.get should equal (10)
@@ -363,6 +360,29 @@ class ParserTests  extends FlatSpec with Matchers {
     dep2.contains(CPAttributeName("i", "row")) should be (true)
     dep2.contains(CPAttributeName("o", "row")) should be (true)
 
+    val dep3 = dependenciesParser("Exist ( moreLeft(leftPoint == ip.leftPoint, rightPoint == ip.rightPoint, pos < ip.leftPoint[\"pos\"]) := leftOf ip () {rightPoint: op.rightPoint, pos: op.leftPoint[\"pos\"]})").get.asInstanceOf[CPExistDependency]
+    println(dep3)
+    val innerConceptStmt1 = dep3.definition.asInstanceOf[CPStrictConcept]
+    innerConceptStmt1.name should equal ("moreLeft")
+    var innerConceptAttrs1 = innerConceptStmt1.attributes
+    innerConceptAttrs1.size should equal (3)
+    innerConceptAttrs1.contains("leftPoint") should be (true)
+    innerConceptAttrs1.contains("rightPoint") should be (true)
+    innerConceptAttrs1.contains("pos") should be (true)
+    val innerConceptsChild1 = innerConceptStmt1.childConcepts
+    innerConceptsChild1.size should equal (1)
+    innerConceptsChild1.head should equal (("leftOf", "ip"))
+    val innerConceptsDependencies1 = innerConceptStmt1.attributesDependencies
+    innerConceptsDependencies1.size should equal (3)
+    innerConceptsDependencies1.contains(new CPExpressionDependency(CPOperation.createBinaryArithmeticExpression(CPAttribute("", "leftPoint"), CPAttribute("ip", "leftPoint"), "=="), CPBooleanValue(true))) should be (true)
+    innerConceptsDependencies1.contains(new CPExpressionDependency(CPOperation.createBinaryArithmeticExpression(CPAttribute("", "rightPoint"), CPAttribute("ip", "rightPoint"), "=="), CPBooleanValue(true))) should be (true)
+    innerConceptsDependencies1.contains(new CPExpressionDependency(CPOperation.createBinaryArithmeticExpression(CPAttribute("", "pos"), new CPGetFromCollection(new CPAttribute(CPAttributeName("ip", "leftPoint")), List(CPConstant(CPStringValue("pos")))), "<"), CPBooleanValue(true))) should be (true)
+    val existQuery = dep3.queryExpr
+    existQuery.size should equal (2)
+    existQuery.get("rightPoint") should equal (Some(new CPAttribute(CPAttributeName("op", "rightPoint"))))
+    existQuery.get("pos") should equal (Some(new CPGetFromCollection(new CPAttribute(CPAttributeName("op", "leftPoint")), List(CPConstant(CPStringValue("pos"))))))
+    dep3.positiveCondition should be (true)
+
     val strictConceptStmt1 = stmtParser("concept income (row, val) := cell c (col == 2), _.row == c.row").get.asInstanceOf[ConceptDefinitionStatement].definition.asInstanceOf[CPStrictConcept]
     strictConceptStmt1.name should equal ("income")
     var strictConceptAttrs1 = strictConceptStmt1.attributes
@@ -515,6 +535,26 @@ class ParserTests  extends FlatSpec with Matchers {
     val grpConceptDep6 = grpConceptStmt6.groupedAttributesDependencies.head.asInstanceOf[CPExpressionDependency].expr.asInstanceOf[CPGreater]
     grpConceptDep6.operand1 should equal (new CPFunctionCall("Grouping.Sum", CPAttribute("c", "val") :: Nil))
     grpConceptDep6.operand2.asInstanceOf[CPConstant].value.getIntValue.get should equal (0)
+
+    val filteringConceptStmt1 = stmtParser("concept PositiveNumbers :- Number n (val > 0)").get.asInstanceOf[ConceptDefinitionStatement].definition.asInstanceOf[CPFilteringConcept]
+    filteringConceptStmt1.name should equal ("PositiveNumbers")
+    filteringConceptStmt1.childConcept should equal (("Number", "n"))
+    val filteringConceptDependencies1 = filteringConceptStmt1.attributesDependencies
+    filteringConceptDependencies1.size should equal (1)
+    filteringConceptDependencies1.head should equal (CPDependency(new CPAttribute(CPAttributeName("n", "val")), new CPConstant(CPIntValue(0)), ">"))
+    val filteringConceptStmt2 = stmtParser("concept PositiveNumbers :- Number n (val > 0)").get.asInstanceOf[ConceptDefinitionStatement].definition.asInstanceOf[CPFilteringConcept]
+    filteringConceptStmt2 should equal (filteringConceptStmt1)
+
+    val conceptWithExistDependency = stmtParser("concept leftMost :- leftOf op (), Not Exist (moreLeft(leftPoint == ip.leftPoint, rightPoint == ip.rightPoint, pos < ip.leftPoint[\"pos\"]) := leftOf ip () {rightPoint: op.rightPoint, pos: op.leftPoint[\"pos\"]}) ").get.asInstanceOf[ConceptDefinitionStatement].definition.asInstanceOf[CPFilteringConcept]
+    conceptWithExistDependency.name should equal ("leftMost")
+    conceptWithExistDependency.childConcept should equal (("leftOf", "op"))
+    val dependencies2 = conceptWithExistDependency.attributesDependencies
+    dependencies2.size should equal (1)
+    val dep4 = dependencies2.head.asInstanceOf[CPExistDependency]
+    dep4.definition should equal (dep3.definition)
+    dep4.queryExpr should equal (dep3.queryExpr)
+    dep4.positiveCondition should be (false)
+
 
     val procStmtFunc = stmtParser("Console.print(\"Hello world\")").get.asInstanceOf[ProcedureCallStatement].function
     procStmtFunc.name should equal ("Console.print")

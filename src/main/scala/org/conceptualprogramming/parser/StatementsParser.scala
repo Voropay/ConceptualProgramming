@@ -1,22 +1,24 @@
 package org.conceptualprogramming.parser
 
+import org.conceptualprogramming.core.CPFilteringConcept
+import org.conceptualprogramming.core.dependencies.CPExistDependency
 import org.conceptualprogramming.core.statements._
-import org.conceptualprogramming.core.statements.expressions.CPAddToCollection
+import org.conceptualprogramming.core.statements.expressions.{CPAddToCollection, CPChildObject}
 import org.conceptualprogramming.core.statements.expressions.operations.CPOperation
 import org.concepualprogramming.core.CPAttributeName
 import org.concepualprogramming.core.CPConcept
 import org.concepualprogramming.core.CPInheritedConcept
 import org.concepualprogramming.core.CPStrictConcept
 import org.concepualprogramming.core._
-import org.concepualprogramming.core.datatypes.{CPStringValue, CPBooleanValue}
-import org.concepualprogramming.core.dependencies.{CPExpressionDependency, CPAttributesLinkDependency, CPDependency}
+import org.concepualprogramming.core.datatypes.{CPBooleanValue, CPStringValue}
+import org.concepualprogramming.core.dependencies.{CPAttributesLinkDependency, CPDependency, CPExpressionDependency}
 import org.concepualprogramming.core.statements.CPStatement
 import org.concepualprogramming.core.statements.ReturnObjectsStatement
 import org.concepualprogramming.core.statements.ReturnValueStatement
 import org.concepualprogramming.core.statements.VariableStatement
 import org.concepualprogramming.core.statements.expressions.functions.CPCompositeFunctionDefinition
 import org.concepualprogramming.core.statements.expressions.operations.CPEquals
-import org.concepualprogramming.core.statements.expressions.{CPVariable, CPExpression, CPAttribute, CPConstant}
+import org.concepualprogramming.core.statements.expressions.{CPAttribute, CPConstant, CPExpression, CPVariable}
 import org.concepualprogramming.core.statements._
 
 import scala.util.Properties
@@ -81,7 +83,7 @@ trait StatementsParser extends ExpressionsParser {
   def conceptDefinitionResolvingToVariableStatement: Parser[CPStatement] = ident ~ "<-" ~ conceptDefinition ^^ {value => new ConceptDefinitionResolvingToVariableStatement(value._1._1, value._2, Map())}
   def conceptResolvingToVariableStatement: Parser[CPStatement] = ident ~ "<-" ~ ident ~ objectQuery ^^ {value => new ConceptResolvingToVariableStatement(value._1._1._1, value._1._2, value._2)}
 
-  def conceptDefinition: Parser[CPConcept] = strictConceptDefinition | inheritedConceptDefinition | freeConceptDefinition | groupingConceptDefinition
+  def conceptDefinition: Parser[CPConcept] = strictConceptDefinition | inheritedConceptDefinition | freeConceptDefinition | groupingConceptDefinition | filteringConceptDefinition
 
   def strictConceptDefinition: Parser[CPConcept] = parentConcept ~ ":=" ~ rep1sep(childConcept, ",") ~ opt("," ~ rep1sep(attrDependency, ",")) ^^ {
     case parentConcept ~ ":=" ~ childConcepts ~ dependencies => {
@@ -167,12 +169,15 @@ trait StatementsParser extends ExpressionsParser {
     })
   }
 
-  def attrDependency: Parser[CPDependency] = attributesLinkDependency | expressionDependency
+  def attrDependency: Parser[CPDependency] = attributesLinkDependency | existDependency | expressionDependency
   def expressionDependency: Parser[CPDependency] = expression ^^ { value =>
     new CPExpressionDependency(value, CPBooleanValue(true))
   }
   def attributesLinkDependency: Parser[CPDependency] = attributeExpression ~ "~" ~ rep1sep(attributeExpression, "~") ^^ {
     case head ~ "~" ~ tail => new CPAttributesLinkDependency(head.attrName :: tail.map(_.attrName))
+  }
+  def existDependency: Parser[CPDependency] = opt("Not") ~ "Exist" ~ "(" ~ conceptDefinition ~  objectQuery ~ ")" ^^ {
+    case not ~ "Exist" ~ "(" ~ concept ~ query ~ ")" => new CPExistDependency(concept, query, not.isEmpty)
   }
 
   sealed trait DependencyAttributes
@@ -440,5 +445,18 @@ trait StatementsParser extends ExpressionsParser {
 
     (dependencyOpt, groupedAttributeOpt, groupedDependency)
   }
+  }
+
+  def filteringConceptDefinition: Parser[CPConcept] = ident ~ ":-" ~ childConcept ~ opt("," ~ rep1sep(attrDependency, ",")) ^^ {
+    case parentConceptName ~ ":-" ~ childConcept ~ dependencies => {
+      val childConceptName = (childConcept._1, childConcept._2)
+      val childConceptDependencies = childConcept._3
+      val additionalDependencies = if(dependencies.isDefined) {
+        dependencies.get._2
+      } else {
+        List()
+      }
+      new CPFilteringConcept(parentConceptName, childConceptName, childConceptDependencies ++ additionalDependencies)
+    }
   }
 }

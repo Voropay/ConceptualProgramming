@@ -1,7 +1,9 @@
 package org.conceptualprogramming
 
+import org.conceptualprogramming.core.{CPFilteringConcept, RunPreferences}
 import org.conceptualprogramming.core.datatypes.composite.CPObjectValue
-import org.conceptualprogramming.core.statements.expressions.CPChildObject
+import org.conceptualprogramming.core.dependencies.CPExistDependency
+import org.conceptualprogramming.core.statements.expressions.{CPChildObject, CPGetFromCollection}
 import org.concepualprogramming.core.datatypes._
 import org.concepualprogramming.core._
 import org.concepualprogramming.core.statements.expressions.operations.CPEquals
@@ -17,7 +19,7 @@ import org.scalatest.{FlatSpec, Matchers}
 class InferenceTests extends FlatSpec with Matchers {
 
   "StrictConcept" should "resolve attribute values correctly" in {
-    val context = new CPExecutionContext
+    val context = new CPExecutionContext(new RunPreferences(Map()))
     context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(1), "col" -> CPIntValue(1), "val" -> CPStringValue("row1")), "val"))
     context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(1), "col" -> CPIntValue(2), "val" -> CPFloatingValue(12)), "val"))
     context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(1), "col" -> CPIntValue(3), "val" -> CPFloatingValue(10)), "val"))
@@ -83,7 +85,7 @@ class InferenceTests extends FlatSpec with Matchers {
     val d4 = CPDependency(cval, CPIntValue(10))
 
     val concept = new CPStrictConcept("", Nil, "", Nil, Nil)
-    val context = new CPExecutionContext
+    val context = new CPExecutionContext(new RunPreferences(Map()))
     val inferredQuery = concept.inferValuesFromDependencies(new CPSubstitutions(query, Map()), d1 :: d2 :: d3 :: d4 :: Nil, context)
     inferredQuery.get.size should equal (5)
     inferredQuery.get.get(aval).get.getIntValue.get should equal (10)
@@ -94,7 +96,7 @@ class InferenceTests extends FlatSpec with Matchers {
   }
 
   "InheritedConcept" should "infer inherited attributes correctly" in {
-    val context = new CPExecutionContext
+    val context = new CPExecutionContext(new RunPreferences(Map()))
     val c = new CPInheritedConcept(
       "Income",
       ("Cell", "c") :: Nil,
@@ -151,7 +153,7 @@ class InferenceTests extends FlatSpec with Matchers {
   }
 
   "InheritedConcept" should "resolve attribute values correctly" in {
-    val context = new CPExecutionContext
+    val context = new CPExecutionContext(new RunPreferences(Map()))
     context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(1), "col" -> CPIntValue(1), "val" -> CPStringValue("row1")), "val"))
     context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(1), "col" -> CPIntValue(2), "val" -> CPFloatingValue(12)), "val"))
     context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(1), "col" -> CPIntValue(3), "val" -> CPFloatingValue(10)), "val"))
@@ -201,7 +203,7 @@ class InferenceTests extends FlatSpec with Matchers {
   }
 
   "Decision Node" should "resolve attribute values correctly" in {
-    val context = new CPExecutionContext
+    val context = new CPExecutionContext(new RunPreferences(Map()))
     context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(1), "col" -> CPIntValue(1), "val" -> CPStringValue("row1")), "val"))
     context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(1), "col" -> CPIntValue(2), "val" -> CPFloatingValue(12)), "val"))
     context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(1), "col" -> CPIntValue(3), "val" -> CPFloatingValue(10)), "val"))
@@ -297,7 +299,7 @@ class InferenceTests extends FlatSpec with Matchers {
   }
 
   "Free concept" should "resolve objects correctly" in {
-    val context = new CPExecutionContext
+    val context = new CPExecutionContext(new RunPreferences(Map()))
     context.knowledgeBase.add(new CPObject("Var", Map("val" -> CPIntValue(1)), "val"))
     context.knowledgeBase.add(new CPObject("Var", Map("val" -> CPIntValue(-1)), "val"))
     val step1 = new ConceptDefinitionResolvingStatement(
@@ -354,7 +356,7 @@ class InferenceTests extends FlatSpec with Matchers {
 
   "Composite statement" should "resolve objects correctly" in {
 
-    val context = new CPExecutionContext
+    val context = new CPExecutionContext(new RunPreferences(Map()))
     context.knowledgeBase.add(new CPObject("Var", Map("val" -> CPIntValue(1)), "val"))
     context.knowledgeBase.add(new CPObject("Var", Map("val" -> CPIntValue(-1)), "val"))
 
@@ -413,7 +415,7 @@ class InferenceTests extends FlatSpec with Matchers {
 
   "Nested concepts" should "be resolved correctly" in {
 
-    val context = new CPExecutionContext
+    val context = new CPExecutionContext(new RunPreferences(Map()))
     val p1 = new CPObject("Point", Map("pos" -> CPIntValue(1)), "pos")
     val p2 = new CPObject("Point", Map("pos" -> CPIntValue(2)), "pos")
     val p3 = new CPObject("Point", Map("pos" -> CPIntValue(3)), "pos")
@@ -454,7 +456,7 @@ class InferenceTests extends FlatSpec with Matchers {
   }
 
   "objects without needed attributes" should "not be resolved" in {
-    val context = new CPExecutionContext
+    val context = new CPExecutionContext(new RunPreferences(Map()))
     context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(1), "col" -> CPIntValue(1), "val" -> CPStringValue("row1")), "val"))
     context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(1), "col" -> CPIntValue(2), "val" -> CPFloatingValue(12)), "val"))
     context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(1), "col" -> CPIntValue(3), "val" -> CPFloatingValue(10)), "val"))
@@ -494,6 +496,71 @@ class InferenceTests extends FlatSpec with Matchers {
     cells.size should equal (1)
     cells.head.attributes("leftCell").asInstanceOf[CPObjectValue].objectValue.attributes("val") should equal (CPStringValue("row1"))
 
+  }
+
+  "concepts with nested Exists() dependencies" should "be resolved correctly" in {
+    val context = new CPExecutionContext(new RunPreferences(Map()))
+    context.knowledgeBase.add(new CPObject("Point", Map("pos" -> CPIntValue(1)), "pos"))
+    context.knowledgeBase.add(new CPObject("Point", Map("pos" -> CPIntValue(2)), "pos"))
+    context.knowledgeBase.add(new CPObject("Point", Map("pos" -> CPIntValue(3)), "pos"))
+    context.knowledgeBase.add(new CPObject("Point", Map("pos" -> CPIntValue(4)), "pos"))
+
+    val leftOf = new CPStrictConcept(
+      "leftOf",
+      "leftPoint" :: "rightPoint" :: Nil,
+      "rightPoint",
+      ("Point", "left") :: ("Point", "right") :: Nil,
+      CPDependency(
+        new CPAttribute(CPAttributeName("", "leftPoint")),
+        new CPChildObject("left"),
+        "="
+      ) :: CPDependency(
+        new CPAttribute(CPAttributeName("", "rightPoint")),
+        new CPChildObject("right"),
+        "="
+      ) :: CPDependency(
+        new CPAttribute(CPAttributeName("left", "pos")),
+        new CPAttribute(CPAttributeName("right", "pos")),
+        "<"
+      ) :: Nil
+    )
+    context.knowledgeBase.add(leftOf)
+
+    val moreLeft = new CPStrictConcept(
+      "moreLeft",
+      "leftPoint" :: "rightPoint" :: "pos" :: Nil,
+      "rightPoint",
+      ("leftOf", "p") :: Nil,
+      CPDependency(
+        new CPAttribute(CPAttributeName("", "leftPoint")),
+        new CPAttribute(CPAttributeName("p", "leftPoint")),
+        "="
+      ) :: CPDependency(
+        new CPAttribute(CPAttributeName("", "rightPoint")),
+        new CPAttribute(CPAttributeName("p", "rightPoint")),
+        "="
+      ) :: CPDependency(
+        new CPGetFromCollection(new CPAttribute(CPAttributeName("p", "leftPoint")), List(CPConstant(CPStringValue("pos")))),
+        new CPAttribute(CPAttributeName("", "pos")),
+        ">"
+      ) :: Nil
+    )
+
+    val leftMost = new CPFilteringConcept(
+      "leftMost",
+      ("leftOf", "p"),
+      CPExistDependency(moreLeft, Map(
+        "rightPoint" -> CPAttribute(new CPAttributeName("p", "rightPoint")),
+        "pos" -> new CPGetFromCollection(new CPAttribute(CPAttributeName("p", "leftPoint")), List(CPConstant(CPStringValue("pos"))))
+      ), false) :: Nil
+    )
+
+    val res = leftMost.resolve(Map("rightPoint" -> new CPObjectValue(
+      new CPObject("Point", Map("pos" -> CPIntValue(3)), "pos")
+    )), context)
+
+    res.size should equal (1)
+    res.head.attributes("leftPoint").asInstanceOf[CPObjectValue].objectValue.attributes("pos") should equal (CPIntValue(2))
   }
 
 

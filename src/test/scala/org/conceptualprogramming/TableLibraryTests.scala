@@ -1,13 +1,14 @@
 package org.conceptualprogramming
 
+import org.conceptualprogramming.core.RunPreferences
 import org.conceptualprogramming.core.datatypes.composite.CPObjectValue
 import org.conceptualprogramming.core.statements.ProgramExecutor
 import org.concepualprogramming.core.statements.AddObjectStatement
-import org.concepualprogramming.core.{CPObject, CPExecutionContext}
+import org.concepualprogramming.core.{CPExecutionContext, CPObject}
 import org.concepualprogramming.core.datatypes.composite.CPList
-import org.concepualprogramming.core.datatypes.{CPIntValue, CPBooleanValue, CPStringValue}
+import org.concepualprogramming.core.datatypes.{CPBooleanValue, CPIntValue, CPStringValue}
 import org.concepualprogramming.core.statements.expressions.{CPConstant, CPFunctionCall}
-import org.scalatest.{Matchers, FlatSpec}
+import org.scalatest.{FlatSpec, Matchers}
 
 /**
  * Created by oleksii.voropai on 4/27/2017.
@@ -19,7 +20,7 @@ class TableLibraryTests extends FlatSpec with Matchers {
     val readHeader = CPConstant(CPBooleanValue(true))
     val readFunc = new CPFunctionCall("Table.readFromCSVFile", filePath :: delimiter :: readHeader :: Nil)
     val pe = new ProgramExecutor
-    val context = pe.initContext
+    val context = pe.initContext(new RunPreferences(Map()))
     val objects = readFunc.calculate(context).get.asInstanceOf[CPList].values
     objects.size should equal (12)
 

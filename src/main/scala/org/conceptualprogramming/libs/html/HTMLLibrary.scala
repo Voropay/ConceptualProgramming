@@ -750,11 +750,11 @@ class HTMLLibrary extends StandardLibrary {
 
           new CPOr(
             new CPAnd(
-              new CPEqualsOrGreater(
+              new CPEqualsOrLess(
                 new CPAttribute(CPAttributeName("under", "positionX")),
                 new CPAttribute(CPAttributeName("above", "positionX"))
               ),
-              new CPEqualsOrLess(
+              new CPEqualsOrGreater(
                 new CPAdd(
                   new CPAttribute(CPAttributeName("under", "positionX")),
                   new CPAttribute(CPAttributeName("under", "width"))
@@ -805,6 +805,89 @@ class HTMLLibrary extends StandardLibrary {
         ) :: Nil
     )
     context.knowledgeBase.add(over)
+
+    val below = new CPStrictConcept(
+      "below",
+      "aboveElement" :: "underElement" :: Nil,
+      "underElement",
+      ("WebPageElement", "above") :: ("WebPageElement", "under") :: Nil,
+      CPDependency(
+        new CPAttribute(CPAttributeName("", "aboveElement")),
+        new CPChildObject("above"),
+        "="
+      ) ::
+        CPDependency(
+          new CPAttribute(CPAttributeName("", "underElement")),
+          new CPChildObject("under"),
+          "="
+        ) ::
+        CPDependency(
+          new CPAdd(
+            new CPAttribute(CPAttributeName("above", "positionY")),
+            new CPAttribute(CPAttributeName("above", "height"))
+          ),
+          new CPAttribute(CPAttributeName("under", "positionY")),
+          "<"
+        ) ::
+        new CPExpressionDependency(
+
+          new CPOr(
+            new CPAnd(
+              new CPEqualsOrLess(
+                new CPAttribute(CPAttributeName("under", "positionX")),
+                new CPAttribute(CPAttributeName("above", "positionX"))
+              ),
+              new CPEqualsOrGreater(
+                new CPAdd(
+                  new CPAttribute(CPAttributeName("under", "positionX")),
+                  new CPAttribute(CPAttributeName("under", "width"))
+                ),
+                new CPAdd(
+                  new CPAttribute(CPAttributeName("above", "positionX")),
+                  new CPAttribute(CPAttributeName("above", "width"))
+                )
+              )
+            ),
+
+            new CPOr(
+              new CPAnd(
+                new CPEqualsOrLess(
+                  new CPAttribute(CPAttributeName("above", "positionX")),
+                  new CPAdd(
+                    new CPAttribute(CPAttributeName("under", "positionX")),
+                    new CPAttribute(CPAttributeName("under", "width"))
+                  )
+                ),
+                new CPEqualsOrLess(
+                  new CPAdd(
+                    new CPAttribute(CPAttributeName("under", "positionX")),
+                    new CPAttribute(CPAttributeName("under", "width"))
+                  ),
+                  new CPAdd(
+                    new CPAttribute(CPAttributeName("above", "positionX")),
+                    new CPAttribute(CPAttributeName("above", "width"))
+                  )
+                )
+              ),
+              new CPAnd(
+                new CPEqualsOrLess(
+                  new CPAttribute(CPAttributeName("above", "positionX")),
+                  new CPAttribute(CPAttributeName("under", "positionX"))
+                ),
+                new CPEqualsOrLess(
+                  new CPAttribute(CPAttributeName("under", "positionX")),
+                  new CPAdd(
+                    new CPAttribute(CPAttributeName("above", "positionX")),
+                    new CPAttribute(CPAttributeName("above", "width"))
+                  )
+                )
+              )
+            )
+          ),
+          CPBooleanValue(true)
+        ) :: Nil
+    )
+    context.knowledgeBase.add(below)
 
   }
 }

@@ -1,12 +1,14 @@
 package org.conceptualprogramming
 
+import org.conceptualprogramming.core.{CPFilteringConcept, RunPreferences}
+import org.conceptualprogramming.core.dependencies.CPExistDependency
 import org.concepualprogramming.core.statements.ConceptDefinitionResolvingStatement
-import org.concepualprogramming.core.statements.expressions.{CPVariable, CPConstant, CPAttribute}
-import org.concepualprogramming.core.statements.expressions.operations.{CPMul, CPDiv}
+import org.concepualprogramming.core.statements.expressions.{CPAttribute, CPConstant, CPVariable}
+import org.concepualprogramming.core.statements.expressions.operations.{CPDiv, CPMul}
 import org.concepualprogramming.core._
-import org.concepualprogramming.core.datatypes.{CPFloatingValue, CPIntValue}
+import org.concepualprogramming.core.datatypes.{CPFloatingValue, CPIntValue, CPStringValue}
 import org.concepualprogramming.core.dependencies._
-import org.scalatest.{Matchers, FlatSpec}
+import org.scalatest.{FlatSpec, Matchers}
 
 /**
  * Created by oleksii.voropai on 8/13/2016.
@@ -14,7 +16,7 @@ import org.scalatest.{Matchers, FlatSpec}
 class DependenciesTests extends FlatSpec with Matchers {
 
   "Equals dependency" should "check and infer values correctly" in {
-    val context = new CPExecutionContext
+    val context = new CPExecutionContext(new RunPreferences(Map()))
     val a = new CPAttributeName("a", "val")
     val b = new CPAttributeName("b", "val")
     val c = new CPAttributeName("c", "val")
@@ -42,7 +44,7 @@ class DependenciesTests extends FlatSpec with Matchers {
   }
 
   "Arithmetical dependencies" should "check and infer values correctly" in {
-    val context = new CPExecutionContext
+    val context = new CPExecutionContext(new RunPreferences(Map()))
     val a = new CPAttributeName("a", "val")
     val b = new CPAttributeName("b", "val")
     val div = CPDiv(new CPAttribute(a), new CPAttribute(b))
@@ -112,6 +114,40 @@ class DependenciesTests extends FlatSpec with Matchers {
     d6.check(context) should be (true)
   }
 
+  "Exist dependencies" should "check values correctly" in {
+    val context = new CPExecutionContext(new RunPreferences(Map()))
+    val a = new CPObject("Object", Map("name" -> CPStringValue("A"), "val" -> CPIntValue(1)), "val")
+    val b = new CPObject("Object", Map("name" -> CPStringValue("B"), "val" -> CPIntValue(2)), "val")
+    val c = new CPObject("Object", Map("name" -> CPStringValue("C"), "val" -> CPIntValue(3)), "val")
+    context.knowledgeBase.add(a)
+    context.knowledgeBase.add(b)
+    context.knowledgeBase.add(c)
+
+    val concept1 = new CPFilteringConcept("Objects", ("Object", "e"), CPDependency(
+      new CPAttribute(CPAttributeName("e", "val")),
+      new CPConstant(CPIntValue(3)),
+      "<"
+    ) :: Nil)
+    val exist1 = new CPExistDependency(concept1, Map(), true)
+    exist1.check(context) should be (true)
+    val notExist1 = new CPExistDependency(concept1, Map(), false)
+    notExist1.check(context) should be (false)
+
+    val exist2 = new CPExistDependency(concept1, Map("name" -> new CPConstant(CPStringValue("B"))), true)
+    exist2.check(context) should be (true)
+
+    val exist3 = new CPExistDependency(concept1, Map("name" -> new CPConstant(CPStringValue("D"))), true)
+    exist3.check(context) should be (false)
+
+    val context1 = new CPExecutionContext(new RunPreferences(Map("RESOLVE_TYPE" -> RunPreferences.DECISION_TREE_RESOLVE_TYPE)))
+    context1.knowledgeBase.add(a)
+    context1.knowledgeBase.add(b)
+    context1.knowledgeBase.add(c)
+    exist1.check(context1) should be (true)
+    notExist1.check(context1) should be (false)
+
+  }
+
   "Dependencies" should "be compared correctly" in {
 
     val de1 = CPDependency(CPAttributeName("a", "val") :: CPAttributeName("b", "val") :: CPAttributeName("c", "val") :: Nil)
@@ -150,7 +186,7 @@ class DependenciesTests extends FlatSpec with Matchers {
   }
 
   "Dependencies" should "handle variables correctly" in {
-    val context = new CPExecutionContext
+    val context = new CPExecutionContext(new RunPreferences(Map()))
     context.knowledgeBase.add(new CPObject("Var", Map("val" -> CPIntValue(1)), "val"))
     context.knowledgeBase.add(new CPObject("Var", Map("val" -> CPIntValue(-1)), "val"))
     val step = new ConceptDefinitionResolvingStatement(
@@ -177,5 +213,4 @@ class DependenciesTests extends FlatSpec with Matchers {
     res.head.name should equal ("PositiveVariable")
     res.head.get("val").get.getIntValue.get should equal (1)
   }
-
 }

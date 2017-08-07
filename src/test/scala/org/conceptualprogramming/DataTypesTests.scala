@@ -3,8 +3,9 @@ package org.conceptualprogramming
 
 import java.time.{LocalDate, Month}
 
-import org.conceptualprogramming.core.datatypes.composite.{CPObjectValue, CPMap}
-import org.concepualprogramming.core.{CPObject, CPExecutionContext}
+import org.conceptualprogramming.core.RunPreferences
+import org.conceptualprogramming.core.datatypes.composite.{CPMap, CPObjectValue}
+import org.concepualprogramming.core.{CPExecutionContext, CPObject}
 import org.concepualprogramming.core.datatypes._
 import org.concepualprogramming.core.datatypes.composite.CPList
 import org.concepualprogramming.core.statements.expressions.{CPConstant, CPFunctionCall}
@@ -156,7 +157,7 @@ class DataTypesTests extends FlatSpec with Matchers {
   }
 
   "List" should "work correctly" in {
-    val context = new CPExecutionContext
+    val context = new CPExecutionContext(new RunPreferences(Map()))
     val l1 = new CPList(List(CPIntValue(1), CPIntValue(2), CPIntValue(3)))
     val l2 = new CPList(List(CPIntValue(1), CPIntValue(2), CPIntValue(3)))
     (l1 == l2) should be (true)
@@ -231,7 +232,7 @@ class DataTypesTests extends FlatSpec with Matchers {
   }
 
   "Map" should "work correctly" in {
-    val context = new CPExecutionContext
+    val context = new CPExecutionContext(new RunPreferences(Map()))
     val m1 = new CPMap(Map(CPStringValue("name") -> CPStringValue("abcd"), CPStringValue("value") -> CPIntValue(1)))
     val m2 = new CPMap(Map(CPStringValue("value") -> CPIntValue(1), CPStringValue("name") -> CPStringValue("abcd")))
     (m1 == m2) should be (true)
@@ -359,7 +360,7 @@ class DataTypesTests extends FlatSpec with Matchers {
     val m1 = new CPMap(Map(CPStringValue("name") -> CPStringValue("abcd"), CPStringValue("value") -> CPIntValue(1)))
     val m2 = new CPMap(Map(CPIntValue(0) -> CPStringValue("a"), CPIntValue(1) -> CPStringValue("b"), CPIntValue(2) -> CPStringValue("c")))
     val l1 = new CPList(List(CPIntValue(1), CPIntValue(2), CPIntValue(3)))
-    val context = new CPExecutionContext
+    val context = new CPExecutionContext(new RunPreferences(Map()))
     CPList.register(context)
     CPMap.register(context)
 
@@ -389,7 +390,7 @@ class DataTypesTests extends FlatSpec with Matchers {
   }
 
   "Object" should "work correctly" in {
-    val context = new CPExecutionContext
+    val context = new CPExecutionContext(new RunPreferences(Map()))
     val m1 = new CPObjectValue(new CPObject("obj", Map("name" -> CPStringValue("abcd"), "value" -> CPIntValue(1)), "value"))
     val m2 = new CPObjectValue(new CPObject("obj", Map("value" -> CPIntValue(1), "name" -> CPStringValue("abcd")), "value"))
     (m1 == m2) should be (true)
@@ -446,7 +447,7 @@ class DataTypesTests extends FlatSpec with Matchers {
   }
 
   "Objects" should "be casted correctly into Maps and Lists" in {
-    val context = new CPExecutionContext
+    val context = new CPExecutionContext(new RunPreferences(Map()))
     val m1 = new CPObjectValue(new CPObject("obj", Map("name" -> CPStringValue("abcd"), "value" -> CPIntValue(1)), "value"))
     CPObjectValue.register(context)
     CPMap.register(context)

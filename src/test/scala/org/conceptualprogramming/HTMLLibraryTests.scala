@@ -2,6 +2,7 @@ package org.conceptualprogramming
 
 import java.io.File
 
+import org.conceptualprogramming.core.RunPreferences
 import org.conceptualprogramming.core.datatypes.composite.CPObjectValue
 import org.conceptualprogramming.core.statements.{ConceptResolvingStatement, ConceptResolvingToVariableStatement, ProgramExecutor}
 import org.concepualprogramming.core.{CPInheritedConcept, CPObject}
@@ -17,12 +18,12 @@ class HTMLLibraryTests extends FlatSpec with Matchers {
 
   val driverFilePath = new File("resources/chromedriver.exe")
   System.setProperty("webdriver.chrome.driver", driverFilePath.getAbsolutePath)
-
+/*
   "openWebPage and closeWebPage functions" should "work correctly" in {
     val url = CPConstant(CPStringValue("file:///C:/projects/AI/ConceptualProgramming/src/test/scala/org/conceptualprogramming/examples/html/loginPage.html"))
     val readFunc = new CPFunctionCall("HTML.openWebPage", url :: Nil)
     val pe = new ProgramExecutor
-    val context = pe.initContext
+    val context = pe.initContext(new RunPreferences(Map()))
     val objects = readFunc.calculate(context).get.asInstanceOf[CPList].values.map(_.asInstanceOf[CPObjectValue].objectValue)
     context.knowledgeBase.add(objects)
     context.knowledgeBase.getObjects("PageInput", Map("name" -> CPStringValue("LoginForm_Login"))).size should equal (1)
@@ -51,7 +52,7 @@ class HTMLLibraryTests extends FlatSpec with Matchers {
     val pageName = CPConstant(CPStringValue("loginPage"))
     val readFunc = new CPFunctionCall("HTML.openWebPage", url :: pageName :: Nil)
     val pe = new ProgramExecutor
-    val context = pe.initContext
+    val context = pe.initContext(new RunPreferences(Map()))
     val objects = readFunc.calculate(context).get.asInstanceOf[CPList].values.map(_.asInstanceOf[CPObjectValue].objectValue)
     context.knowledgeBase.add(objects)
     val buttonObj = context.knowledgeBase.getObjects("PageInput", Map("name" -> CPStringValue("submit")))
@@ -78,7 +79,7 @@ class HTMLLibraryTests extends FlatSpec with Matchers {
     val pageName = CPConstant(CPStringValue("loginPage"))
     val readFunc = new CPFunctionCall("HTML.openWebPage", url :: pageName :: Nil)
     val pe = new ProgramExecutor
-    val context = pe.initContext
+    val context = pe.initContext(new RunPreferences(Map()))
     val objects = readFunc.calculate(context).get.asInstanceOf[CPList].values.map(_.asInstanceOf[CPObjectValue].objectValue)
     context.knowledgeBase.add(objects)
     val buttonObj = context.knowledgeBase.getObjects("PageInput", Map("name" -> CPStringValue("submit")))
@@ -101,7 +102,7 @@ class HTMLLibraryTests extends FlatSpec with Matchers {
     val pageName = CPConstant(CPStringValue("loginPage"))
     val readFunc = new CPFunctionCall("HTML.openWebPage", url :: pageName :: Nil)
     val pe = new ProgramExecutor
-    val context = pe.initContext
+    val context = pe.initContext(new RunPreferences(Map()))
     val objects = readFunc.calculate(context).get.asInstanceOf[CPList].values.map(_.asInstanceOf[CPObjectValue].objectValue)
     context.knowledgeBase.add(objects)
     val buttonObj = context.knowledgeBase.getObjects("PageInput", Map("name" -> CPStringValue("submit")))
@@ -128,7 +129,7 @@ class HTMLLibraryTests extends FlatSpec with Matchers {
     val url = CPConstant(CPStringValue("file:///C:/projects/AI/ConceptualProgramming/src/test/scala/org/conceptualprogramming/examples/html/loginPage.html"))
     val readFunc = new CPFunctionCall("HTML.openWebPage", url :: Nil)
     val pe = new ProgramExecutor
-    val context = pe.initContext
+    val context = pe.initContext(new RunPreferences(Map()))
     val objects = readFunc.calculate(context).get.asInstanceOf[CPList].values.map(_.asInstanceOf[CPObjectValue].objectValue)
     context.knowledgeBase.add(objects)
     val inputObj = context.knowledgeBase.getObjects("PageInput", Map("name" -> CPStringValue("LoginForm_Login")))
@@ -155,7 +156,7 @@ class HTMLLibraryTests extends FlatSpec with Matchers {
     val url = CPConstant(CPStringValue("file:///C:/projects/AI/ConceptualProgramming/src/test/scala/org/conceptualprogramming/examples/html/form.html"))
     val readFunc = new CPFunctionCall("HTML.openWebPage", url :: Nil)
     val pe = new ProgramExecutor
-    val context = pe.initContext
+    val context = pe.initContext(new RunPreferences(Map()))
     val objects = readFunc.calculate(context).get.asInstanceOf[CPList].values.map(_.asInstanceOf[CPObjectValue].objectValue)
     context.knowledgeBase.add(objects)
     val uaObj = context.knowledgeBase.getObjects("PageOption", Map("value" -> CPStringValue("ua")))
@@ -183,7 +184,7 @@ class HTMLLibraryTests extends FlatSpec with Matchers {
     val url = CPConstant(CPStringValue("file:///C:/projects/AI/ConceptualProgramming/src/test/scala/org/conceptualprogramming/examples/html/welcomePage.html"))
     val readFunc = new CPFunctionCall("HTML.openWebPage", url :: Nil)
     val pe = new ProgramExecutor
-    val context = pe.initContext
+    val context = pe.initContext(new RunPreferences(Map()))
     val objects = readFunc.calculate(context).get.asInstanceOf[CPList].values.map(_.asInstanceOf[CPObjectValue].objectValue)
     context.knowledgeBase.add(objects)
 
@@ -201,12 +202,12 @@ class HTMLLibraryTests extends FlatSpec with Matchers {
     val closeFunc = new CPFunctionCall("HTML.closeWebPage", url :: Nil)
     closeFunc.calculate(context).get.getBooleanValue.get should be (true)
   }
-
+*/
   "spatial concepts" should "work correctly" in {
     val url = CPConstant(CPStringValue("file:///C:/projects/AI/ConceptualProgramming/src/test/scala/org/conceptualprogramming/examples/html/form.html"))
     val readFunc = new CPFunctionCall("HTML.openWebPage", url :: Nil)
     val pe = new ProgramExecutor
-    val context = pe.initContext
+    val context = pe.initContext(new RunPreferences(Map()))
     val objects = readFunc.calculate(context).get.asInstanceOf[CPList].values.map(_.asInstanceOf[CPObjectValue].objectValue)
     context.knowledgeBase.add(objects)
 
@@ -235,6 +236,12 @@ class HTMLLibraryTests extends FlatSpec with Matchers {
 
     aboveObjects.size should equal (1)
     aboveObjects.find(checkObj(_, "id", "aboveElement", CPStringValue("fname"))).isDefined should be (true)
+
+    val below = context.knowledgeBase.getConcepts("below").head
+    val belowObjects = below.resolve(Map("aboveElement" -> new CPObjectValue(lname)), context)
+
+    belowObjects.size should equal (1)
+    belowObjects.find(checkObj(_, "id", "underElement", CPStringValue("description"))).isDefined should be (true)
 
     val closeFunc = new CPFunctionCall("HTML.closeWebPage", url :: Nil)
     closeFunc.calculate(context).get.getBooleanValue.get should be (true)

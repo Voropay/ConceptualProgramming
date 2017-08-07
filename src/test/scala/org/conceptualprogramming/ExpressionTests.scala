@@ -1,12 +1,13 @@
 package org.conceptualprogramming
 
-import org.conceptualprogramming.core.datatypes.composite.{CPObjectValue, CPMap}
+import org.conceptualprogramming.core.RunPreferences
+import org.conceptualprogramming.core.datatypes.composite.{CPMap, CPObjectValue}
 import org.conceptualprogramming.core.statements.expressions._
 import org.concepualprogramming.core.datatypes.composite.CPList
 import org.concepualprogramming.core.statements.expressions.operations._
-import org.concepualprogramming.core.{CPObject, CPSubstitutions, CPExecutionContext, CPAttributeName}
-import org.concepualprogramming.core.datatypes.{CPStringValue, CPFloatingValue, CPBooleanValue, CPIntValue}
-import org.concepualprogramming.core.statements.expressions.{CPAttribute, CPVariable, CPConstant}
+import org.concepualprogramming.core.{CPAttributeName, CPExecutionContext, CPObject, CPSubstitutions}
+import org.concepualprogramming.core.datatypes.{CPBooleanValue, CPFloatingValue, CPIntValue, CPStringValue}
+import org.concepualprogramming.core.statements.expressions.{CPAttribute, CPConstant, CPVariable}
 import org.scalatest._
 
 /**
@@ -14,7 +15,7 @@ import org.scalatest._
  */
 class ExpressionTests extends FlatSpec with Matchers {
   "constants and variables" should "be evaluated correctly" in {
-    val context = new CPExecutionContext
+    val context = new CPExecutionContext(new RunPreferences(Map()))
     val c = new CPConstant(CPIntValue(1))
     c.calculate(context).get.getIntValue.get should equal (1)
     c.isDefined(context) should be (true)
@@ -29,7 +30,7 @@ class ExpressionTests extends FlatSpec with Matchers {
   }
 
   "attributes" should "be evaluated correctly" in {
-    val context = new CPExecutionContext
+    val context = new CPExecutionContext(new RunPreferences(Map()))
     val a = new CPAttribute(new CPAttributeName("a", "b"))
     a.isDefined(context) should be (false)
     val inferred = a.infer(CPIntValue(5), context)
@@ -45,7 +46,7 @@ class ExpressionTests extends FlatSpec with Matchers {
 
   "Add" should "be evaluated correctly" in {
     val add = new CPAdd(new CPVariable("a"), new CPVariable("b"))
-    val context = new CPExecutionContext
+    val context = new CPExecutionContext(new RunPreferences(Map()))
 
     add.calculate(context).isEmpty should be (true)
     context.setVariable("a", CPIntValue(1))
@@ -65,7 +66,7 @@ class ExpressionTests extends FlatSpec with Matchers {
 
   "Sub" should "be evaluated correctly" in {
     val sub = new CPSub(new CPVariable("a"), new CPVariable("b"))
-    val context = new CPExecutionContext
+    val context = new CPExecutionContext(new RunPreferences(Map()))
     sub.calculate(context).isEmpty should be (true)
     context.setVariable("b", CPIntValue(2))
     sub.calculate(context).isEmpty should be (true)
@@ -84,7 +85,7 @@ class ExpressionTests extends FlatSpec with Matchers {
 
   "Mul" should "be evaluated correctly" in {
     val mul = new CPMul(new CPVariable("a"), new CPVariable("b"))
-    val context = new CPExecutionContext
+    val context = new CPExecutionContext(new RunPreferences(Map()))
     mul.calculate(context).isEmpty should be (true)
     context.setVariable("b", CPIntValue(2))
     mul.calculate(context).isEmpty should be (true)
@@ -104,7 +105,7 @@ class ExpressionTests extends FlatSpec with Matchers {
 
   "Div" should "be evaluated correctly" in {
     val div = new CPDiv(new CPVariable("a"), new CPVariable("b"))
-    val context = new CPExecutionContext
+    val context = new CPExecutionContext(new RunPreferences(Map()))
 
     div.calculate(context).isEmpty should be (true)
     context.setVariable("a", CPIntValue(6))
@@ -126,7 +127,7 @@ class ExpressionTests extends FlatSpec with Matchers {
 
   "Logical expressions" should "be evaluated correctly" in {
     val and = new CPAnd(new CPVariable("a"), new CPVariable("b"))
-    val context = new CPExecutionContext
+    val context = new CPExecutionContext(new RunPreferences(Map()))
     and.calculate(context).isEmpty should be (true)
     context.setVariable("a", CPBooleanValue(true))
     and.calculate(context).isEmpty should be (true)
@@ -187,7 +188,7 @@ class ExpressionTests extends FlatSpec with Matchers {
     val gt = new CPGreater(new CPVariable("a"), new CPVariable("b"))
     val ls = new CPLess(new CPVariable("a"), new CPVariable("b"))
 
-    val context = new CPExecutionContext
+    val context = new CPExecutionContext(new RunPreferences(Map()))
 
     eq.calculate(context).isEmpty should be (true)
     context.setVariable("a", CPIntValue(2))
@@ -236,7 +237,7 @@ class ExpressionTests extends FlatSpec with Matchers {
   }
 
   "List" should "be calculated correctly" in {
-    val context = new CPExecutionContext
+    val context = new CPExecutionContext(new RunPreferences(Map()))
     val list = new CPListExpression(CPConstant(CPIntValue(1)) :: CPConstant(CPIntValue(2)) :: CPConstant(CPIntValue(3)) :: Nil)
     val res = list.calculate(context).get.asInstanceOf[CPList].values
     res.size should equal (3)
@@ -246,7 +247,7 @@ class ExpressionTests extends FlatSpec with Matchers {
   }
 
   "Map" should "be calculated correctly" in {
-    val context = new CPExecutionContext
+    val context = new CPExecutionContext(new RunPreferences(Map()))
     val map = new CPMapExpression(Map(CPConstant(CPIntValue(1)) -> CPConstant(CPIntValue(10)), CPConstant(CPIntValue(2)) -> CPConstant(CPIntValue(20))))
     val res = map.calculate(context).get.asInstanceOf[CPMap].values
     res.size should equal (2)
@@ -255,7 +256,7 @@ class ExpressionTests extends FlatSpec with Matchers {
   }
 
   "Object" should "be calculated correctly" in {
-    val context = new CPExecutionContext
+    val context = new CPExecutionContext(new RunPreferences(Map()))
     val obj = new CPObjectExpression("myobj", Map("attr1" -> CPConstant(CPIntValue(10)), "attr2" -> CPConstant(CPIntValue(20))), Some("attr1"))
     val res = obj.calculate(context).get.asInstanceOf[CPObjectValue].objectValue
     res.name should equal ("myobj")
@@ -266,7 +267,7 @@ class ExpressionTests extends FlatSpec with Matchers {
   }
 
   "collections operations" should "be calculated correctly" in {
-    val context = new CPExecutionContext
+    val context = new CPExecutionContext(new RunPreferences(Map()))
     val list = new CPList(List(CPIntValue(1), CPIntValue(2), CPIntValue(3)))
     val listRes1 = (new CPAddToCollection(CPConstant(list), CPConstant(CPIntValue(4)), None)).calculate(context).get.asInstanceOf[CPList].values
     listRes1.size should equal (4)

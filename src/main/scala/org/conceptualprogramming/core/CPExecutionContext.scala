@@ -1,5 +1,6 @@
 package org.concepualprogramming.core
 
+import org.conceptualprogramming.core.RunPreferences
 import org.concepualprogramming.core.datatypes.CPValue
 import org.concepualprogramming.core.statements.expressions.CPFunctionDefinition
 import org.concepualprogramming.core.knowledgebase.KnowledgeBase
@@ -10,7 +11,7 @@ import scala.collection.mutable
 /**
  * Created by oleksii.voropai on 8/27/2016.
  */
-class CPExecutionContext {
+case class CPExecutionContext(preferences: RunPreferences) {
   val frameStack = mutable.Stack[CPExecutionFrame]()
   addFrame
 

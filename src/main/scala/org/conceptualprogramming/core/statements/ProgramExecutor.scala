@@ -23,7 +23,7 @@ class ProgramExecutor {
     if(programCode.isEmpty) {
       return ""
     }
-    val context = initContext
+    val context = initContext(preferences)
     val resolveType = preferences.getResolveType
     val res = resolveType match {
       case RunPreferences.RECURSIVE_RESOLVE_TYPE => programCode.get.execute(context); context.getValueResult
@@ -37,8 +37,8 @@ class ProgramExecutor {
     }
   }
 
-  def initContext(): CPExecutionContext = {
-    val context = new CPExecutionContext
+  def initContext(preferences: RunPreferences): CPExecutionContext = {
+    val context = new CPExecutionContext(preferences)
     GroupingFunctions.register(context)
     ConsoleFunctions.register(context)
     ObjectsFunctions.register(context)
@@ -73,7 +73,7 @@ class ProgramExecutor {
   }
 
   def stepByStepExecute(preferences: RunPreferences) = {
-    val context = initContext
+    val context = initContext(preferences)
     val resolveType = preferences.getResolveType
     val stmtParser = new StatementsParser {
       def apply(code: String): Option[CPStatement] = {

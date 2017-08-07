@@ -1,6 +1,6 @@
 package org.conceptualprogramming
 
-import org.conceptualprogramming.core.CPFilteringConcept
+import org.conceptualprogramming.core.{CPFilteringConcept, RunPreferences}
 import org.conceptualprogramming.core.datatypes.composite.CPObjectValue
 import org.conceptualprogramming.core.statements.ConceptResolvingToVariableStatement
 import org.concepualprogramming.core.dependencies._
@@ -160,7 +160,7 @@ class ConceptTests extends FlatSpec with Matchers {
     grouped.contains(key3) should be (true)
     grouped.get(key3).get.size should equal (2)
 
-    val context = new CPExecutionContext
+    val context = new CPExecutionContext(new RunPreferences(Map()))
     GroupingFunctions.register(context)
     val aggregated = concept.aggregateAttributes(grouped, context)
     aggregated.size should equal (3)
@@ -199,7 +199,7 @@ class ConceptTests extends FlatSpec with Matchers {
   }
 
   "Filtering concept" should "prepare objects correctly" in {
-    val context = new CPExecutionContext
+    val context = new CPExecutionContext(new RunPreferences(Map()))
     val a = new CPObject("ObjectA", Map("name" -> CPStringValue("A"), "val" -> CPIntValue(1)), "val")
     val b = new CPObject("ObjectB", Map("name" -> CPStringValue("B"), "val" -> CPIntValue(2)), "val")
     val c = new CPObject("ObjectC", Map("name" -> CPStringValue("C"), "val" -> CPIntValue(3)), "val")
