@@ -169,7 +169,7 @@ trait StatementsParser extends ExpressionsParser {
     })
   }
 
-  def attrDependency: Parser[CPDependency] = attributesLinkDependency | existDependency | expressionDependency
+  def attrDependency: Parser[CPDependency] = attributesLinkDependency | existByNameDependency | existDependency | expressionDependency
   def expressionDependency: Parser[CPDependency] = expression ^^ { value =>
     new CPExpressionDependency(value, CPBooleanValue(true))
   }
@@ -178,6 +178,12 @@ trait StatementsParser extends ExpressionsParser {
   }
   def existDependency: Parser[CPDependency] = opt("Not") ~ "Exist" ~ "(" ~ conceptDefinition ~  objectQuery ~ ")" ^^ {
     case not ~ "Exist" ~ "(" ~ concept ~ query ~ ")" => new CPExistDependency(concept, query, not.isEmpty)
+  }
+  def existByNameDependency: Parser[CPDependency] = opt("Not") ~ "Exist" ~ "(" ~ ident ~  objectQuery ~ ")" ^^ {
+    case not ~ "Exist" ~ "(" ~ conceptName ~ query ~ ")" => {
+      val concept = new CPFilteringConcept("anonymousFilteringConcept_" + java.util.UUID.randomUUID.toString, (conceptName, conceptName), Nil)
+      new CPExistDependency(concept, query, not.isEmpty)
+    }
   }
 
   sealed trait DependencyAttributes

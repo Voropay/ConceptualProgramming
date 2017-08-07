@@ -361,7 +361,6 @@ class ParserTests  extends FlatSpec with Matchers {
     dep2.contains(CPAttributeName("o", "row")) should be (true)
 
     val dep3 = dependenciesParser("Exist ( moreLeft(leftPoint == ip.leftPoint, rightPoint == ip.rightPoint, pos < ip.leftPoint[\"pos\"]) := leftOf ip () {rightPoint: op.rightPoint, pos: op.leftPoint[\"pos\"]})").get.asInstanceOf[CPExistDependency]
-    println(dep3)
     val innerConceptStmt1 = dep3.definition.asInstanceOf[CPStrictConcept]
     innerConceptStmt1.name should equal ("moreLeft")
     var innerConceptAttrs1 = innerConceptStmt1.attributes
@@ -382,6 +381,12 @@ class ParserTests  extends FlatSpec with Matchers {
     existQuery.get("rightPoint") should equal (Some(new CPAttribute(CPAttributeName("op", "rightPoint"))))
     existQuery.get("pos") should equal (Some(new CPGetFromCollection(new CPAttribute(CPAttributeName("op", "leftPoint")), List(CPConstant(CPStringValue("pos"))))))
     dep3.positiveCondition should be (true)
+
+    val dep4 = dependenciesParser("Not Exist (moreLeft {rightPoint: op.rightPoint, pos: op.leftPoint[\"pos\"]})").get.asInstanceOf[CPExistDependency]
+    val innerConceptStmt2 = dep4.definition.asInstanceOf[CPFilteringConcept]
+    innerConceptStmt2.childConcept should equal (("moreLeft", "moreLeft"))
+    innerConceptStmt2.attributesDependencies.isEmpty should be (true)
+    dep4.queryExpr should equal (dep3.queryExpr)
 
     val strictConceptStmt1 = stmtParser("concept income (row, val) := cell c (col == 2), _.row == c.row").get.asInstanceOf[ConceptDefinitionStatement].definition.asInstanceOf[CPStrictConcept]
     strictConceptStmt1.name should equal ("income")
@@ -548,13 +553,23 @@ class ParserTests  extends FlatSpec with Matchers {
     val conceptWithExistDependency = stmtParser("concept leftMost :- leftOf op (), Not Exist (moreLeft(leftPoint == ip.leftPoint, rightPoint == ip.rightPoint, pos < ip.leftPoint[\"pos\"]) := leftOf ip () {rightPoint: op.rightPoint, pos: op.leftPoint[\"pos\"]}) ").get.asInstanceOf[ConceptDefinitionStatement].definition.asInstanceOf[CPFilteringConcept]
     conceptWithExistDependency.name should equal ("leftMost")
     conceptWithExistDependency.childConcept should equal (("leftOf", "op"))
-    val dependencies2 = conceptWithExistDependency.attributesDependencies
-    dependencies2.size should equal (1)
-    val dep4 = dependencies2.head.asInstanceOf[CPExistDependency]
-    dep4.definition should equal (dep3.definition)
-    dep4.queryExpr should equal (dep3.queryExpr)
-    dep4.positiveCondition should be (false)
+    val conceptWithExistDependencies = conceptWithExistDependency.attributesDependencies
+    conceptWithExistDependencies.size should equal (1)
+    val existDependency = conceptWithExistDependencies.head.asInstanceOf[CPExistDependency]
+    existDependency.definition should equal (dep3.definition)
+    existDependency.queryExpr should equal (dep3.queryExpr)
+    existDependency.positiveCondition should be (false)
 
+    val conceptWithExistDependency1 = stmtParser("concept leftMost :- leftOf op (), Not Exist (moreLeft {rightPoint: op.rightPoint, pos: op.leftPoint[\"pos\"]}) ").get.asInstanceOf[ConceptDefinitionStatement].definition.asInstanceOf[CPFilteringConcept]
+    conceptWithExistDependency1.name should equal ("leftMost")
+    conceptWithExistDependency1.childConcept should equal (("leftOf", "op"))
+    val conceptWithExistDependencies1 = conceptWithExistDependency1.attributesDependencies
+    conceptWithExistDependencies1.size should equal (1)
+    val existDependency1 = conceptWithExistDependencies1.head.asInstanceOf[CPExistDependency]
+    existDependency1.definition.asInstanceOf[CPFilteringConcept].childConcept should equal (("moreLeft", "moreLeft"))
+    existDependency1.definition.asInstanceOf[CPFilteringConcept].attributesDependencies.isEmpty should be (true)
+    existDependency1.queryExpr should equal (dep4.queryExpr)
+    existDependency1.positiveCondition should be (false)
 
     val procStmtFunc = stmtParser("Console.print(\"Hello world\")").get.asInstanceOf[ProcedureCallStatement].function
     procStmtFunc.name should equal ("Console.print")
