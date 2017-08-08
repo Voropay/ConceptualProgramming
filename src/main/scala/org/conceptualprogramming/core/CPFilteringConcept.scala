@@ -22,9 +22,10 @@ case class CPFilteringConcept(name: String, childConcept: Tuple2[String, String]
     if(wrongChildAttributeExists) {
       return None
     }
-    val attributesToAdd = parentAttributes.filter(item => {
+    val parentAttributesToAdd = parentAttributes.filter(item => {
       !query.attributesValues.contains(CPAttributeName(childConcept._2, item._1.attributeName))
     })
+    val attributesToAdd = parentAttributesToAdd.map(item => {(CPAttributeName(childConcept._2, item._1.attributeName), item._2)})
     val convertedQuery = new CPSubstitutions(attributesToAdd ++ query.attributesValues, query.objects)
     inferValuesFromDependencies(convertedQuery, attributesDependencies, context)
   }

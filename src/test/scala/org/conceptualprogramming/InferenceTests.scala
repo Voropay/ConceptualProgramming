@@ -4,6 +4,7 @@ import org.conceptualprogramming.core.{CPFilteringConcept, RunPreferences}
 import org.conceptualprogramming.core.datatypes.composite.CPObjectValue
 import org.conceptualprogramming.core.dependencies.CPExistDependency
 import org.conceptualprogramming.core.statements.expressions.{CPChildObject, CPGetFromCollection}
+import org.conceptualprogramming.parser.StatementsParser
 import org.concepualprogramming.core.datatypes._
 import org.concepualprogramming.core._
 import org.concepualprogramming.core.statements.expressions.operations.CPEquals
@@ -561,6 +562,26 @@ class InferenceTests extends FlatSpec with Matchers {
 
     res.size should equal (1)
     res.head.attributes("leftPoint").asInstanceOf[CPObjectValue].objectValue.attributes("pos") should equal (CPIntValue(2))
+
+    val stmtParser = new StatementsParser {
+      def apply(code: String): Option[CPStatement] = {
+        parse(statement, code) match {
+          case Success(res, _) => Some(res)
+          case _ => None
+        }
+      }
+    }
+
+    context.knowledgeBase.add(moreLeft)
+    val conceptWithExistDependencyDefinition = stmtParser("concept leftMost :- leftOf op (), Not Exist (moreLeft {rightPoint: op.rightPoint, pos: op.leftPoint[\"pos\"]}) ").get
+    conceptWithExistDependencyDefinition.execute(context)
+    val conceptWithExistDependency = context.knowledgeBase.getConcepts("leftMost").head
+    val res1 = conceptWithExistDependency.resolve(Map("rightPoint" -> new CPObjectValue(
+      new CPObject("Point", Map("pos" -> CPIntValue(3)), "pos")
+    )), context)
+    println(res1)
+    res1.size should equal (1)
+    res1.head.attributes("leftPoint").asInstanceOf[CPObjectValue].objectValue.attributes("pos") should equal (CPIntValue(2))
   }
 
 
