@@ -4,7 +4,8 @@ import java.io.File
 
 import org.conceptualprogramming.core.CPFilteringConcept
 import org.conceptualprogramming.core.datatypes.composite.CPObjectValue
-import org.conceptualprogramming.core.statements.expressions.CPChildObject
+import org.conceptualprogramming.core.dependencies.CPExistDependency
+import org.conceptualprogramming.core.statements.expressions.{CPChildObject, CPGetFromCollection}
 import org.conceptualprogramming.libs.StandardLibrary
 import org.conceptualprogramming.libs.html.HTMLParser
 import org.concepualprogramming.core._
@@ -888,6 +889,126 @@ class HTMLLibrary extends StandardLibrary {
         ) :: Nil
     )
     context.knowledgeBase.add(below)
+
+    val moreLeft = new CPStrictConcept(
+      "moreLeft",
+      "leftElement" :: "rightElement" :: "positionX" :: Nil,
+      "rightElement",
+      ("leftOf", "e") :: Nil,
+      CPDependency(
+        new CPAttribute(CPAttributeName("", "leftElement")),
+        new CPAttribute(CPAttributeName("e", "leftElement")),
+        "="
+      ) :: CPDependency(
+        new CPAttribute(CPAttributeName("", "rightElement")),
+        new CPAttribute(CPAttributeName("e", "rightElement")),
+        "="
+      ) :: CPDependency(
+        new CPGetFromCollection(new CPAttribute(CPAttributeName("e", "leftElement")), List(CPConstant(CPStringValue("positionX")))),
+        new CPAttribute(CPAttributeName("", "positionX")),
+        ">"
+      ) :: Nil
+    )
+
+    val leftMostOf = new CPFilteringConcept(
+      "leftMostOf",
+      ("leftOf", "e"),
+      CPExistDependency(moreLeft, Map(
+        "rightElement" -> CPAttribute(new CPAttributeName("e", "rightElement")),
+        "positionX" -> new CPGetFromCollection(new CPAttribute(CPAttributeName("e", "leftElement")), List(CPConstant(CPStringValue("positionX"))))
+      ), false) :: Nil
+    )
+    context.knowledgeBase.add(leftMostOf)
+
+    val moreRight = new CPStrictConcept(
+      "moreRight",
+      "leftElement" :: "rightElement" :: "positionX" :: Nil,
+      "leftElement",
+      ("rightOf", "e") :: Nil,
+      CPDependency(
+        new CPAttribute(CPAttributeName("", "leftElement")),
+        new CPAttribute(CPAttributeName("e", "leftElement")),
+        "="
+      ) :: CPDependency(
+        new CPAttribute(CPAttributeName("", "rightElement")),
+        new CPAttribute(CPAttributeName("e", "rightElement")),
+        "="
+      ) :: CPDependency(
+        new CPGetFromCollection(new CPAttribute(CPAttributeName("e", "rightElement")), List(CPConstant(CPStringValue("positionX")))),
+        new CPAttribute(CPAttributeName("", "positionX")),
+        "<"
+      ) :: Nil
+    )
+
+    val rightMostOf = new CPFilteringConcept(
+      "rightMostOf",
+      ("rightOf", "e"),
+      CPExistDependency(moreRight, Map(
+        "leftElement" -> CPAttribute(new CPAttributeName("e", "leftElement")),
+        "positionX" -> new CPGetFromCollection(new CPAttribute(CPAttributeName("e", "rightElement")), List(CPConstant(CPStringValue("positionX"))))
+      ), false) :: Nil
+    )
+    context.knowledgeBase.add(rightMostOf)
+
+    val lower = new CPStrictConcept(
+      "lower",
+      "aboveElement" :: "underElement" :: "positionY" :: Nil,
+      "aboveElement",
+      ("below", "e") :: Nil,
+      CPDependency(
+        new CPAttribute(CPAttributeName("", "aboveElement")),
+        new CPAttribute(CPAttributeName("e", "aboveElement")),
+        "="
+      ) :: CPDependency(
+        new CPAttribute(CPAttributeName("", "underElement")),
+        new CPAttribute(CPAttributeName("e", "underElement")),
+        "="
+      ) :: CPDependency(
+        new CPGetFromCollection(new CPAttribute(CPAttributeName("e", "aboveElement")), List(CPConstant(CPStringValue("positionY")))),
+        new CPAttribute(CPAttributeName("", "positionY")),
+        ">"
+      ) :: Nil
+    )
+
+    val upperMostOf = new CPFilteringConcept(
+      "upperMostOf",
+      ("over", "e"),
+      CPExistDependency(lower, Map(
+        "underElement" -> CPAttribute(new CPAttributeName("e", "underElement")),
+        "positionY" -> new CPGetFromCollection(new CPAttribute(CPAttributeName("e", "aboveElement")), List(CPConstant(CPStringValue("positionY"))))
+      ), false) :: Nil
+    )
+    context.knowledgeBase.add(upperMostOf)
+
+    val higher = new CPStrictConcept(
+      "higher",
+      "aboveElement" :: "underElement" :: "positionY" :: Nil,
+      "underElement",
+      ("over", "e") :: Nil,
+      CPDependency(
+        new CPAttribute(CPAttributeName("", "aboveElement")),
+        new CPAttribute(CPAttributeName("e", "aboveElement")),
+        "="
+      ) :: CPDependency(
+        new CPAttribute(CPAttributeName("", "underElement")),
+        new CPAttribute(CPAttributeName("e", "underElement")),
+        "="
+      ) :: CPDependency(
+        new CPGetFromCollection(new CPAttribute(CPAttributeName("e", "underElement")), List(CPConstant(CPStringValue("positionY")))),
+        new CPAttribute(CPAttributeName("", "positionY")),
+        "<"
+      ) :: Nil
+    )
+
+    val lowerMostOf = new CPFilteringConcept(
+      "lowerMostOf",
+      ("below", "e"),
+      CPExistDependency(higher, Map(
+        "aboveElement" -> CPAttribute(new CPAttributeName("e", "aboveElement")),
+        "positionY" -> new CPGetFromCollection(new CPAttribute(CPAttributeName("e", "underElement")), List(CPConstant(CPStringValue("positionY"))))
+      ), false) :: Nil
+    )
+    context.knowledgeBase.add(lowerMostOf)
 
   }
 }

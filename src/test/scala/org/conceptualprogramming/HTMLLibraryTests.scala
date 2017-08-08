@@ -18,7 +18,7 @@ class HTMLLibraryTests extends FlatSpec with Matchers {
 
   val driverFilePath = new File("resources/chromedriver.exe")
   System.setProperty("webdriver.chrome.driver", driverFilePath.getAbsolutePath)
-/*
+
   "openWebPage and closeWebPage functions" should "work correctly" in {
     val url = CPConstant(CPStringValue("file:///C:/projects/AI/ConceptualProgramming/src/test/scala/org/conceptualprogramming/examples/html/loginPage.html"))
     val readFunc = new CPFunctionCall("HTML.openWebPage", url :: Nil)
@@ -202,7 +202,7 @@ class HTMLLibraryTests extends FlatSpec with Matchers {
     val closeFunc = new CPFunctionCall("HTML.closeWebPage", url :: Nil)
     closeFunc.calculate(context).get.getBooleanValue.get should be (true)
   }
-*/
+
   "spatial concepts" should "work correctly" in {
     val url = CPConstant(CPStringValue("file:///C:/projects/AI/ConceptualProgramming/src/test/scala/org/conceptualprogramming/examples/html/form.html"))
     val readFunc = new CPFunctionCall("HTML.openWebPage", url :: Nil)
@@ -242,6 +242,28 @@ class HTMLLibraryTests extends FlatSpec with Matchers {
 
     belowObjects.size should equal (1)
     belowObjects.find(checkObj(_, "id", "underElement", CPStringValue("description"))).isDefined should be (true)
+
+    val leftMost = context.knowledgeBase.getConcepts("leftMostOf").head
+    val leftMostObject = leftMost.resolve(Map("rightElement" -> new CPObjectValue(textarea)), context)
+    leftMostObject.size should equal (1)
+    leftMostObject.find(checkObj(_, "text", "leftElement", CPStringValue("Description:"))).isDefined should be (true)
+
+    val rightMost = context.knowledgeBase.getConcepts("rightMostOf").head
+    val rightMostObject = rightMost.resolve(Map("leftElement" -> new CPObjectValue(textarea)), context)
+    rightMostObject.size should equal (1)
+    rightMostObject.find(checkObj(_, "text", "rightElement", CPStringValue("Country:"))).isDefined should be (true)
+
+
+    val upperMost = context.knowledgeBase.getConcepts("upperMostOf").head
+    val upperMostObject = upperMost.resolve(Map("underElement" -> new CPObjectValue(textarea)), context)
+    upperMostObject.size should equal (1)
+    upperMostObject.find(checkObj(_, "id", "aboveElement", CPStringValue("lname"))).isDefined should be (true)
+
+    val fname = context.knowledgeBase.getObjects("PageInput", Map("id" -> CPStringValue("fname"))).head
+    val lowerMost = context.knowledgeBase.getConcepts("lowerMostOf").head
+    val lowerMostObject = lowerMost.resolve(Map("aboveElement" -> new CPObjectValue(fname)), context)
+    lowerMostObject.size should equal (1)
+    lowerMostObject.find(checkObj(_, "id", "underElement", CPStringValue("lname"))).isDefined should be (true)
 
     val closeFunc = new CPFunctionCall("HTML.closeWebPage", url :: Nil)
     closeFunc.calculate(context).get.getBooleanValue.get should be (true)
