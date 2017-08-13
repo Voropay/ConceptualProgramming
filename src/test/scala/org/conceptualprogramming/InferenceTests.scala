@@ -579,9 +579,17 @@ class InferenceTests extends FlatSpec with Matchers {
     val res1 = conceptWithExistDependency.resolve(Map("rightPoint" -> new CPObjectValue(
       new CPObject("Point", Map("pos" -> CPIntValue(3)), "pos")
     )), context)
-    println(res1)
     res1.size should equal (1)
     res1.head.attributes("leftPoint").asInstanceOf[CPObjectValue].objectValue.attributes("pos") should equal (CPIntValue(2))
+
+    val conceptWithExistDependencyDefinition1 = stmtParser("concept leftMost1 :- leftOf o (), Not Exist (leftOf i (), i.rightPoint == o.rightPoint, i.leftPoint[\"pos\"] > o.leftPoint[\"pos\"])").get
+    conceptWithExistDependencyDefinition1.execute(context)
+    val conceptWithExistDependency1 = context.knowledgeBase.getConcepts("leftMost1").head
+    val res2 = conceptWithExistDependency1.resolve(Map("rightPoint" -> new CPObjectValue(
+      new CPObject("Point", Map("pos" -> CPIntValue(3)), "pos")
+    )), context)
+    res2.size should equal (1)
+    res2.head.attributes("leftPoint").asInstanceOf[CPObjectValue].objectValue.attributes("pos") should equal (CPIntValue(2))
   }
 
 
