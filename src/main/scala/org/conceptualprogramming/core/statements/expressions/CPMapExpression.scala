@@ -31,6 +31,12 @@ case class CPMapExpression(map: Map[CPExpression, CPExpression]) extends CPExpre
 
   override def infer(result: CPValue, context: CPExecutionContext): Map[CPAttributeName, CPValue] = Map()
 
+  def externalExpressions(internalConcepts: List[String]): List[CPExpression] = {
+    val keysExps = map.keys.flatMap(_.externalExpressions(internalConcepts)).toList
+    val valuesExps = map.values.flatMap(_.externalExpressions(internalConcepts)).toList
+    keysExps ::: valuesExps
+  }
+
   override def toString: String = "CPMap: {" + map.mkString(",") + "}"
 
   override def hashCode:Int = {

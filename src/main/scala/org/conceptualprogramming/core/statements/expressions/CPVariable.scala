@@ -21,6 +21,8 @@ case class CPVariable(name: String) extends CPExpression{
 
   override def infer(result: CPValue, context: CPExecutionContext): Map[CPAttributeName, CPValue] = Map()
 
+  def externalExpressions(internalConcepts: List[String]): List[CPExpression] = Nil
+
   override def toString: String = "CPVariable: {" + name + "}"
 
   override def hashCode:Int = {

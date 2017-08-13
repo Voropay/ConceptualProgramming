@@ -550,7 +550,7 @@ class InferenceTests extends FlatSpec with Matchers {
     val leftMost = new CPFilteringConcept(
       "leftMost",
       ("leftOf", "p"),
-      CPExistDependency(moreLeft, Map(
+      new CPExistDependency(moreLeft, Nil, Map(
         "rightPoint" -> CPAttribute(new CPAttributeName("p", "rightPoint")),
         "pos" -> new CPGetFromCollection(new CPAttribute(CPAttributeName("p", "leftPoint")), List(CPConstant(CPStringValue("pos"))))
       ), false) :: Nil

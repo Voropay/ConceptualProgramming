@@ -28,6 +28,8 @@ object HTMLParser {
       "pageHandle" -> CPStringValue(page.getWindowHandle),
       "url" -> CPStringValue(page.getCurrentUrl),
       "value" -> CPStringValue(page.getTitle),
+      "pageWidth" -> CPIntValue(page.manage.window.getPosition.x),
+      "pageHeight" -> CPIntValue(page.manage.window.getPosition.y),
       "id"   -> CPStringValue(titleId)
     ))
     val meta = findElementByXPath(page, "//meta[@name='description']")
@@ -163,20 +165,6 @@ object HTMLParser {
       map += ("fieldset" -> CPStringValue(attributes.get("fieldset").get))
     }
 
-
-
-    /*
-    val rectangle = element.getRect
-    if(rectangle != null) {
-      val locationMap: Map[CPValue, CPValue] = Map(
-        CPStringValue("xPos") -> CPIntValue(rectangle.x),
-        CPStringValue("yPos") -> CPIntValue(rectangle.y),
-        CPStringValue("height") -> CPIntValue(rectangle.height),
-        CPStringValue("width") -> CPIntValue(rectangle.width)
-      )
-      map += ("location" -> new CPMap(locationMap))
-    }
-*/
     map = map ++ extractCSSAttributes(element, attributes)
 
     map

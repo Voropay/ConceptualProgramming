@@ -323,6 +323,10 @@ class ExecutionContextTests extends FlatSpec with Matchers {
       count.calculate(context).get.getIntValue.get should be (3)
       val avg = new CPFunctionCall("Grouping.avg", List(expr))
       avg.calculate(context).get.getIntValue.get should be (12)
+
+      val func = new CPFunctionCall("Func", List(new CPAttribute(new CPAttributeName("a", "b"))))
+      val funcRes = func.externalExpressions(Nil)
+      funcRes.head should equal (new CPAttribute(new CPAttributeName("a", "b")))
     }
 
     "while statement" should "be executed correctly" in {

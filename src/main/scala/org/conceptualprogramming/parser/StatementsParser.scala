@@ -169,7 +169,7 @@ trait StatementsParser extends ExpressionsParser {
     })
   }
 
-  def attrDependency: Parser[CPDependency] = attributesLinkDependency | existByNameDependency | existDependency | expressionDependency
+  def attrDependency: Parser[CPDependency] = attributesLinkDependency | existByNameDependency | existByChildConceptsDependency | existDependency | expressionDependency
   def expressionDependency: Parser[CPDependency] = expression ^^ { value =>
     new CPExpressionDependency(value, CPBooleanValue(true))
   }
@@ -177,12 +177,23 @@ trait StatementsParser extends ExpressionsParser {
     case head ~ "~" ~ tail => new CPAttributesLinkDependency(head.attrName :: tail.map(_.attrName))
   }
   def existDependency: Parser[CPDependency] = opt("Not") ~ "Exist" ~ "(" ~ conceptDefinition ~  objectQuery ~ ")" ^^ {
-    case not ~ "Exist" ~ "(" ~ concept ~ query ~ ")" => new CPExistDependency(concept, query, not.isEmpty)
+    case not ~ "Exist" ~ "(" ~ concept ~ query ~ ")" => new CPExistDependency(concept, Nil, query, not.isEmpty)
   }
   def existByNameDependency: Parser[CPDependency] = opt("Not") ~ "Exist" ~ "(" ~ ident ~  objectQuery ~ ")" ^^ {
     case not ~ "Exist" ~ "(" ~ conceptName ~ query ~ ")" => {
-      val concept = new CPFilteringConcept("anonymousFilteringConcept_" + java.util.UUID.randomUUID.toString, (conceptName, conceptName), Nil)
-      new CPExistDependency(concept, query, not.isEmpty)
+      CPExistDependency.byName(conceptName, query, not.isEmpty)
+    }
+  }
+  def existByChildConceptsDependency: Parser[CPDependency] = opt("Not") ~ "Exist" ~ "(" ~ rep1sep(childConcept, ",") ~ opt("," ~ rep1sep(attrDependency, ",")) ~  opt(objectQuery) ~ ")" ^^ {
+    case not ~ "Exist" ~ "(" ~ childConcepts ~ dependencies ~ queryOpt ~ ")" => {
+      val childConceptsNames = childConcepts.map(curItem => (curItem._1, curItem._2))
+      val childConceptsDependencies = childConcepts.flatMap(_._3)
+      val additionalDependencies = if(dependencies.isDefined) {
+        dependencies.get._2
+      } else {
+        List()
+      }
+      CPExistDependency.byChildConcepts(childConceptsNames, childConceptsDependencies ++ additionalDependencies, queryOpt.getOrElse(Map()), not.isEmpty)
     }
   }
 

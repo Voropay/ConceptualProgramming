@@ -41,6 +41,12 @@ class DependenciesTests extends FlatSpec with Matchers {
     context.setSubstitutions(Some(s5))
     val i2 = d.infer(context)
     i2.size should equal (0)
+
+    val dRes = d.externalExpressions(Nil)
+    dRes.size should equal (3)
+    dRes.contains(new CPAttribute(a)) should equal (true)
+    dRes.contains(new CPAttribute(b)) should equal (true)
+    dRes.contains(new CPAttribute(c)) should equal (true)
   }
 
   "Arithmetical dependencies" should "check and infer values correctly" in {
@@ -112,6 +118,11 @@ class DependenciesTests extends FlatSpec with Matchers {
     val s16 = new CPSubstitutions(Map(CPAttributeName("p", "val") -> CPFloatingValue(-2)), Map())
     context.setSubstitutions(Some(s16))
     d6.check(context) should be (true)
+
+    val d1Res = d1.externalExpressions(Nil)
+    d1Res.size should equal (2)
+    d1Res.contains(new CPAttribute(a)) should equal (true)
+    d1Res.contains(new CPAttribute(b)) should equal (true)
   }
 
   "Exist dependencies" should "check values correctly" in {
@@ -128,25 +139,91 @@ class DependenciesTests extends FlatSpec with Matchers {
       new CPConstant(CPIntValue(3)),
       "<"
     ) :: Nil)
-    val exist1 = new CPExistDependency(concept1, Map(), true)
+    val exist1 = new CPExistDependency(concept1, Nil, Map(), true)
     exist1.check(context) should be (true)
-    val notExist1 = new CPExistDependency(concept1, Map(), false)
+    val notExist1 = new CPExistDependency(concept1, Nil, Map(), false)
     notExist1.check(context) should be (false)
+    context.setSubstitutions(None)
 
-    val exist2 = new CPExistDependency(concept1, Map("name" -> new CPConstant(CPStringValue("B"))), true)
+    val exist2 = new CPExistDependency(concept1, Nil, Map("name" -> new CPConstant(CPStringValue("B"))), true)
     exist2.check(context) should be (true)
+    context.setSubstitutions(None)
 
-    val exist3 = new CPExistDependency(concept1, Map("name" -> new CPConstant(CPStringValue("D"))), true)
+    val exist3 = new CPExistDependency(concept1, Nil, Map("name" -> new CPConstant(CPStringValue("D"))), true)
     exist3.check(context) should be (false)
+    context.setSubstitutions(None)
 
     val context1 = new CPExecutionContext(new RunPreferences(Map("RESOLVE_TYPE" -> RunPreferences.DECISION_TREE_RESOLVE_TYPE)))
     context1.knowledgeBase.add(a)
     context1.knowledgeBase.add(b)
     context1.knowledgeBase.add(c)
     exist1.check(context1) should be (true)
+    context1.setSubstitutions(None)
     notExist1.check(context1) should be (false)
+    context1.setSubstitutions(None)
 
+    val concept2 = new CPFilteringConcept("Objects", ("Object", "i"), CPDependency(
+      new CPAttribute(CPAttributeName("e", "val")),
+      new CPAttribute(CPAttributeName("i", "val")),
+      "<"
+    ) :: Nil)
+    val exist4 = new CPExistDependency(concept2, List(new CPAttribute(CPAttributeName("e", "val"))), Map("name" -> new CPAttribute(CPAttributeName("o", "name"))), true)
+    val exist4Res = exist4.externalExpressions(Nil)
+    exist4Res.size should equal (2)
+    exist4Res.contains(new CPAttribute(CPAttributeName("e", "val"))) should equal (true)
+    exist4Res.contains(new CPAttribute(CPAttributeName("o", "name"))) should equal (true)
+
+    val exist5 = CPExistDependency.byChildConcepts(List(("Object", "i")),
+      CPDependency(
+        new CPAttribute(new CPAttributeName("i", "val")),
+        new CPAttribute(new CPAttributeName("o", "val")),
+        "<"
+      ) :: Nil, Map(), true)
+    val exist5Res = exist5.externalExpressions(Nil)
+    exist5Res.size should equal (1)
+    exist5Res.contains(new CPAttribute(CPAttributeName("o", "val"))) should equal (true)
+    exist5.isDefinded(context) should be (false)
+    context.setSubstitutions(Some(new CPSubstitutions(
+      Map(new CPAttributeName("o", "val") -> CPIntValue(1)),
+      Map("o" -> new CPObject("obj", Map("val" -> CPIntValue(1)), "val"))
+    )))
+    exist5.isDefinded(context) should be (true)
+    exist5.check(context) should be (false)
+    context.setSubstitutions(Some(new CPSubstitutions(
+      Map(new CPAttributeName("o", "val") -> CPIntValue(2)),
+      Map("o" -> new CPObject("obj", Map("val" -> CPIntValue(2)), "val"))
+    )))
+    exist5.check(context) should be (true)
+
+    val exist6 = CPExistDependency.byChildConcepts(List(("Object", "i")),
+      CPDependency(
+        new CPAttribute(new CPAttributeName("i", "val")),
+        new CPAttribute(new CPAttributeName("o", "val")),
+        "<"
+      ) :: Nil, Map(), false)
+    context.setSubstitutions(Some(new CPSubstitutions(
+      Map(new CPAttributeName("o", "val") -> CPIntValue(1)),
+      Map("o" -> new CPObject("obj", Map("val" -> CPIntValue(1)), "val"))
+    )))
+    exist6.check(context) should be (true)
+    context.setSubstitutions(Some(new CPSubstitutions(
+      Map(new CPAttributeName("o", "val") -> CPIntValue(2)),
+      Map("o" -> new CPObject("obj", Map("val" -> CPIntValue(2)), "val"))
+    )))
+    exist6.check(context) should be (false)
+
+    context1.setSubstitutions(Some(new CPSubstitutions(
+      Map(new CPAttributeName("o", "val") -> CPIntValue(1)),
+      Map("o" -> new CPObject("obj", Map("val" -> CPIntValue(1)), "val"))
+    )))
+    exist6.check(context1) should be (true)
+    context1.setSubstitutions(Some(new CPSubstitutions(
+      Map(new CPAttributeName("o", "val") -> CPIntValue(2)),
+      Map("o" -> new CPObject("obj", Map("val" -> CPIntValue(2)), "val"))
+    )))
+    exist6.check(context1) should be (false)
   }
+
 
   "Dependencies" should "be compared correctly" in {
 

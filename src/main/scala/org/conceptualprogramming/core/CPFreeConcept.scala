@@ -12,8 +12,9 @@ class CPFreeConcept(_name: String, _steps: List[CPStatement]) extends CPConcept{
 
   val steps = ArrayBuffer[CPStatement]() ++ _steps
 
-  override def resolve(query: Map[String, CPValue], context: CPExecutionContext): List[CPObject] = {
+  override def resolveForSubstitutions(query: CPSubstitutions, context: CPExecutionContext): List[CPObject] = {
     context.addFrame
+    context.setSubstitutions(Some(query))
     while(!context.isStopped && context.getCurrentStep < steps.size) {
       val step = steps(context.getCurrentStep)
       step.execute(context)
@@ -23,7 +24,14 @@ class CPFreeConcept(_name: String, _steps: List[CPStatement]) extends CPConcept{
     return res
   }
 
-  override def createDecisionNode(query: Map[String, CPValue], context: CPExecutionContext): CPDecisionNode = new DecisionNode(query, context)
+  override def resolve(query: Map[String, CPValue], context: CPExecutionContext): List[CPObject] = resolveForSubstitutions(CPSubstitutions(query, ""), context)
+
+  override def createDecisionNode(query: Map[String, CPValue], context: CPExecutionContext): CPDecisionNode = {
+    new DecisionNode(CPSubstitutions(query, ""), context)
+  }
+  override def createDecisionNodeForSubstitutions(query: CPSubstitutions, context: CPExecutionContext): CPDecisionNode = {
+    new DecisionNode(query, context)
+  }
 
   override def name: String = _name
 
@@ -37,14 +45,15 @@ class CPFreeConcept(_name: String, _steps: List[CPStatement]) extends CPConcept{
     case _ => false
   }
 
-  def checkQuery(obj: CPObject, query: Map[String, CPValue]): Boolean = {
-    query.isEmpty || query.find(attr => {
-      obj.get(attr._1).isEmpty || obj.get(attr._1).get != attr._2
+  def checkQuery(obj: CPObject, query: CPSubstitutions): Boolean = {
+    val attrValues = query.attributesValues
+    attrValues.isEmpty || attrValues.find(attr => {
+      (attr._1.conceptName == "" || attr._1.conceptName == obj.name) &&
+        (obj.get(attr._1.attributeName).isEmpty || obj.get(attr._1.attributeName).get != attr._2)
     }).isEmpty
   }
 
-  private class DecisionNode(query: Map[String, CPValue], context: CPExecutionContext) extends CPDecisionNode {
-
+  private class DecisionNode(query: CPSubstitutions, context: CPExecutionContext) extends CPDecisionNode {
     var nextBranchExists = false
     var results: List[CPObject] = List()
 

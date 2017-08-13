@@ -27,6 +27,10 @@ case class CPFunctionCall(name: String, args: List[CPExpression]) extends CPExpr
 
   override def infer(result: CPValue, context: CPExecutionContext): Map[CPAttributeName, CPValue] = Map()
 
+  def externalExpressions(internalConcepts: List[String]): List[CPExpression] = {
+    args.flatMap(_.externalExpressions(internalConcepts)).toList
+  }
+
   override def toString: String = "CPFunctionCall {" + name + "(" + args + ")}"
 
   override def equals(other: Any): Boolean = {

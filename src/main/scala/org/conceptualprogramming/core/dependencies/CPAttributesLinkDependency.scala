@@ -1,8 +1,9 @@
 package org.concepualprogramming.core.dependencies
 
 import org.concepualprogramming.core.datatypes.CPValue
+import org.concepualprogramming.core.statements.expressions.{CPAttribute, CPExpression}
 import org.concepualprogramming.core.utils.Utils
-import org.concepualprogramming.core.{CPExecutionContext, CPAttributeName}
+import org.concepualprogramming.core.{CPAttributeName, CPExecutionContext}
 
 /**
  * Created by oleksii.voropai on 12/27/2016.
@@ -44,6 +45,11 @@ case class CPAttributesLinkDependency(attributesNames: List[CPAttributeName]) ex
       }
     }
     return true
+  }
+
+  override def externalExpressions(internalConcepts: List[String]): List[CPExpression] = {
+    val externalAttributes = attributesNames.filter(item => !internalConcepts.contains(item.conceptName))
+    externalAttributes.map(new CPAttribute(_))
   }
 
   override def equals(other: Any): Boolean = {

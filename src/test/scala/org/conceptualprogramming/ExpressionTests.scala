@@ -20,6 +20,7 @@ class ExpressionTests extends FlatSpec with Matchers {
     c.calculate(context).get.getIntValue.get should equal (1)
     c.isDefined(context) should be (true)
     c.infer(CPIntValue(2), context) should equal (Map())
+    c.externalExpressions(Nil).isEmpty should be(true)
 
     val v = new CPVariable("a")
     v.calculate(context).isEmpty should be (true)
@@ -27,6 +28,7 @@ class ExpressionTests extends FlatSpec with Matchers {
     v.calculate(context).get.getIntValue.get should equal (1)
     v.isDefined(context) should be (true)
     v.infer(CPIntValue(2), context) should equal (Map())
+    v.externalExpressions(Nil).isEmpty should be(true)
   }
 
   "attributes" should "be evaluated correctly" in {
@@ -42,6 +44,8 @@ class ExpressionTests extends FlatSpec with Matchers {
     )))
     a.isDefined(context) should be (true)
     a.calculate(context).get.getIntValue.get should equal (1)
+    a.externalExpressions(List("a")).isEmpty should be(true)
+    a.externalExpressions(Nil).head should equal (a)
   }
 
   "Add" should "be evaluated correctly" in {
@@ -53,6 +57,7 @@ class ExpressionTests extends FlatSpec with Matchers {
     add.calculate(context).isEmpty should be (true)
     context.setVariable("b", CPIntValue(2))
     add.calculate(context).get.getIntValue.get should equal (3)
+    add.externalExpressions(Nil).isEmpty should be(true)
 
     val add1 = new CPAdd(add, new CPConstant(CPIntValue(3)))
     add1.calculate(context).get.getIntValue.get should equal (6)
@@ -62,6 +67,7 @@ class ExpressionTests extends FlatSpec with Matchers {
     add2.isDefined(context) should be (false)
     val inferred = add2.infer(CPIntValue(7), context)
     inferred.get(new CPAttributeName("a", "b")).get.getIntValue.get should equal (1)
+    add2.externalExpressions(Nil).head should equal (new CPAttribute(new CPAttributeName("a", "b")))
   }
 
   "Sub" should "be evaluated correctly" in {
@@ -79,6 +85,7 @@ class ExpressionTests extends FlatSpec with Matchers {
 
     val sub2 = new CPSub(add1, new CPAttribute(new CPAttributeName("a", "b")))
     sub2.isDefined(context) should be (false)
+    sub2.externalExpressions(Nil).head should equal (new CPAttribute(new CPAttributeName("a", "b")))
     val inferred = sub2.infer(CPIntValue(1), context)
     inferred.get(new CPAttributeName("a", "b")).get.getIntValue.get should equal (3)
   }
@@ -99,6 +106,7 @@ class ExpressionTests extends FlatSpec with Matchers {
 
     val mul2 = new CPMul(mul1, new CPAttribute(new CPAttributeName("a", "b")))
     mul2.isDefined(context) should be (false)
+    mul2.externalExpressions(Nil).head should equal (new CPAttribute(new CPAttributeName("a", "b")))
     val inferred = mul2.infer(CPIntValue(14), context)
     inferred.get(new CPAttributeName("a", "b")).get.getIntValue.get should equal (2)
   }
@@ -121,6 +129,7 @@ class ExpressionTests extends FlatSpec with Matchers {
 
     val div2 = new CPDiv(div, new CPAttribute(new CPAttributeName("a", "b")))
     div2.isDefined(context) should be (false)
+    div2.externalExpressions(Nil).head should equal (new CPAttribute(new CPAttributeName("a", "b")))
     val inferred = div2.infer(CPFloatingValue(1.5), context)
     inferred.get(new CPAttributeName("a", "b")).get.getIntValue.get should equal (2)
   }
@@ -139,6 +148,7 @@ class ExpressionTests extends FlatSpec with Matchers {
 
     val and1 = new CPAnd(new CPConstant(CPBooleanValue(true)), new CPAttribute(new CPAttributeName("a", "b")))
     and1.isDefined(context) should be (false)
+    and1.externalExpressions(Nil).head should equal (new CPAttribute(new CPAttributeName("a", "b")))
     val inferred = and1.infer(CPBooleanValue(true), context)
     inferred.get(new CPAttributeName("a", "b")).get.getBooleanValue.get should equal (true)
     val inferred1 = and1.infer(CPBooleanValue(false), context)
@@ -156,6 +166,7 @@ class ExpressionTests extends FlatSpec with Matchers {
 
     val or1 = new CPOr(new CPConstant(CPBooleanValue(false)), new CPAttribute(new CPAttributeName("a", "b")))
     or1.isDefined(context) should be (false)
+    or1.externalExpressions(Nil).head should equal (new CPAttribute(new CPAttributeName("a", "b")))
     val inferred3 = or1.infer(CPBooleanValue(true), context)
     inferred3.get(new CPAttributeName("a", "b")).get.getBooleanValue.get should equal (true)
     val inferred4 = or1.infer(CPBooleanValue(false), context)
@@ -174,6 +185,7 @@ class ExpressionTests extends FlatSpec with Matchers {
 
     val not1 = new CPNot(new CPAttribute(new CPAttributeName("a", "b")))
     not1.isDefined(context) should be (false)
+    not1.externalExpressions(Nil).head should equal (new CPAttribute(new CPAttributeName("a", "b")))
     val inferred6 = not1.infer(CPBooleanValue(true), context)
     inferred6.get(new CPAttributeName("a", "b")).get.getBooleanValue.get should equal (false)
     val inferred7 = not1.infer(CPBooleanValue(false), context)
@@ -227,23 +239,34 @@ class ExpressionTests extends FlatSpec with Matchers {
     eq1.isDefined(context) should be (false)
     eq1.infer(CPBooleanValue(true), context).get(new CPAttributeName("a", "b")) .get.getIntValue.get should equal (1)
     eq1.infer(CPBooleanValue(false), context) should equal (Map())
+    eq1.externalExpressions(Nil).head should equal (new CPAttribute(new CPAttributeName("a", "b")))
     neq1.isDefined(context) should be (false)
     neq1.infer(CPBooleanValue(false), context).get(new CPAttributeName("a", "b")) .get.getIntValue.get should equal (1)
     neq1.infer(CPBooleanValue(true), context) should equal (Map())
+    neq1.externalExpressions(Nil).head should equal (new CPAttribute(new CPAttributeName("a", "b")))
     eqgt1.infer(CPBooleanValue(true), context) should equal (Map())
+    eqgt1.externalExpressions(Nil).head should equal (new CPAttribute(new CPAttributeName("a", "b")))
     eqls1.infer(CPBooleanValue(true), context) should equal (Map())
+    eqls1.externalExpressions(Nil).head should equal (new CPAttribute(new CPAttributeName("a", "b")))
     gt1.infer(CPBooleanValue(true), context) should equal (Map())
+    gt1.externalExpressions(Nil).head should equal (new CPAttribute(new CPAttributeName("a", "b")))
     ls1.infer(CPBooleanValue(true), context) should equal (Map())
+    ls1.externalExpressions(Nil).head should equal (new CPAttribute(new CPAttributeName("a", "b")))
   }
 
   "List" should "be calculated correctly" in {
     val context = new CPExecutionContext(new RunPreferences(Map()))
     val list = new CPListExpression(CPConstant(CPIntValue(1)) :: CPConstant(CPIntValue(2)) :: CPConstant(CPIntValue(3)) :: Nil)
+    list.externalExpressions(Nil).isEmpty should be(true)
     val res = list.calculate(context).get.asInstanceOf[CPList].values
     res.size should equal (3)
     res.head.getIntValue.get should equal (1)
     res.tail.head.getIntValue.get should equal (2)
     res.tail.tail.head.getIntValue.get should equal (3)
+    val list1 = new CPListExpression(new CPAttribute(new CPAttributeName("a", "b")) :: new CPAttribute(new CPAttributeName("c", "d")) :: CPConstant(CPIntValue(3)) :: Nil)
+    val ext = list1.externalExpressions("c" :: Nil)
+    ext.size should equal (1)
+    ext.head should equal (new CPAttribute(new CPAttributeName("a", "b")))
   }
 
   "Map" should "be calculated correctly" in {
@@ -253,6 +276,15 @@ class ExpressionTests extends FlatSpec with Matchers {
     res.size should equal (2)
     res.get(CPIntValue(1)).get.getIntValue.get should equal (10)
     res.get(CPIntValue(2)).get.getIntValue.get should equal (20)
+
+    val map1 = new CPMapExpression(Map(new CPAttribute(new CPAttributeName("a", "b")) -> CPConstant(CPIntValue(10)), CPConstant(CPIntValue(2)) -> new CPAttribute(new CPAttributeName("c", "d"))))
+    val ext1 = map1.externalExpressions("c" :: Nil)
+    ext1.size should equal (1)
+    ext1.head should equal (new CPAttribute(new CPAttributeName("a", "b")))
+
+    val ext2 = map1.externalExpressions("a" :: Nil)
+    ext2.size should equal (1)
+    ext2.head should equal (new CPAttribute(new CPAttributeName("c", "d")))
   }
 
   "Object" should "be calculated correctly" in {
@@ -264,6 +296,11 @@ class ExpressionTests extends FlatSpec with Matchers {
     res.attributes.get("attr1").get.getIntValue.get should equal (10)
     res.attributes.get("attr2").get.getIntValue.get should equal (20)
     res.defaultAttribute should equal ("attr1")
+
+    val obj1 = new CPObjectExpression("myobj", Map("attr1" -> new CPAttribute(new CPAttributeName("a", "b")), "attr2" -> new CPAttribute(new CPAttributeName("c", "d"))), Some("attr1"))
+    val ext1 = obj1.externalExpressions("c" :: Nil)
+    ext1.size should equal (1)
+    ext1.head should equal (new CPAttribute(new CPAttributeName("a", "b")))
   }
 
   "collections operations" should "be calculated correctly" in {
@@ -316,6 +353,20 @@ class ExpressionTests extends FlatSpec with Matchers {
       new CPObjectValue(new CPObject("myobj", Map("name" -> CPStringValue("obj1"), "value" -> CPIntValue(3)), "value"))))
     val objListRes1 = (new CPGetFromCollection(CPConstant(objList), CPConstant(CPIntValue(1)) :: CPConstant(CPStringValue("value")) :: Nil)).calculate(context).get
     objListRes1.getIntValue.get should equal (2)
+
+    val add = new CPAddToCollection(new CPAttribute(new CPAttributeName("a", "b")), new CPAttribute(new CPAttributeName("c", "d")), Some(new CPAttribute(new CPAttributeName("e", "f"))))
+    val addRes = add.externalExpressions(Nil)
+    addRes.size should equal (3)
+    addRes.contains(new CPAttribute(new CPAttributeName("a", "b"))) should equal (true)
+    addRes.contains(new CPAttribute(new CPAttributeName("c", "d"))) should equal (true)
+    addRes.contains(new CPAttribute(new CPAttributeName("e", "f"))) should equal (true)
+
+    val get = new CPGetFromCollection(new CPAttribute(new CPAttributeName("a", "b")), new CPAttribute(new CPAttributeName("c", "d")) :: new CPAttribute(new CPAttributeName("e", "f")) :: Nil)
+    val getRes = add.externalExpressions(Nil)
+    getRes.size should equal (3)
+    getRes.contains(new CPAttribute(new CPAttributeName("a", "b"))) should equal (true)
+    getRes.contains(new CPAttribute(new CPAttributeName("c", "d"))) should equal (true)
+    getRes.contains(new CPAttribute(new CPAttributeName("e", "f"))) should equal (true)
   }
 
   "Expressions" should "be compared correctly" in {

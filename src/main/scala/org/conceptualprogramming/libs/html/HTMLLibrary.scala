@@ -2,6 +2,7 @@ package main.scala.org.conceptualprogramming.libs.html
 
 import java.io.File
 
+import org.conceptualprogramming.core
 import org.conceptualprogramming.core.CPFilteringConcept
 import org.conceptualprogramming.core.datatypes.composite.CPObjectValue
 import org.conceptualprogramming.core.dependencies.CPExistDependency
@@ -913,7 +914,7 @@ class HTMLLibrary extends StandardLibrary {
     val leftMostOf = new CPFilteringConcept(
       "leftMostOf",
       ("leftOf", "e"),
-      CPExistDependency(moreLeft, Map(
+      CPExistDependency(moreLeft, Nil, Map(
         "rightElement" -> CPAttribute(new CPAttributeName("e", "rightElement")),
         "positionX" -> new CPGetFromCollection(new CPAttribute(CPAttributeName("e", "leftElement")), List(CPConstant(CPStringValue("positionX"))))
       ), false) :: Nil
@@ -943,7 +944,7 @@ class HTMLLibrary extends StandardLibrary {
     val rightMostOf = new CPFilteringConcept(
       "rightMostOf",
       ("rightOf", "e"),
-      CPExistDependency(moreRight, Map(
+      CPExistDependency(moreRight, Nil, Map(
         "leftElement" -> CPAttribute(new CPAttributeName("e", "leftElement")),
         "positionX" -> new CPGetFromCollection(new CPAttribute(CPAttributeName("e", "rightElement")), List(CPConstant(CPStringValue("positionX"))))
       ), false) :: Nil
@@ -973,7 +974,7 @@ class HTMLLibrary extends StandardLibrary {
     val upperMostOf = new CPFilteringConcept(
       "upperMostOf",
       ("over", "e"),
-      CPExistDependency(lower, Map(
+      CPExistDependency(lower, Nil, Map(
         "underElement" -> CPAttribute(new CPAttributeName("e", "underElement")),
         "positionY" -> new CPGetFromCollection(new CPAttribute(CPAttributeName("e", "aboveElement")), List(CPConstant(CPStringValue("positionY"))))
       ), false) :: Nil
@@ -1003,12 +1004,23 @@ class HTMLLibrary extends StandardLibrary {
     val lowerMostOf = new CPFilteringConcept(
       "lowerMostOf",
       ("below", "e"),
-      CPExistDependency(higher, Map(
+      CPExistDependency(higher, Nil, Map(
         "aboveElement" -> CPAttribute(new CPAttributeName("e", "aboveElement")),
         "positionY" -> new CPGetFromCollection(new CPAttribute(CPAttributeName("e", "underElement")), List(CPConstant(CPStringValue("positionY"))))
       ), false) :: Nil
     )
     context.knowledgeBase.add(lowerMostOf)
-
+/*
+    val leftPartOfThePage = new CPFilteringConcept(
+      "leftPartOfThePage",
+      ("WebPageElement", "e"),
+      CPExistDependency(
+        new CPFilteringConcept(
+          "",
+          ("PageTitle", "t"),
+        )
+      )
+    )
+    */
   }
 }

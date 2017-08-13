@@ -104,9 +104,8 @@ abstract class CPAbstractConcept extends CPConcept{
 
   def inferValues(attributesValues: CPSubstitutions, context: CPExecutionContext): Option[Map[CPAttributeName, CPValue]]
 
-  def resolve(query: Map[String, CPValue], context: CPExecutionContext): List[CPObject] = {
-    val convertedQuery = CPSubstitutions(query, "")
-    val attributesValues = resolve(convertedQuery, childConcepts, context)
+  def resolveForSubstitutions(query: CPSubstitutions, context: CPExecutionContext): List[CPObject] = {
+    val attributesValues = resolve(query, childConcepts, context)
     if(attributesValues.isEmpty) {
       return List()
     }
@@ -116,19 +115,27 @@ abstract class CPAbstractConcept extends CPConcept{
     return objects
   }
 
+  def resolve(query: Map[String, CPValue], context: CPExecutionContext): List[CPObject] = resolveForSubstitutions(CPSubstitutions(query, ""), context)
+
   def prepareObjects(attributesValues: List[CPSubstitutions], context: CPExecutionContext): List[Option[CPObject]] = attributesValues.map(prepareObjectFromAttributesValues(_))
 
   def prepareObjectFromAttributesValues(attributesValues: CPSubstitutions): Option[CPObject]
 
-  def createDecisionNode(query: Map[String, CPValue], context: CPExecutionContext): CPDecisionNode = new DecisionNode(query, context)
+  def createDecisionNode(query: Map[String, CPValue], context: CPExecutionContext): CPDecisionNode = {
+    new DecisionNode(CPSubstitutions(query, ""), context)
+  }
 
-  private class DecisionNode(query: Map[String, CPValue], context: CPExecutionContext) extends CPDecisionNode {
+  def createDecisionNodeForSubstitutions(query: CPSubstitutions, context: CPExecutionContext): CPDecisionNode = {
+    new DecisionNode(query, context)
+  }
+
+  private class DecisionNode(query: CPSubstitutions, context: CPExecutionContext) extends CPDecisionNode {
 
     var allResults: List[CPSubstitutions] = Nil
 
     val foundObjectsStack: Array[List[CPSubstitutions]] = new Array(childConcepts.size + 1) //init array of found objects combinations for each child concept
     var curObjectsStackPos: Array[Int] = new Array(childConcepts.size) //init array of current positions of objects combinations for each child concept
-    foundObjectsStack(0) = List(CPSubstitutions(query, ""))
+    foundObjectsStack(0) = List(query)
 
     val foundConceptsStack: Array[List[CPConcept]] = new Array(childConcepts.size) //init array of concept variants for each child concept
     val curConceptStackPos: Array[Int] = new Array(childConcepts.size) //init array of current positions of concept variants for each child concept

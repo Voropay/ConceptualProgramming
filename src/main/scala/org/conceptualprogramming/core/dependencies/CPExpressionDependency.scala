@@ -24,6 +24,10 @@ case class CPExpressionDependency(expr: CPExpression, value: CPValue) extends CP
     res.isDefined && (res.get ?= value)
   }
 
+  def externalExpressions(internalConcepts: List[String]): List[CPExpression] = {
+    expr.externalExpressions(internalConcepts)
+  }
+
   override def equals(other: Any): Boolean = {
     other match {
       case other: CPExpressionDependency => expr == other.expr

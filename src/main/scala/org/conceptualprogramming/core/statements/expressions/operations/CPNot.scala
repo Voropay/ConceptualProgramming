@@ -37,5 +37,10 @@ case class CPNot(operand: CPExpression) extends CPExpression {
       operand.infer(CPBooleanValue(true), context)
     }
   }
+
+  def externalExpressions(internalConcepts: List[String]): List[CPExpression] = {
+    operand.externalExpressions(internalConcepts)
+  }
+
   override def toString: String = name + " " + operand.toString
 }

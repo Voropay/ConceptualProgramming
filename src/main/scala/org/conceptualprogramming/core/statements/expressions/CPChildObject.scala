@@ -28,6 +28,14 @@ case class CPChildObject(childObject: String) extends CPExpression {
 
   override def infer(result: CPValue, context: CPExecutionContext): Map[CPAttributeName, CPValue] = Map()
 
+  def externalExpressions(internalConcepts: List[String]): List[CPExpression] = {
+    if(internalConcepts.contains(childObject)) {
+      Nil
+    } else {
+      List(this)
+    }
+  }
+
   override def equals(other: Any) = {
     other match {
       case other: CPChildObject => childObject == other.childObject

@@ -29,6 +29,14 @@ case class CPAttribute(attrName: CPAttributeName) extends CPExpression {
     }
   }
 
+  def externalExpressions(internalConcepts: List[String]): List[CPExpression] = {
+    if(internalConcepts.contains(attrName.conceptName)) {
+      Nil
+    } else {
+      List(this)
+    }
+  }
+
   override def equals(other: Any) = {
     other match {
       case other: CPAttribute => attrName == other.attrName

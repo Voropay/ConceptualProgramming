@@ -22,6 +22,8 @@ case class CPConstant(value: CPValue) extends CPExpression{
 
   override def infer(result: CPValue, context: CPExecutionContext): Map[CPAttributeName, CPValue] = Map()
 
+  def externalExpressions(internalConcepts: List[String]): List[CPExpression] = Nil
+
   override def hashCode:Int = {
     val prime = 31
     var result = 1

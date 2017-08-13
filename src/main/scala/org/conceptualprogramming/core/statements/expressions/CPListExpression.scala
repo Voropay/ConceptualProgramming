@@ -30,6 +30,10 @@ case class CPListExpression(list: List[CPExpression]) extends CPExpression {
 
   override def infer(result: CPValue, context: CPExecutionContext): Map[CPAttributeName, CPValue] = Map()
 
+  def externalExpressions(internalConcepts: List[String]): List[CPExpression] = {
+    list.flatMap(_.externalExpressions(internalConcepts)).toList
+  }
+
   override def toString: String = "CPList: {" + list.mkString(",") + "}"
 
   override def hashCode:Int = {

@@ -34,6 +34,17 @@ case class CPAddToCollection(collection: CPExpression, value: CPExpression, key:
     }
   }
 
+  def externalExpressions(internalConcepts: List[String]): List[CPExpression] = {
+    val collectionExprs = collection.externalExpressions(internalConcepts)
+    val valueExprs = value.externalExpressions(internalConcepts)
+    val keyExps = if(key.isDefined) {
+      key.get.externalExpressions(internalConcepts)
+    } else {
+      Nil
+    }
+    collectionExprs ::: valueExprs ::: keyExps
+  }
+
   override def equals(other: Any): Boolean = {
     other match {
       case other: CPAddToCollection => collection == other.collection && value == other.value && key == other.key

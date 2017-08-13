@@ -10,4 +10,5 @@ trait CPExpression {
   def calculate(context: CPExecutionContext): Option[CPValue]
   def isDefined(context: CPExecutionContext): Boolean
   def infer(result: CPValue, context: CPExecutionContext) : Map[CPAttributeName, CPValue]
+  def externalExpressions(internalConcepts: List[String]): List[CPExpression]
 }

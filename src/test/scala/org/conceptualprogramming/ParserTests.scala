@@ -32,6 +32,7 @@ import org.concepualprogramming.core.statements.expressions.CPExpression
 import org.concepualprogramming.core.statements.expressions.CPVariable
 import org.concepualprogramming.core.statements.expressions._
 import org.concepualprogramming.core.statements.expressions.operations._
+import org.concepualprogramming.core.utils.Utils
 import org.scalatest.{FlatSpec, Matchers}
 
 import scala.util.Success
@@ -388,6 +389,18 @@ class ParserTests  extends FlatSpec with Matchers {
     innerConceptStmt2.attributesDependencies.isEmpty should be (true)
     dep4.queryExpr should equal (dep3.queryExpr)
 
+    val dep5 = dependenciesParser("Not Exist (leftOf i (), i.rightPoint == o.rightPoint, i.leftPoint[\"pos\"] > o.leftPoint[\"pos\"])").get.asInstanceOf[CPExistDependency]
+    val innerConceptStmt3 = dep5.definition.asInstanceOf[CPStrictConcept]
+    innerConceptStmt3.childConcepts.head should equal (("leftOf", "i"))
+    val innerConceptsDependencies3 = innerConceptStmt3.attributesDependencies
+    innerConceptsDependencies3.size should equal (3)
+    innerConceptsDependencies3.contains(CPDependency(CPAttribute("", "i"), CPChildObject("i"), "=")) should be (true)
+    innerConceptsDependencies3.contains(CPDependency(CPAttribute("i", "rightPoint"), CPAttribute("o", "rightPoint"), "=")) should be (true)
+    innerConceptsDependencies3.contains(CPDependency(
+      new CPGetFromCollection(new CPAttribute(CPAttributeName("i", "leftPoint")), List(CPConstant(CPStringValue("pos")))),
+      new CPGetFromCollection(new CPAttribute(CPAttributeName("o", "leftPoint")), List(CPConstant(CPStringValue("pos")))),
+      ">")) should be (true)
+
     val strictConceptStmt1 = stmtParser("concept income (row, val) := cell c (col == 2), _.row == c.row").get.asInstanceOf[ConceptDefinitionStatement].definition.asInstanceOf[CPStrictConcept]
     strictConceptStmt1.name should equal ("income")
     var strictConceptAttrs1 = strictConceptStmt1.attributes
@@ -570,6 +583,18 @@ class ParserTests  extends FlatSpec with Matchers {
     existDependency1.definition.asInstanceOf[CPFilteringConcept].attributesDependencies.isEmpty should be (true)
     existDependency1.queryExpr should equal (dep4.queryExpr)
     existDependency1.positiveCondition should be (false)
+
+    val conceptWithExistDependency2 = stmtParser("concept leftMost :- leftOf o (), Not Exist (leftOf i (), i.rightPoint == o.rightPoint, i.leftPoint[\"pos\"] > o.leftPoint[\"pos\"])").get.asInstanceOf[ConceptDefinitionStatement].definition.asInstanceOf[CPFilteringConcept]
+    conceptWithExistDependency2.name should equal ("leftMost")
+    conceptWithExistDependency2.childConcept should equal (("leftOf", "o"))
+    val conceptWithExistDependencies2 = conceptWithExistDependency2.attributesDependencies
+    conceptWithExistDependencies2.size should equal (1)
+    val existDependency2 = conceptWithExistDependencies2.head.asInstanceOf[CPExistDependency]
+    val existDependency2Definition = existDependency2.definition.asInstanceOf[CPStrictConcept]
+    Utils.compareList(existDependency2Definition.childConcepts, innerConceptStmt3.childConcepts) should be (true)
+    Utils.compareList(existDependency2Definition.attributesDependencies, innerConceptStmt3.attributesDependencies) should be (true)
+    existDependency2.queryExpr should equal (dep5.queryExpr)
+    existDependency2.positiveCondition should be (false)
 
     val procStmtFunc = stmtParser("Console.print(\"Hello world\")").get.asInstanceOf[ProcedureCallStatement].function
     procStmtFunc.name should equal ("Console.print")

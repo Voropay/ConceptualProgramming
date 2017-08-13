@@ -49,5 +49,11 @@ case class CPNotEquals(operand1: CPExpression, operand2: CPExpression) extends C
     Map()
   }
 
+  def externalExpressions(internalConcepts: List[String]): List[CPExpression] = {
+    val operand1Exprs = operand1.externalExpressions(internalConcepts)
+    val operand2Exprs = operand2.externalExpressions(internalConcepts)
+    operand1Exprs ::: operand2Exprs
+  }
+
   override def toString: String =  "(" + operand1.toString + ") " + name + " (" + operand2.toString + ")"
 }

@@ -31,6 +31,10 @@ case class CPObjectExpression(name: String, attributes: Map[String, CPExpression
 
   override def infer(result: CPValue, context: CPExecutionContext): Map[CPAttributeName, CPValue] = Map()
 
+  def externalExpressions(internalConcepts: List[String]): List[CPExpression] = {
+    attributes.values.flatMap(_.externalExpressions(internalConcepts)).toList
+  }
+
   override def toString: String = "CPObject: {" + name + "{" + attributes.mkString(",") + "}, default: " + defaultAttribute + "}"
 
   override def hashCode:Int = {

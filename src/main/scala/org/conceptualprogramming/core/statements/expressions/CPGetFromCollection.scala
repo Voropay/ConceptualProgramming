@@ -36,6 +36,12 @@ case class CPGetFromCollection(collection: CPExpression, keys: List[CPExpression
     Some(curCollection)
   }
 
+  def externalExpressions(internalConcepts: List[String]): List[CPExpression] = {
+    val keysExps = keys.flatMap(_.externalExpressions(internalConcepts)).toList
+    val collectionExprs = collection.externalExpressions(internalConcepts)
+    keysExps ::: collectionExprs
+  }
+
   override def equals(other: Any): Boolean = {
     other match {
       case other: CPGetFromCollection => collection == other.collection && other.keys.corresponds(keys)(_ == _)
