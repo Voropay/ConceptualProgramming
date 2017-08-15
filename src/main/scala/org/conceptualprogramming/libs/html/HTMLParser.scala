@@ -28,8 +28,8 @@ object HTMLParser {
       "pageHandle" -> CPStringValue(page.getWindowHandle),
       "url" -> CPStringValue(page.getCurrentUrl),
       "value" -> CPStringValue(page.getTitle),
-      "pageWidth" -> CPIntValue(page.manage.window.getPosition.x),
-      "pageHeight" -> CPIntValue(page.manage.window.getPosition.y),
+      "pageWidth" -> CPIntValue(page.manage.window.getSize.width),
+      "pageHeight" -> CPIntValue(page.manage.window.getSize.height),
       "id"   -> CPStringValue(titleId)
     ))
     val meta = findElementByXPath(page, "//meta[@name='description']")

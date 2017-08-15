@@ -18,7 +18,7 @@ class HTMLLibraryTests extends FlatSpec with Matchers {
 
   val driverFilePath = new File("resources/chromedriver.exe")
   System.setProperty("webdriver.chrome.driver", driverFilePath.getAbsolutePath)
-
+/*
   "openWebPage and closeWebPage functions" should "work correctly" in {
     val url = CPConstant(CPStringValue("file:///C:/projects/AI/ConceptualProgramming/src/test/scala/org/conceptualprogramming/examples/html/loginPage.html"))
     val readFunc = new CPFunctionCall("HTML.openWebPage", url :: Nil)
@@ -202,7 +202,7 @@ class HTMLLibraryTests extends FlatSpec with Matchers {
     val closeFunc = new CPFunctionCall("HTML.closeWebPage", url :: Nil)
     closeFunc.calculate(context).get.getBooleanValue.get should be (true)
   }
-
+*/
   "spatial concepts" should "work correctly" in {
     val url = CPConstant(CPStringValue("file:///C:/projects/AI/ConceptualProgramming/src/test/scala/org/conceptualprogramming/examples/html/form.html"))
     val readFunc = new CPFunctionCall("HTML.openWebPage", url :: Nil)
@@ -265,7 +265,32 @@ class HTMLLibraryTests extends FlatSpec with Matchers {
     lowerMostObject.size should equal (1)
     lowerMostObject.find(checkObj(_, "id", "underElement", CPStringValue("lname"))).isDefined should be (true)
 
+    val leftPartOfThePage = context.knowledgeBase.getConcepts("onTheLeftPartOfThePage").head
+    val leftPartOfThePageObjects = leftPartOfThePage.resolve(Map("page" -> fname.attributes("page")), context)
+    leftPartOfThePageObjects.size should equal (8)
+
+    val rightPartOfThePage = context.knowledgeBase.getConcepts("onTheRightPartOfThePage").head
+    val rightPartOfThePageObjects = rightPartOfThePage.resolve(Map("page" -> fname.attributes("page")), context)
+    rightPartOfThePageObjects.size should equal (4)
+
     val closeFunc = new CPFunctionCall("HTML.closeWebPage", url :: Nil)
     closeFunc.calculate(context).get.getBooleanValue.get should be (true)
+
+    val url1 = CPConstant(CPStringValue("file:///C:/projects/AI/ConceptualProgramming/src/test/scala/org/conceptualprogramming/examples/html/loginPage.html"))
+    val readFunc1 = new CPFunctionCall("HTML.openWebPage", url1 :: Nil)
+    val objects1 = readFunc1.calculate(context).get.asInstanceOf[CPList].values.map(_.asInstanceOf[CPObjectValue].objectValue)
+    context.knowledgeBase.add(objects1)
+    val title = context.knowledgeBase.getObjects("PageTitle", Map()).head
+
+    val topOfThePage = context.knowledgeBase.getConcepts("atTheTopOfThePage").head
+    val topOfThePageObjects = topOfThePage.resolve(Map("page" -> title.attributes("page")), context)
+    topOfThePageObjects.size should equal (5)
+
+    val bottomPartOfThePage = context.knowledgeBase.getConcepts("atTheBottomOfThePage").head
+    val bottomOfThePageObjects = bottomPartOfThePage.resolve(Map("page" -> title.attributes("page")), context)
+    bottomOfThePageObjects.size should equal (9)
+
+    val closeFunc1 = new CPFunctionCall("HTML.closeWebPage", url1 :: Nil)
+    closeFunc1.calculate(context).get.getBooleanValue.get should be (true)
   }
 }

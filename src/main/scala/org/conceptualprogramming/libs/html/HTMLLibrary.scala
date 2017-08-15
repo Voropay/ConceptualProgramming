@@ -10,7 +10,7 @@ import org.conceptualprogramming.core.statements.expressions.{CPChildObject, CPG
 import org.conceptualprogramming.libs.StandardLibrary
 import org.conceptualprogramming.libs.html.HTMLParser
 import org.concepualprogramming.core._
-import org.concepualprogramming.core.datatypes.{CPBooleanValue, CPStringValue, CPValue}
+import org.concepualprogramming.core.datatypes._
 import org.concepualprogramming.core.datatypes.composite.CPList
 import org.concepualprogramming.core.dependencies.{CPDependency, CPExpressionDependency}
 import org.concepualprogramming.core.statements.expressions.functions.BuiltInFunctionDefinition
@@ -1010,17 +1010,110 @@ class HTMLLibrary extends StandardLibrary {
       ), false) :: Nil
     )
     context.knowledgeBase.add(lowerMostOf)
-/*
+
     val leftPartOfThePage = new CPFilteringConcept(
-      "leftPartOfThePage",
+      "onTheLeftPartOfThePage",
       ("WebPageElement", "e"),
-      CPExistDependency(
-        new CPFilteringConcept(
-          "",
-          ("PageTitle", "t"),
-        )
-      )
+      CPExistDependency.byChildConcepts(
+        ("PageTitle", "t") :: Nil,
+        CPDependency(
+          CPAttribute("t", "page"),
+          CPAttribute("e", "page"),
+          "="
+        ) ::
+        CPDependency(
+          CPAdd(CPAttribute("e", "positionX"), CPAttribute("e", "width")),
+          CPDiv(CPAttribute("t", "pageWidth"), new CPConstant(CPFloatingValue(2))),
+          "<"
+        ) ::
+        CPDependency(
+          CPAttribute("e", "positionX"),
+          CPConstant(CPIntValue(0)),
+          ">"
+        ) :: Nil,
+        Map(),
+        true
+      ) :: Nil
     )
-    */
+    context.knowledgeBase.add(leftPartOfThePage)
+
+    val rightPartOfThePage = new CPFilteringConcept(
+      "onTheRightPartOfThePage",
+      ("WebPageElement", "e"),
+      CPExistDependency.byChildConcepts(
+        ("PageTitle", "t") :: Nil,
+        CPDependency(
+          CPAttribute("t", "page"),
+          CPAttribute("e", "page"),
+          "="
+        ) ::
+          CPDependency(
+            CPAttribute("e", "positionX"),
+            CPDiv(CPAttribute("t", "pageWidth"), new CPConstant(CPFloatingValue(2))),
+            ">"
+          ) ::
+          CPDependency(
+            CPAttribute("e", "positionX"),
+            CPConstant(CPIntValue(0)),
+            ">"
+          ) :: Nil,
+        Map(),
+        true
+      ) :: Nil
+    )
+    context.knowledgeBase.add(rightPartOfThePage)
+
+    val topOfThePage = new CPFilteringConcept(
+      "atTheTopOfThePage",
+      ("WebPageElement", "e"),
+      CPExistDependency.byChildConcepts(
+        ("PageTitle", "t") :: Nil,
+        CPDependency(
+          CPAttribute("t", "page"),
+          CPAttribute("e", "page"),
+          "="
+        ) ::
+          CPDependency(
+            CPAdd(CPAttribute("e", "positionY"), CPAttribute("e", "height")),
+            CPDiv(CPAttribute("t", "pageHeight"), new CPConstant(CPFloatingValue(2))),
+            "<"
+          ) ::
+          CPDependency(
+            CPAttribute("e", "positionY"),
+            CPConstant(CPIntValue(0)),
+            ">"
+          ) :: Nil,
+        Map(),
+        true
+      ) :: Nil
+    )
+    context.knowledgeBase.add(topOfThePage)
+
+    val bottomOfThePage = new CPFilteringConcept(
+      "atTheBottomOfThePage",
+      ("WebPageElement", "e"),
+      CPExistDependency.byChildConcepts(
+        ("PageTitle", "t") :: Nil,
+        CPDependency(
+          CPAttribute("t", "page"),
+          CPAttribute("e", "page"),
+          "="
+        ) ::
+          CPDependency(
+            CPAttribute("e", "positionY"),
+            CPDiv(CPAttribute("t", "pageHeight"), new CPConstant(CPFloatingValue(2))),
+            ">"
+          ) ::
+          CPDependency(
+            CPAttribute("e", "positionY"),
+            CPConstant(CPIntValue(0)),
+            ">"
+          ) :: Nil,
+        Map(),
+        true
+      ) :: Nil
+    )
+    context.knowledgeBase.add(bottomOfThePage)
+
   }
 }
