@@ -41,6 +41,8 @@ case class CPInheritedConcept(
     return inferValuesFromDependencies(new CPSubstitutions(newAttributes, query.objects), attributesDependencies, context)
   }
 
+  override def checkDependencies(attributesValues: List[CPSubstitutions], context: CPExecutionContext): List[CPSubstitutions] = checkDependencies(attributesValues, attributesDependencies, context)
+
   def prepareDependencies(overriddenAttributes: Map[String, CPExpression],
                           specifiedAttributes: Map[CPAttributeName, CPExpression],
                           filterDependencies: List[CPDependency]): List[CPDependency] = {

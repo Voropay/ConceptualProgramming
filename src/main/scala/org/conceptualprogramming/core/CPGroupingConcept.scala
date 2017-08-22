@@ -18,6 +18,8 @@ case class CPGroupingConcept (
 
   override def inferValues(query: CPSubstitutions, context: CPExecutionContext): Option[Map[CPAttributeName, CPValue]] = inferValuesFromDependencies(query, attributesDependencies, context)
 
+  override def checkDependencies(attributesValues: List[CPSubstitutions], context: CPExecutionContext): List[CPSubstitutions] = checkDependencies(attributesValues, attributesDependencies, context)
+
   override def prepareObjects(attributesValues: List[CPSubstitutions], context: CPExecutionContext): List[Option[CPObject]] = {
     val groupedSubstitutions: Map[Map[String, CPValue], List[CPSubstitutions]] = groupSubstitutions(attributesValues)
     val aggregatedAttributes: Map[Map[String, CPValue], Map[String, CPValue]] = aggregateAttributes(groupedSubstitutions, context)

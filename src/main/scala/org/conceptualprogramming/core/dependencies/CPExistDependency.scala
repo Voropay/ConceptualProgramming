@@ -16,7 +16,7 @@ case class CPExistDependency(definition: CPConcept, conceptExternalExpressions: 
 
   override def infer(context: CPExecutionContext): Map[CPAttributeName, CPValue] = Map()
 
-  def isDefinded(context: CPExecutionContext): Boolean = {
+  def isDefined(context: CPExecutionContext): Boolean = {
     if(!queryExpr.isEmpty) {
       if(queryExpr.find(!_._2.isDefined(context)).isDefined) {
         return false
@@ -32,7 +32,7 @@ case class CPExistDependency(definition: CPConcept, conceptExternalExpressions: 
   }
 
   override def check(context: CPExecutionContext): Boolean = {
-    if(!isDefinded(context)) {
+    if(!isDefined(context)) {
       return true
     }
     val queryOpt = queryExpr.mapValues(_.calculate(context))

@@ -30,6 +30,15 @@ abstract class CPAbstractConcept extends CPConcept{
     Some(curAttrValues)
   }
 
+  def checkDependencies(attributesValues: List[CPSubstitutions], dependencies: List[CPDependency], context: CPExecutionContext): List[CPSubstitutions] = {
+    attributesValues.filter(curAttrValues => {
+      dependencies.find(curDependency => {
+        context.setSubstitutions(Some(curAttrValues))
+        !curDependency.isDefined(context)
+      }).isEmpty
+    })
+  }
+
   def prepareQueryForConcept(conceptAlias: String, attributesValues: Map[CPAttributeName, CPValue]): Map[String, CPValue] = {
     val curConceptAttrs = attributesValues.filterKeys(_.conceptName == conceptAlias)
     curConceptAttrs.map(curEntry => (curEntry._1.attributeName -> curEntry._2))
@@ -104,13 +113,16 @@ abstract class CPAbstractConcept extends CPConcept{
 
   def inferValues(attributesValues: CPSubstitutions, context: CPExecutionContext): Option[Map[CPAttributeName, CPValue]]
 
+  def checkDependencies(attributesValues: List[CPSubstitutions], context: CPExecutionContext): List[CPSubstitutions]
+
   def resolveForSubstitutions(query: CPSubstitutions, context: CPExecutionContext): List[CPObject] = {
     val attributesValues = resolve(query, childConcepts, context)
     if(attributesValues.isEmpty) {
       return List()
     }
 
-    val objectsOptions = prepareObjects(attributesValues, context)
+    val checkedAttributesValues = checkDependencies(attributesValues, context)
+    val objectsOptions = prepareObjects(checkedAttributesValues, context)
     val objects = objectsOptions.filter(_.isDefined).map(_.get)
     return objects
   }

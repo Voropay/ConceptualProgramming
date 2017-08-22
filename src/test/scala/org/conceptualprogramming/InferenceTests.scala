@@ -499,6 +499,55 @@ class InferenceTests extends FlatSpec with Matchers {
 
   }
 
+  "substitutions with undefined dependencies" should "be filtered out" in {
+    val context = new CPExecutionContext(new RunPreferences(Map()))
+    context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(1), "col" -> CPIntValue(1), "val" -> CPStringValue("row1")), "val"))
+    context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(1), "col" -> CPIntValue(2), "val" -> CPFloatingValue(12)), "val"))
+    context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(1), "col" -> CPIntValue(3), "val" -> CPFloatingValue(10)), "val"))
+    context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(2), "col" -> CPIntValue(1), "val" -> CPStringValue("row2")), "val"))
+    context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(2), "col" -> CPIntValue(2), "val" -> CPFloatingValue(24)), "val"))
+    context.knowledgeBase.add(new CPObject("Cell", Map("row" -> CPIntValue(2), "col" -> CPIntValue(3), "val" -> CPFloatingValue(26)), "val"))
+    context.knowledgeBase.add(new CPObject("Header", Map("col" -> CPIntValue(2), "val" -> CPStringValue("income")), "val"))
+    context.knowledgeBase.add(new CPObject("Header", Map("col" -> CPIntValue(3), "val" -> CPStringValue("outcome")), "val"))
+
+    val cellsWithHeaderWithTypo = new CPFilteringConcept(
+      "cellsWithHeader",
+      ("Cell", "cellAlias"),
+      CPExistDependency.byChildConcepts(
+        ("Header", "h") :: Nil,
+        CPDependency(
+          CPAttribute("h", "col"),
+          CPAttribute("cellAliasWithTypo", "col"),
+          "="
+        ) :: Nil,
+        Map(),
+        true
+      ) :: Nil
+    )
+
+    val cells1 = cellsWithHeaderWithTypo.resolve(Map(), context)
+    cells1.isEmpty should be (true)
+
+    val cellsWithHeader = new CPFilteringConcept(
+      "cellsWithHeader",
+      ("Cell", "cellAlias"),
+      CPExistDependency.byChildConcepts(
+        ("Header", "h") :: Nil,
+        CPDependency(
+          CPAttribute("h", "col"),
+          CPAttribute("cellAlias", "col"),
+          "="
+        ) :: Nil,
+        Map(),
+        true
+      ) :: Nil
+    )
+
+    val cells2 = cellsWithHeader.resolve(Map(), context)
+    cells2.size should equal (4)
+
+  }
+
   "concepts with nested Exists() dependencies" should "be resolved correctly" in {
     val context = new CPExecutionContext(new RunPreferences(Map()))
     context.knowledgeBase.add(new CPObject("Point", Map("pos" -> CPIntValue(1)), "pos"))
