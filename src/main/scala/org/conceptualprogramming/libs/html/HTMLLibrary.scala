@@ -1115,5 +1115,41 @@ class HTMLLibrary extends StandardLibrary {
     )
     context.knowledgeBase.add(bottomOfThePage)
 
+    val centerOfThePage = new CPFilteringConcept(
+      "inTheCenterOfThePage",
+      ("WebPageElement", "e"),
+      CPExistDependency.byChildConcepts(
+        ("PageTitle", "t") :: Nil,
+        CPDependency(
+          CPAttribute("t", "page"),
+          CPAttribute("e", "page"),
+          "="
+        ) ::
+          CPDependency(
+            CPAttribute("e", "positionY"),
+            CPDiv(CPAttribute("t", "pageHeight"), new CPConstant(CPFloatingValue(4))),
+            ">"
+          ) ::
+          CPDependency(
+            CPAdd(CPAttribute("e", "positionY"), CPAttribute("e", "height")),
+            CPMul(CPAttribute("t", "pageHeight"), new CPConstant(CPFloatingValue(0.75))),
+            "<"
+          ) ::
+          CPDependency(
+            CPAttribute("e", "positionX"),
+            CPDiv(CPAttribute("t", "pageWidth"), new CPConstant(CPFloatingValue(4))),
+            ">"
+          ) ::
+          CPDependency(
+            CPAdd(CPAttribute("e", "positionX"), CPAttribute("e", "width")),
+            CPMul(CPAttribute("t", "pageWidth"), new CPConstant(CPFloatingValue(0.75))),
+            "<"
+          ) :: Nil,
+        Map(),
+        true
+      ) :: Nil
+    )
+    context.knowledgeBase.add(centerOfThePage)
+
   }
 }
