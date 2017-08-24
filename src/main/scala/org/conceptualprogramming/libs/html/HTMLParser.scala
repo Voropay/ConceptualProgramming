@@ -211,14 +211,17 @@ object HTMLParser {
     if(color != null && !color.isEmpty) {
       map += (
         "color" -> CPStringValue(color),
-        "colorName" -> CPStringValue(ColorUtils.extractColorName(color))
+        "colorName" -> CPStringValue(ColorUtils.extractColorName(color)),
+        "basicColorName" -> CPStringValue(ColorUtils.extractBasicColorName(color))
+
       )
     }
     val bgColor = element.getCssValue("background-color")
     if(bgColor != null && !bgColor.isEmpty) {
       map += (
         "backgroundColor" -> CPStringValue(bgColor),
-        "backgroundColorName" -> CPStringValue(ColorUtils.extractColorName(bgColor))
+        "backgroundColorName" -> CPStringValue(ColorUtils.extractColorName(bgColor)),
+        "backgroundBasicColorName" -> CPStringValue(ColorUtils.extractBasicColorName(bgColor))
       )
     }
     val borderMap = extractBorder(element, attributes)
@@ -263,7 +266,8 @@ object HTMLParser {
     if(borderBottomColor != null && !borderBottomColor.isEmpty && borderBottomColor == borderTopColor && borderBottomColor == borderLeftColor && borderBottomColor == borderRightColor) {
       map += (
         "borderColor" -> CPStringValue(borderBottomColor),
-        "borderColorName" -> CPStringValue(ColorUtils.extractColorName(borderBottomColor))
+        "borderColorName" -> CPStringValue(ColorUtils.extractColorName(borderBottomColor)),
+        "borderBasicColorName" -> CPStringValue(ColorUtils.extractBasicColorName(borderBottomColor))
       )
     }
 
@@ -283,7 +287,7 @@ object HTMLParser {
     if(borderRightWidth != null && !borderRightWidth.isEmpty) {
       map += ("borderRightWidth" -> CPFloatingValue(extractSize(borderRightWidth)))
     }
-    if(borderBottomWidth != null && !borderBottomWidth.isEmpty && borderBottomColor == borderTopWidth && borderBottomWidth == borderLeftWidth && borderBottomColor == borderRightWidth) {
+    if(borderBottomWidth != null && !borderBottomWidth.isEmpty && borderBottomWidth == borderTopWidth && borderBottomWidth == borderLeftWidth && borderBottomWidth == borderRightWidth) {
       map += ("borderWidth" -> CPFloatingValue(extractSize(borderBottomWidth)))
     }
 

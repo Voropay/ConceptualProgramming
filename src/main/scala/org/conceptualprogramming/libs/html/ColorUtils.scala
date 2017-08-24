@@ -6,7 +6,7 @@ import scala.util.Try
   * Created by oleksii.voropai on 6/2/2017.
   */
 object ColorUtils {
- val colorList = List(
+ val extendedColorList = List(
    ("AliceBlue", 0xF0, 0xF8, 0xFF),
    ("AntiqueWhite", 0xFA, 0xEB, 0xD7),
    ("Aqua", 0x00, 0xFF, 0xFF),
@@ -149,8 +149,22 @@ object ColorUtils {
    ("YellowGreen", 0x9A, 0xCD, 0x32)
  )
 
-  def getColorNameFromRgb(r: Int, g: Int, b: Int): String = {
-    val closestColor = colorList.foldLeft(("Unknown", Integer.MAX_VALUE)) ((min, c) => {
+  val basicColorList = List(
+    ("Red", 0xFF, 0x00, 0x00),
+    ("Orange", 0xFF, 0xA5, 0x00),
+    ("Yellow", 0xFF, 0xFF, 0x00),
+    ("Green", 0x00, 0x80, 0x00),
+    ("Blue", 0x00, 0x00, 0xFF),
+    ("Violet", 0xEE, 0x82, 0xEE),
+    ("Black", 0x00, 0x00, 0x00),
+    ("Brown", 0xA5, 0x2A, 0x2A),
+    ("Gray", 0x80, 0x80, 0x80),
+    ("Silver", 0xC0, 0xC0, 0xC0),
+    ("White", 0xFF, 0xFF, 0xFF)
+  )
+
+  def getColorNameFromRgb(r: Int, g: Int, b: Int, colorsList: List[(String, Int, Int, Int)]): String = {
+    val closestColor = colorsList.foldLeft(("Unknown", Integer.MAX_VALUE)) ((min, c) => {
       val mse = computeMSE(c, (r, g, b))
       if (mse < min._2) {
         (c._1, mse)
@@ -183,6 +197,17 @@ object ColorUtils {
     if(rgba.get._4 == 0) {
       return "Transparent"
     }
-    getColorNameFromRgb(rgba.get._1, rgba.get._2, rgba.get._3)
+    getColorNameFromRgb(rgba.get._1, rgba.get._2, rgba.get._3, extendedColorList)
+  }
+
+  def extractBasicColorName(color: String): String = {
+    val rgba = stringToRGBA(color)
+    if(rgba.isEmpty) {
+      return "Unknown"
+    }
+    if(rgba.get._4 == 0) {
+      return "Transparent"
+    }
+    getColorNameFromRgb(rgba.get._1, rgba.get._2, rgba.get._3, basicColorList)
   }
 }

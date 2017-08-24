@@ -520,6 +520,8 @@ class HTMLLibrary extends StandardLibrary {
   def registerConcepts(context: CPExecutionContext): Unit = {
     registerHierarchyConcepts(context)
     registerSpatialConcepts(context)
+    registerColorConcepts(context)
+    registerPositionConcepts(context)
   }
 
   def registerHierarchyConcepts(context: CPExecutionContext): Unit = {
@@ -1151,5 +1153,90 @@ class HTMLLibrary extends StandardLibrary {
     )
     context.knowledgeBase.add(centerOfThePage)
 
+  }
+
+  def registerColorConcepts(context: CPExecutionContext): Unit = {
+    val OfColor = new CPFilteringConcept(
+      "ofColor",
+      ("WebPageElement", "e"),
+      new CPExpressionDependency(
+        new CPOr(
+          new CPEquals(CPAttribute("e", "colorName"), CPAttribute("", "givenColor")),
+          new CPOr(
+            new CPEquals(CPAttribute("e", "basicColorName"), CPAttribute("", "givenColor")),
+            new CPOr(
+              new CPEquals(CPAttribute("e", "backgroundColorName"), CPAttribute("", "givenColor")),
+              new CPOr(
+                new CPEquals(CPAttribute("e", "backgroundBasicColorName"), CPAttribute("", "givenColor")),
+                new CPOr(
+                  new CPEquals(CPAttribute("e", "borderColorName"), CPAttribute("", "givenColor")),
+                  new CPEquals(CPAttribute("e", "borderBasicColorName"), CPAttribute("", "givenColor"))
+                ))))),
+        CPBooleanValue(true)
+      ) :: Nil
+    )
+    context.knowledgeBase.add(OfColor)
+  }
+
+  def registerPositionConcepts(context: CPExecutionContext): Unit = {
+    val next = new CPStrictConcept(
+      "next",
+      "previousElement" :: "nextElement" :: Nil,
+      "nextElement",
+      ("WebPageElement", "pe") :: ("WebPageElement", "ne") :: Nil,
+      CPDependency(CPAttribute("", "previousElement"), CPChildObject("pe"), "=") ::
+        CPDependency(CPAttribute("", "nextElement"), CPChildObject("ne"), "=") ::
+        CPDependency(CPAttribute("pe", "parent"), CPAttribute("ne", "parent"), "=") ::
+        CPDependency(CPAttribute("ne", "pos"), CPAdd(CPAttribute("pe", "pos"), CPConstant(CPIntValue(1))), "=") :: Nil
+    )
+    context.knowledgeBase.add(next)
+
+    val prev = new CPStrictConcept(
+      "previous",
+      "previousElement" :: "nextElement" :: Nil,
+      "previousElement",
+      ("WebPageElement", "pe") :: ("WebPageElement", "ne") :: Nil,
+      CPDependency(CPAttribute("", "previousElement"), CPChildObject("pe"), "=") ::
+        CPDependency(CPAttribute("", "nextElement"), CPChildObject("ne"), "=") ::
+        CPDependency(CPAttribute("pe", "parent"), CPAttribute("ne", "parent"), "=") ::
+        CPDependency(CPAttribute("ne", "pos"), CPAdd(CPAttribute("pe", "pos"), CPConstant(CPIntValue(1))), "=") :: Nil
+    )
+    context.knowledgeBase.add(prev)
+
+    val after = new CPStrictConcept(
+      "after",
+      "beforeElement" :: "afterElement" :: Nil,
+      "afterElement",
+      ("WebPageElement", "be") :: ("WebPageElement", "ae") :: Nil,
+      CPDependency(CPAttribute("", "beforeElement"), CPChildObject("be"), "=") ::
+        CPDependency(CPAttribute("", "afterElement"), CPChildObject("ae"), "=") ::
+        CPDependency(CPAttribute("be", "parent"), CPAttribute("ae", "parent"), "=") ::
+        CPDependency(CPAttribute("be", "pos"), CPAttribute("ae", "pos"), "<") :: Nil
+    )
+    context.knowledgeBase.add(after)
+
+    val before = new CPStrictConcept(
+      "before",
+      "beforeElement" :: "afterElement" :: Nil,
+      "beforeElement",
+      ("WebPageElement", "be") :: ("WebPageElement", "ae") :: Nil,
+      CPDependency(CPAttribute("", "beforeElement"), CPChildObject("be"), "=") ::
+        CPDependency(CPAttribute("", "afterElement"), CPChildObject("ae"), "=") ::
+        CPDependency(CPAttribute("be", "parent"), CPAttribute("ae", "parent"), "=") ::
+        CPDependency(CPAttribute("be", "pos"), CPAttribute("ae", "pos"), "<") :: Nil
+    )
+    context.knowledgeBase.add(before)
+
+    val position = new CPStrictConcept(
+      "atAPositionFrom",
+      "beforeElement" :: "afterElement" :: "givenPosition" :: Nil,
+      "afterElement",
+      ("WebPageElement", "be") :: ("WebPageElement", "ae") :: Nil,
+      CPDependency(CPAttribute("", "beforeElement"), CPChildObject("be"), "=") ::
+        CPDependency(CPAttribute("", "afterElement"), CPChildObject("ae"), "=") ::
+        CPDependency(CPAttribute("be", "parent"), CPAttribute("ae", "parent"), "=") ::
+        CPDependency(CPAttribute("ae", "pos"), CPAdd(CPAttribute("be", "pos"), CPAttribute("", "givenPosition")), "=") :: Nil
+    )
+    context.knowledgeBase.add(position)
   }
 }
