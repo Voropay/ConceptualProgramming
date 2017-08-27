@@ -2,7 +2,7 @@ package org.conceptualprogramming
 
 import org.conceptualprogramming.core.{CPFilteringConcept, RunPreferences}
 import org.conceptualprogramming.core.datatypes.composite.CPObjectValue
-import org.conceptualprogramming.core.dependencies.CPExistDependency
+import org.conceptualprogramming.core.dependencies.{CPExistDependency, CPOrDependency}
 import org.conceptualprogramming.core.statements.expressions.{CPChildObject, CPGetFromCollection}
 import org.conceptualprogramming.parser.StatementsParser
 import org.concepualprogramming.core.datatypes._
@@ -639,6 +639,68 @@ class InferenceTests extends FlatSpec with Matchers {
     )), context)
     res2.size should equal (1)
     res2.head.attributes("leftPoint").asInstanceOf[CPObjectValue].objectValue.attributes("pos") should equal (CPIntValue(2))
+  }
+
+  "concepts with nested OR dependency" should "be resolved correctly" in {
+    val context = new CPExecutionContext(new RunPreferences(Map()))
+    val o1 = new CPObject("Element", Map("id" -> CPIntValue(1)), "id")
+    val o2 = new CPObject("Element", Map("id" -> CPIntValue(2), "parent" -> CPIntValue(1)), "id")
+    val o3 = new CPObject("Element", Map("id" -> CPIntValue(3), "parent" -> CPIntValue(2)), "id")
+    val o4 = new CPObject("Element", Map("id" -> CPIntValue(4), "parent" -> CPIntValue(3)), "id")
+    context.knowledgeBase.add(o1)
+    context.knowledgeBase.add(o2)
+    context.knowledgeBase.add(o3)
+    context.knowledgeBase.add(o4)
+
+    val inside = new CPStrictConcept(
+      "inside",
+      "insideElement" :: "outsideElement" :: Nil,
+      "insideElement",
+      ("Element", "ie") :: ("Element", "oe") :: Nil,
+      CPDependency(CPAttribute("", "insideElement"), CPChildObject("ie"), "=") ::
+        CPDependency(CPAttribute("", "outsideElement"), CPChildObject("oe"), "=") ::
+        new CPOrDependency(
+          CPDependency(CPAttribute("ie", "parent"), CPAttribute("oe", "id"), "=") ::
+          CPExistDependency.byChildConcepts(
+            ("Element", "int") :: ("inside", "intRel") :: Nil,
+            CPDependency(CPAttribute("int", "id"), CPAttribute("ie", "parent"), "=") ::
+            CPDependency(CPAttribute("intRel", "insideElement"), CPChildObject("int"), "=") ::
+            CPDependency(CPAttribute("intRel", "outsideElement"), CPChildObject("oe"), "=") :: Nil,
+            Map(),
+            true
+          ) :: Nil
+        ) :: Nil
+    )
+    context.knowledgeBase.add(inside)
+
+    val res1 = inside.resolve(Map(
+      "insideElement" -> new CPObjectValue(o2),
+      "outsideElement" -> new CPObjectValue(o1)
+    ), context)
+    res1.size should equal (1)
+    res1.head.attributes("insideElement").asInstanceOf[CPObjectValue].objectValue should equal (o2)
+    res1.head.attributes("outsideElement").asInstanceOf[CPObjectValue].objectValue should equal (o1)
+
+    val res2 = inside.resolve(Map(
+      "insideElement" -> new CPObjectValue(o4),
+      "outsideElement" -> new CPObjectValue(o1)
+    ), context)
+    res2.size should equal (1)
+    res2.head.attributes("insideElement").asInstanceOf[CPObjectValue].objectValue should equal (o4)
+    res2.head.attributes("outsideElement").asInstanceOf[CPObjectValue].objectValue should equal (o1)
+
+
+    val res3 = inside.resolve(Map(
+      "insideElement" -> new CPObjectValue(o3)
+    ), context)
+    res3.size should equal (2)
+    res3.contains(new CPObject("inside", Map("insideElement" -> new CPObjectValue(o3), "outsideElement" -> new CPObjectValue(o2)), "insideElement")) should be (true)
+    res3.contains(new CPObject("inside", Map("insideElement" -> new CPObjectValue(o3), "outsideElement" -> new CPObjectValue(o1)), "insideElement")) should be (true)
+
+    val res4 = inside.resolve(Map(
+      "insideElement" -> new CPObjectValue(o1)
+    ), context)
+    res4.size should equal (0)
   }
 
 

@@ -40,9 +40,10 @@ case class CPExistDependency(definition: CPConcept, conceptExternalExpressions: 
       val query = queryOpt.mapValues(_.get)
       val resolveType = context.preferences.getResolveType
       val combinedSubst = if(!conceptExternalExpressions.isEmpty) {
-        val outerSubst = context.getSubstitutions.getOrElse(new CPSubstitutions(Map(), Map()))
+        val allOuterSubst = context.getSubstitutions.getOrElse(new CPSubstitutions(Map(), Map()))
+        val outerAttributes = filterExternalAttributes(allOuterSubst.attributesValues)
         val querySubst = CPSubstitutions(query, "")
-        new CPSubstitutions(outerSubst.attributesValues ++ querySubst.attributesValues, outerSubst.objects ++ querySubst.objects)
+        new CPSubstitutions(outerAttributes ++ querySubst.attributesValues, allOuterSubst.objects ++ querySubst.objects)
       } else {
         CPSubstitutions(query, "")
       }
@@ -59,6 +60,22 @@ case class CPExistDependency(definition: CPConcept, conceptExternalExpressions: 
     } else {
       false
     }
+  }
+
+  def filterExternalAttributes(attributesValues: Map[CPAttributeName, CPValue]): Map[CPAttributeName, CPValue] = {
+    attributesValues.filter(curAttrValue => {
+      conceptExternalExpressions.find(curExpr => {
+        curExpr match {
+          case expr: CPAttribute => {
+            expr.attrName == curAttrValue._1
+          }
+          case expr: CPChildObject => {
+            expr.childObject == curAttrValue._1.conceptName
+          }
+          case _ => false
+        }
+      }).isDefined
+    })
   }
 
   def externalExpressions(internalConcepts: List[String]): List[CPExpression] = {

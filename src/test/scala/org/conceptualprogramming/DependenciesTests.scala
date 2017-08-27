@@ -1,7 +1,7 @@
 package org.conceptualprogramming
 
 import org.conceptualprogramming.core.{CPFilteringConcept, RunPreferences}
-import org.conceptualprogramming.core.dependencies.CPExistDependency
+import org.conceptualprogramming.core.dependencies.{CPExistDependency, CPOrDependency}
 import org.concepualprogramming.core.statements.ConceptDefinitionResolvingStatement
 import org.concepualprogramming.core.statements.expressions.{CPAttribute, CPConstant, CPVariable}
 import org.concepualprogramming.core.statements.expressions.operations.{CPDiv, CPMul}
@@ -196,6 +196,13 @@ class DependenciesTests extends FlatSpec with Matchers {
     )))
     exist5.isDefined(context) should be (true)
     exist5.check(context) should be (false)
+    val externalAttributes5 = exist5.filterExternalAttributes(Map(
+      new CPAttributeName("o", "val") -> CPIntValue(1),
+      new CPAttributeName("", "val") -> CPIntValue(2)
+    ))
+    externalAttributes5.size should equal (1)
+    externalAttributes5.get(CPAttributeName("o", "val")) should equal (Some(CPIntValue(1)))
+
     context.setSubstitutions(Some(new CPSubstitutions(
       Map(new CPAttributeName("o", "val") -> CPIntValue(2)),
       Map("o" -> new CPObject("obj", Map("val" -> CPIntValue(2)), "val"))
@@ -267,6 +274,10 @@ class DependenciesTests extends FlatSpec with Matchers {
       ">"
     )
     (dag1 == dag2) should be (true)
+
+    val dOr1 = new CPOrDependency(dag1 :: dag2 :: Nil)
+    val dOr2 = new CPOrDependency(dag2 :: dag1 :: Nil)
+    (dOr1 == dOr2) should be (true)
   }
 
   "Dependencies" should "handle variables correctly" in {
@@ -296,5 +307,32 @@ class DependenciesTests extends FlatSpec with Matchers {
     res.size should equal (1)
     res.head.name should equal ("PositiveVariable")
     res.head.get("val").get.getIntValue.get should equal (1)
+  }
+
+  "or dependency" should "check and infer values correctly" in {
+    val context = new CPExecutionContext(new RunPreferences(Map()))
+    val a = new CPAttributeName("a", "val")
+    val b = new CPAttributeName("b", "val")
+    val d1 = CPDependency(CPAttribute(a), CPAttribute(b), "=")
+    val d2 = CPDependency(CPAttribute(a), CPConstant(CPIntValue(0)), "=")
+    val d = new CPOrDependency(d1 :: d2 :: Nil)
+
+    val s1 = new CPSubstitutions(Map(a -> CPIntValue(1), b -> CPIntValue(1)), Map())
+    context.setSubstitutions(Some(s1))
+    d.check(context) should be (true)
+    d.isDefined(context) should be (true)
+
+    val s2 = new CPSubstitutions(Map(a -> CPIntValue(1), b -> CPIntValue(2)), Map())
+    context.setSubstitutions(Some(s2))
+    d.check(context) should be (false)
+    d.isDefined(context) should be (true)
+
+    val s3 = new CPSubstitutions(Map(a -> CPIntValue(1)), Map())
+    context.setSubstitutions(Some(s3))
+    d.check(context) should be (true)
+    d.isDefined(context) should be (false)
+    val i3 = d.infer(context)
+    i3.get(b).get.getIntValue.get should equal (1)
+
   }
 }

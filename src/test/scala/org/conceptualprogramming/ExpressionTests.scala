@@ -303,6 +303,16 @@ class ExpressionTests extends FlatSpec with Matchers {
     ext1.head should equal (new CPAttribute(new CPAttributeName("a", "b")))
   }
 
+  "Child Object" should "be calculated correctly" in {
+    val context = new CPExecutionContext(new RunPreferences(Map()))
+    val obj = new CPChildObject("obj")
+    val objVal = new CPObjectValue(new CPObject("obj", Map("name" -> CPStringValue("a"), "val" -> CPIntValue(1)), "val"))
+    val inferred = obj.infer(objVal, context)
+    inferred.size should equal (2)
+    inferred(CPAttributeName("obj", "name")) should equal (CPStringValue("a"))
+    inferred(CPAttributeName("obj", "val")) should equal (CPIntValue(1))
+  }
+
   "collections operations" should "be calculated correctly" in {
     val context = new CPExecutionContext(new RunPreferences(Map()))
     val list = new CPList(List(CPIntValue(1), CPIntValue(2), CPIntValue(3)))
