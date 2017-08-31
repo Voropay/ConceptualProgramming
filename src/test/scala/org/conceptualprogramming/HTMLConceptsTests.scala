@@ -40,6 +40,12 @@ class HTMLConceptsTests extends FlatSpec with Matchers {
   val loginCloseFunc = new CPFunctionCall("HTML.closeWebPage", loginUrl :: Nil)
   loginCloseFunc.calculate(context)
 
+  val tableUrl = CPConstant(CPStringValue("file:///C:/projects/AI/ConceptualProgramming/src/test/scala/org/conceptualprogramming/examples/html/table.html"))
+  val tableReadFunc = new CPFunctionCall("HTML.openWebPage", tableUrl :: Nil)
+  val tableObjects = tableReadFunc.calculate(context).get.asInstanceOf[CPList].values.map(_.asInstanceOf[CPObjectValue].objectValue)
+  val tableCloseFunc = new CPFunctionCall("HTML.closeWebPage", tableUrl :: Nil)
+  tableCloseFunc.calculate(context)
+
   "hierarchy concepts" should "work correctly" in {
     val pe = new ProgramExecutor
     val context = pe.initContext(new RunPreferences(Map()))
@@ -198,6 +204,63 @@ class HTMLConceptsTests extends FlatSpec with Matchers {
 
     val allPosObjects = position.resolve(Map("beforeElement" -> new CPObjectValue(loginDiv)), context)
     allPosObjects.size should equal (3)
+
+    val inside = context.knowledgeBase.getConcepts("inside").head
+    val form = context.knowledgeBase.getObjects("PageForm").head
+    val insideObjects = inside.resolve(Map("outsideElement" -> new CPObjectValue(form)), context)
+    insideObjects.size should equal (12)
+    insideObjects.contains(new CPObject("inside", Map("insideElement" -> new CPObjectValue(login), "outsideElement" -> new CPObjectValue(form)), "insideElement")) should be (true)
+    insideObjects.contains(new CPObject("inside", Map("insideElement" -> new CPObjectValue(password), "outsideElement" -> new CPObjectValue(form)), "insideElement")) should be (true)
+    insideObjects.contains(new CPObject("inside", Map("insideElement" -> new CPObjectValue(domain), "outsideElement" -> new CPObjectValue(form)), "insideElement")) should be (true)
+
+    val outside = context.knowledgeBase.getConcepts("outside").head
+    val outsideObject = outside.resolve(Map("outsideElement" -> new CPObjectValue(form), "insideElement" -> new CPObjectValue(login)), context)
+    outsideObject.size should equal (1)
+    outsideObject.head should equal (new CPObject("outside", Map("insideElement" -> new CPObjectValue(login), "outsideElement" -> new CPObjectValue(form)), "outsideElement"))
+
+  }
+
+  "caption concepts" should "work correctly" in {
+    val pe = new ProgramExecutor
+    val context = pe.initContext(new RunPreferences(Map()))
+    context.knowledgeBase.add(formObjects)
+
+    val withLabelStmt = new ConceptResolvingToVariableStatement("withLabelRes", "withLabel", Map("labelText" -> CPConstant(CPStringValue("First name:"))))
+    withLabelStmt.execute(context)
+    val fname = context.getVariable("withLabelRes").get.asInstanceOf[CPList].values
+    fname.size should equal (1)
+    fname.head.asInstanceOf[CPObjectValue].objectValue.attributes.get("element").get.asInstanceOf[CPObjectValue].objectValue.attributes.get("id") should equal (Some(CPStringValue("fname")))
+
+    val context1 = pe.initContext(new RunPreferences(Map()))
+    context1.knowledgeBase.add(loginObjects)
+    val withLabelStmt1 = new ConceptResolvingToVariableStatement("withLabelRes", "withLabel", Map("labelText" -> CPConstant(CPStringValue("Name"))))
+    withLabelStmt1.execute(context1)
+    val login = context1.getVariable("withLabelRes").get.asInstanceOf[CPList].values
+    login.size should equal (1)
+    login.head.asInstanceOf[CPObjectValue].objectValue.attributes.get("element").get.asInstanceOf[CPObjectValue].objectValue.attributes.get("id") should equal (Some(CPStringValue("LoginForm_Login")))
+
+    val withLabelStmt2 = new ConceptResolvingToVariableStatement("withLabelRes", "withLabel", Map("labelText" -> CPConstant(CPStringValue("Personalia:"))))
+    withLabelStmt2.execute(context)
+    val fieldSet = context.getVariable("withLabelRes").get.asInstanceOf[CPList].values
+    fieldSet.size should equal (1)
+    fieldSet.head.asInstanceOf[CPObjectValue].objectValue.attributes.get("element").get.asInstanceOf[CPObjectValue].objectValue.name should equal ("PageFieldSet")
+
+    val withLabelStmt3 = new ConceptResolvingToVariableStatement("withLabelRes", "withLabel", Map("labelText" -> CPConstant(CPStringValue("Software developers"))))
+    withLabelStmt3.execute(context)
+    val optGroup = context.getVariable("withLabelRes").get.asInstanceOf[CPList].values
+    optGroup.size should equal (1)
+    val seniorOption = context.knowledgeBase.getObjects("PageOption", Map("value" -> CPStringValue("senior"))).head
+    val optGroupObj = optGroup.head.asInstanceOf[CPObjectValue].objectValue.attributes.get("element").get.asInstanceOf[CPObjectValue].objectValue
+    seniorOption.attributes.get("optgroup") should equal (optGroupObj.attributes.get("id"))
+
+    val context2 = pe.initContext(new RunPreferences(Map()))
+    context2.knowledgeBase.add(tableObjects)
+    val withLabelStmt4 = new ConceptResolvingToVariableStatement("withLabelRes", "withLabel", Map("labelText" -> CPConstant(CPStringValue("Monthly savings"))))
+    withLabelStmt4.execute(context2)
+    val table = context2.getVariable("withLabelRes").get.asInstanceOf[CPList].values
+    table.size should equal (1)
+    table.head.asInstanceOf[CPObjectValue].objectValue.attributes.get("element").get.asInstanceOf[CPObjectValue].objectValue.attributes.get("xPath") should equal (Some(CPStringValue("/html[1]/body[1]/table[2]")))
+
   }
 
 }

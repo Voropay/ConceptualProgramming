@@ -653,7 +653,7 @@ class InferenceTests extends FlatSpec with Matchers {
     context.knowledgeBase.add(o4)
 
     val inside = new CPStrictConcept(
-      "inside",
+      "insideTest",
       "insideElement" :: "outsideElement" :: Nil,
       "insideElement",
       ("Element", "ie") :: ("Element", "oe") :: Nil,
@@ -662,7 +662,7 @@ class InferenceTests extends FlatSpec with Matchers {
         new CPOrDependency(
           CPDependency(CPAttribute("ie", "parent"), CPAttribute("oe", "id"), "=") ::
           CPExistDependency.byChildConcepts(
-            ("Element", "int") :: ("inside", "intRel") :: Nil,
+            ("Element", "int") :: ("insideTest", "intRel") :: Nil,
             CPDependency(CPAttribute("int", "id"), CPAttribute("ie", "parent"), "=") ::
             CPDependency(CPAttribute("intRel", "insideElement"), CPChildObject("int"), "=") ::
             CPDependency(CPAttribute("intRel", "outsideElement"), CPChildObject("oe"), "=") :: Nil,
@@ -694,8 +694,8 @@ class InferenceTests extends FlatSpec with Matchers {
       "insideElement" -> new CPObjectValue(o3)
     ), context)
     res3.size should equal (2)
-    res3.contains(new CPObject("inside", Map("insideElement" -> new CPObjectValue(o3), "outsideElement" -> new CPObjectValue(o2)), "insideElement")) should be (true)
-    res3.contains(new CPObject("inside", Map("insideElement" -> new CPObjectValue(o3), "outsideElement" -> new CPObjectValue(o1)), "insideElement")) should be (true)
+    res3.contains(new CPObject("insideTest", Map("insideElement" -> new CPObjectValue(o3), "outsideElement" -> new CPObjectValue(o2)), "insideElement")) should be (true)
+    res3.contains(new CPObject("insideTest", Map("insideElement" -> new CPObjectValue(o3), "outsideElement" -> new CPObjectValue(o1)), "insideElement")) should be (true)
 
     val res4 = inside.resolve(Map(
       "insideElement" -> new CPObjectValue(o1)

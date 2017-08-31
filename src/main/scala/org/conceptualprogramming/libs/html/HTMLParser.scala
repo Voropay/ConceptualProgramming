@@ -428,6 +428,10 @@ object HTMLParser {
     if(value != null) {
       tagAttributes += ("value" -> CPStringValue(value))
     }
+    val placeholder = element.getAttribute("placeholder")
+    if(placeholder != null && !placeholder.isEmpty) {
+      tagAttributes += ("placeholder" -> CPStringValue(placeholder))
+    }
     val inputObj = new PageElement("PageInput", tagAttributes)
     processChildTags(inputObj, element, inputObj, attributes)
   }
@@ -512,7 +516,7 @@ object HTMLParser {
     if(form.isDefined) {
       tagAttributes += ("form" -> form.get)
     }
-    tagAttributes += ("legend" -> CPStringValue(""))
+    tagAttributes += ("label" -> CPStringValue(""))
     val fieldsetObj = new PageElement("PageFieldSet", tagAttributes)
     val id = tagAttributes.get("id").get.getStringValue.get
     processChildTags(fieldsetObj, element, fieldsetObj, attributes + ("fieldset" -> id))
@@ -591,8 +595,8 @@ object HTMLParser {
     }
 
     val legendObj = new PageElement("PageLegend", tagAttributes)
-    if(parent.attributes.contains("legend")) {
-      parent.attributes.put("legend", legendObj.attributes.get("id").get)
+    if(parent.attributes.contains("label")) {
+      parent.attributes.put("label", legendObj.attributes.get("id").get)
     }
     processChildTags(legendObj, element, legendObj, attributes)
   }
@@ -809,7 +813,7 @@ object HTMLParser {
       tagAttributes += ("table" -> CPStringValue(table.get))
     }
     val tableCaptionObj = new PageElement("PageTableCaption", tagAttributes)
-    parent.attributes.put("caption", tagAttributes.get("id").get)
+    parent.attributes.put("label", tagAttributes.get("id").get)
     processChildTags(tableCaptionObj, element, tableCaptionObj, attributes)
   }
 

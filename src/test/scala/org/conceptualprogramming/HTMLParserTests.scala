@@ -272,7 +272,7 @@ class HTMLParserTests extends FlatSpec with Matchers {
     legendObj.attributes("parent").getStringValue.get should equal(fieldSetId)
     legendObj.attributes("form").getStringValue.get should equal(formId)
     legendObj.attributes("text").getStringValue.get should equal("Personalia:")
-    fieldSetObj.attributes("legend").getStringValue.get should equal(legendObj.attributes("id").getStringValue.get)
+    fieldSetObj.attributes("label").getStringValue.get should equal(legendObj.attributes("id").getStringValue.get)
 
     val fnameObj = pageObjects.filter(_.attributes.getOrElse("xPath", CPBooleanValue(false)) == CPStringValue("/html[1]/body[1]/form[1]/fieldset[1]/input[1]")).head
     fnameObj.attributes("pos").getIntValue.get should equal(1)
@@ -733,7 +733,7 @@ class HTMLParserTests extends FlatSpec with Matchers {
     earningsTableCaptionObj.name should equal("PageTableCaption")
     earningsTableCaptionObj.attributes("text").getStringValue.get should equal("Monthly savings")
     val earningsTableCaptionId = earningsTableCaptionObj.attributes("id").getStringValue.get
-    earningsTableObj.attributes("caption").getStringValue.get should equal(earningsTableCaptionId)
+    earningsTableObj.attributes("label").getStringValue.get should equal(earningsTableCaptionId)
 
     val earningsTableHeaderRowObj = pageObjects.filter(_.attributes.getOrElse("xPath", CPBooleanValue(false)) == CPStringValue("/html[1]/body[1]/table[2]/tbody[1]/tr[1]")).head
     earningsTableHeaderRowObj.attributes("pos").getIntValue.get should equal(1)

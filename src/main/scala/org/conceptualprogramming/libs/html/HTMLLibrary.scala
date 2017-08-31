@@ -5,7 +5,7 @@ import java.io.File
 import org.conceptualprogramming.core
 import org.conceptualprogramming.core.CPFilteringConcept
 import org.conceptualprogramming.core.datatypes.composite.CPObjectValue
-import org.conceptualprogramming.core.dependencies.CPExistDependency
+import org.conceptualprogramming.core.dependencies.{CPExistDependency, CPOrDependency}
 import org.conceptualprogramming.core.statements.expressions.{CPChildObject, CPGetFromCollection}
 import org.conceptualprogramming.libs.StandardLibrary
 import org.conceptualprogramming.libs.html.HTMLParser
@@ -522,6 +522,7 @@ class HTMLLibrary extends StandardLibrary {
     registerSpatialConcepts(context)
     registerColorConcepts(context)
     registerPositionConcepts(context)
+    registerCaptionConcepts(context)
   }
 
   def registerHierarchyConcepts(context: CPExecutionContext): Unit = {
@@ -1238,5 +1239,94 @@ class HTMLLibrary extends StandardLibrary {
         CPDependency(CPAttribute("ae", "pos"), CPAdd(CPAttribute("be", "pos"), CPAttribute("", "givenPosition")), "=") :: Nil
     )
     context.knowledgeBase.add(position)
+
+    val inside = new CPStrictConcept(
+      "inside",
+      "insideElement" :: "outsideElement" :: Nil,
+      "insideElement",
+      ("WebPageElement", "ie") :: ("WebPageElement", "oe") :: Nil,
+      CPDependency(CPAttribute("", "insideElement"), CPChildObject("ie"), "=") ::
+        CPDependency(CPAttribute("", "outsideElement"), CPChildObject("oe"), "=") ::
+        new CPOrDependency(
+          CPDependency(CPAttribute("ie", "parent"), CPAttribute("oe", "id"), "=") ::
+            CPExistDependency.byChildConcepts(
+              ("WebPageElement", "int") :: ("inside", "intRel") :: Nil,
+              CPDependency(CPAttribute("int", "id"), CPAttribute("ie", "parent"), "=") ::
+                CPDependency(CPAttribute("intRel", "insideElement"), CPChildObject("int"), "=") ::
+                CPDependency(CPAttribute("intRel", "outsideElement"), CPChildObject("oe"), "=") :: Nil,
+              Map(),
+              true
+            ) :: Nil
+        ) :: Nil
+    )
+    context.knowledgeBase.add(inside)
+
+    val outside = new CPStrictConcept(
+      "outside",
+      "insideElement" :: "outsideElement" :: Nil,
+      "outsideElement",
+      ("WebPageElement", "ie") :: ("WebPageElement", "oe") :: Nil,
+      CPDependency(CPAttribute("", "insideElement"), CPChildObject("ie"), "=") ::
+        CPDependency(CPAttribute("", "outsideElement"), CPChildObject("oe"), "=") ::
+        new CPOrDependency(
+          CPDependency(CPAttribute("ie", "parent"), CPAttribute("oe", "id"), "=") ::
+            CPExistDependency.byChildConcepts(
+              ("WebPageElement", "int") :: ("inside", "intRel") :: Nil,
+              CPDependency(CPAttribute("int", "id"), CPAttribute("ie", "parent"), "=") ::
+                CPDependency(CPAttribute("intRel", "insideElement"), CPChildObject("int"), "=") ::
+                CPDependency(CPAttribute("intRel", "outsideElement"), CPChildObject("oe"), "=") :: Nil,
+              Map(),
+              true
+            ) :: Nil
+        ) :: Nil
+    )
+    context.knowledgeBase.add(outside)
+  }
+
+  def registerCaptionConcepts(context: CPExecutionContext): Unit = {
+
+    val withLabel = new CPStrictConcept(
+      "withLabel",
+      "element" :: "labelText" :: Nil,
+      "element",
+      ("WebPageElement", "e") :: ("WebPageElement", "l") :: Nil,
+      CPDependency(CPAttribute("", "element"), CPChildObject("e"), "=") ::
+        CPDependency(CPAttribute("", "labelText"), CPAttribute("l", "text"), "=") ::
+        CPDependency(CPAttribute("e", "label"), CPAttribute("l", "id"), "=") :: Nil)
+    context.knowledgeBase.add(withLabel)
+
+    val withPlaceholder = new CPStrictConcept(
+      "withLabel",
+      "element" :: "labelText" :: Nil,
+      "element",
+      ("WebPageElement", "e") :: Nil,
+      CPDependency(CPAttribute("", "element"), CPChildObject("e"), "=") ::
+        CPDependency(CPAttribute("", "labelText"), CPAttribute("e", "placeholder"), "=") :: Nil)
+    context.knowledgeBase.add(withPlaceholder)
+
+    val optGroupWithLabel = new CPStrictConcept(
+      "withLabel",
+      "element" :: "labelText" :: Nil,
+      "element",
+      ("WebPageElement", "e") :: Nil,
+      CPDependency(CPAttribute("", "element"), CPChildObject("e"), "=") ::
+        CPDependency(CPAttribute("", "labelText"), CPAttribute("e", "label"), "=") :: Nil)
+    context.knowledgeBase.add(optGroupWithLabel)
+
+    context.knowledgeBase.add(new CPFilteringConcept("TableCell", ("PageTableCell", "e"), Nil))
+    context.knowledgeBase.add(new CPFilteringConcept("TableCell", ("PageTableHeaderCell", "e"), Nil))
+
+    val cellWithCaption = new CPStrictConcept(
+      "cellWithCaption",
+      "cell" :: "labelText" :: Nil,
+      "cell",
+      ("TableCell", "c") :: ("TableCell", "h") :: Nil,
+      CPDependency(CPAttribute("", "cell"), CPChildObject("c"), "=") ::
+        CPDependency(CPAttribute("", "labelText"), CPAttribute("h", "text"), "=") ::
+        CPDependency(CPAttribute("c", "table"), CPAttribute("h", "table"), "=") ::
+        CPDependency(CPAttribute("c", "columnNum"), CPAttribute("h", "columnNum"), "=") ::
+        CPDependency(CPAttribute("c", "id"), CPAttribute("h", "id"), "!=") ::
+        CPDependency(CPAttribute("h", "tableSection"), CPConstant(CPStringValue("header")), "=") :: Nil)
+    context.knowledgeBase.add(cellWithCaption)
   }
 }

@@ -4,7 +4,7 @@ import java.time.LocalDate
 
 import org.conceptualprogramming.core.CPFilteringConcept
 import org.conceptualprogramming.core.datatypes.composite.{CPMap, CPObjectValue}
-import org.conceptualprogramming.core.dependencies.CPExistDependency
+import org.conceptualprogramming.core.dependencies.{CPExistDependency, CPOrDependency}
 import org.conceptualprogramming.core.statements._
 import org.conceptualprogramming.core.statements.expressions._
 import org.conceptualprogramming.core.statements.expressions.operations.CPOperation
@@ -401,6 +401,11 @@ class ParserTests  extends FlatSpec with Matchers {
       new CPGetFromCollection(new CPAttribute(CPAttributeName("o", "leftPoint")), List(CPConstant(CPStringValue("pos")))),
       ">")) should be (true)
 
+    val dep6 = dependenciesParser("i.start > o.end OR i.end < o.start").get.asInstanceOf[CPOrDependency]
+    dep6.dependencies.size should equal (2)
+    dep6.dependencies.contains(CPDependency(CPAttribute("i", "start"), CPAttribute("o", "end"), ">")) should be (true)
+    dep6.dependencies.contains(CPDependency(CPAttribute("i", "end"), CPAttribute("o", "start"), "<")) should be (true)
+
     val strictConceptStmt1 = stmtParser("concept income (row, val) := cell c (col == 2), _.row == c.row").get.asInstanceOf[ConceptDefinitionStatement].definition.asInstanceOf[CPStrictConcept]
     strictConceptStmt1.name should equal ("income")
     var strictConceptAttrs1 = strictConceptStmt1.attributes
@@ -595,6 +600,39 @@ class ParserTests  extends FlatSpec with Matchers {
     Utils.compareList(existDependency2Definition.attributesDependencies, innerConceptStmt3.attributesDependencies) should be (true)
     existDependency2.queryExpr should equal (dep5.queryExpr)
     existDependency2.positiveCondition should be (false)
+
+    val conceptWithOrDependency = stmtParser("concept inside(insideElement == $ie, outsideElement == $oe) := Element ie(), Element oe(), ie.parent == oe.id OR Exist (Element int(id == ie.parent), inside intRel(insideElement == $int, outsideElement == $oe))").get.asInstanceOf[ConceptDefinitionStatement].definition.asInstanceOf[CPStrictConcept]
+    conceptWithOrDependency.name should equal ("inside")
+    conceptWithOrDependency.attributes.size should equal (2)
+    conceptWithOrDependency.attributes.contains("insideElement") should be (true)
+    conceptWithOrDependency.attributes.contains("outsideElement") should be (true)
+    conceptWithOrDependency.defaultAttribute should equal ("insideElement")
+    conceptWithOrDependency.childConcepts.size should equal (2)
+    conceptWithOrDependency.childConcepts.contains(("Element", "ie")) should be (true)
+    conceptWithOrDependency.childConcepts.contains(("Element", "oe")) should be (true)
+    val conceptWithOrDependencies = conceptWithOrDependency.attributesDependencies
+    conceptWithOrDependencies.size should equal (3)
+    conceptWithOrDependencies.contains(CPDependency(CPAttribute("", "insideElement"), CPChildObject("ie"), "=")) should be (true)
+    conceptWithOrDependencies.contains(CPDependency(CPAttribute("", "outsideElement"), CPChildObject("oe"), "=")) should be (true)
+    val OrExistDependencies = conceptWithOrDependencies.find(dep => dep.isInstanceOf[CPOrDependency]).get.asInstanceOf[CPOrDependency].dependencies
+    OrExistDependencies.size should equal (2)
+    OrExistDependencies.contains(CPDependency(CPAttribute("ie", "parent"), CPAttribute("oe", "id"), "=")) should be (true)
+    val OrExistDependency = OrExistDependencies.find(dep => dep.isInstanceOf[CPExistDependency]).get.asInstanceOf[CPExistDependency]
+    val orExistConceptDefinition = OrExistDependency.definition.asInstanceOf[CPStrictConcept]
+    Utils.compareList(orExistConceptDefinition.attributes, "int" :: "intRel" :: Nil) should be (true)
+    Utils.compareList(orExistConceptDefinition.childConcepts, ("Element", "int") :: ("inside", "intRel") :: Nil) should be (true)
+    val orExistNestedDependencies = orExistConceptDefinition.attributesDependencies
+    orExistNestedDependencies.size should equal (5)
+    orExistNestedDependencies.contains(CPDependency(CPAttribute("", "int"), CPChildObject("int"), "=")) should be (true)
+    orExistNestedDependencies.contains(CPDependency(CPAttribute("", "intRel"), CPChildObject("intRel"), "=")) should be (true)
+    orExistNestedDependencies.contains(CPDependency(CPAttribute("int", "id"), CPAttribute("ie", "parent"), "=")) should be (true)
+    orExistNestedDependencies.contains(CPDependency(CPAttribute("intRel", "insideElement"), CPChildObject("int"), "=")) should be (true)
+    orExistNestedDependencies.contains(CPDependency(CPAttribute("intRel", "outsideElement"), CPChildObject("oe"), "=")) should be (true)
+    OrExistDependency.conceptExternalExpressions.size should equal (2)
+    OrExistDependency.conceptExternalExpressions.contains(CPAttribute("ie", "parent")) should be (true)
+    OrExistDependency.conceptExternalExpressions.contains(CPChildObject("oe")) should be (true)
+    OrExistDependency.queryExpr.isEmpty should be (true)
+    OrExistDependency.positiveCondition should be (true)
 
     val procStmtFunc = stmtParser("Console.print(\"Hello world\")").get.asInstanceOf[ProcedureCallStatement].function
     procStmtFunc.name should equal ("Console.print")

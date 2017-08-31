@@ -1,7 +1,7 @@
 package org.conceptualprogramming.parser
 
 import org.conceptualprogramming.core.CPFilteringConcept
-import org.conceptualprogramming.core.dependencies.CPExistDependency
+import org.conceptualprogramming.core.dependencies.{CPExistDependency, CPOrDependency}
 import org.conceptualprogramming.core.statements._
 import org.conceptualprogramming.core.statements.expressions.{CPAddToCollection, CPChildObject}
 import org.conceptualprogramming.core.statements.expressions.operations.CPOperation
@@ -169,7 +169,8 @@ trait StatementsParser extends ExpressionsParser {
     })
   }
 
-  def attrDependency: Parser[CPDependency] = attributesLinkDependency | existByNameDependency | existByChildConceptsDependency | existDependency | expressionDependency
+  def attrDependencyNonRecursive: Parser[CPDependency] = attributesLinkDependency | existByNameDependency | existByChildConceptsDependency | existDependency | expressionDependency
+  def attrDependency: Parser[CPDependency] = orDependency | attrDependencyNonRecursive
   def expressionDependency: Parser[CPDependency] = expression ^^ { value =>
     new CPExpressionDependency(value, CPBooleanValue(true))
   }
@@ -196,6 +197,10 @@ trait StatementsParser extends ExpressionsParser {
       CPExistDependency.byChildConcepts(childConceptsNames, childConceptsDependencies ++ additionalDependencies, queryOpt.getOrElse(Map()), not.isEmpty)
     }
   }
+  def orDependency: Parser[CPDependency] = attrDependencyNonRecursive ~ "OR" ~ rep1sep(attrDependencyNonRecursive, "OR") ^^ { value =>
+    new CPOrDependency(value._1._1 :: value._2)
+  }
+
 
   sealed trait DependencyAttributes
   case class ArithmeticalDependencyAttributes (operation: String, operand: CPExpression) extends DependencyAttributes
