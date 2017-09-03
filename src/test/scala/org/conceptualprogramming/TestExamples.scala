@@ -260,24 +260,24 @@ class TestExamples extends FlatSpec with Matchers {
       "Name",
       ("Cell", "c") :: Nil,
       Map(),
-      Map(CPAttributeName("c", "col") -> new CPConstant(CPIntValue(1))),
-      Nil
+      List(CPAttributeName("c", "col")),
+      CPDependency(CPAttribute("c", "col"), CPConstant(CPIntValue(1)), "=") :: Nil
     )
 
     val income = new CPInheritedConcept(
       "Income",
       ("Cell", "c") :: Nil,
       Map(),
-      Map(CPAttributeName("c", "col") -> new CPConstant(CPIntValue(2))),
-      Nil
+      List(CPAttributeName("c", "col")),
+      CPDependency(CPAttribute("c", "col"), CPConstant(CPIntValue(2)), "=") :: Nil
     )
 
     val outcome = new CPInheritedConcept(
       "Outcome",
       ("Cell", "c") :: Nil,
       Map(),
-      Map(CPAttributeName("c", "col") -> new CPConstant(CPIntValue(3))),
-      Nil
+      List(CPAttributeName("c", "col")),
+      CPDependency(CPAttribute("c", "col"), CPConstant(CPIntValue(3)), "=") :: Nil
     )
 
     val profit = new CPInheritedConcept(
@@ -285,7 +285,7 @@ class TestExamples extends FlatSpec with Matchers {
       ("Income", "i") :: ("Outcome", "o") :: Nil,
       Map(
         "val" -> new CPSub(new CPAttribute(CPAttributeName("i", "val")), new CPAttribute(CPAttributeName("o", "val")))),
-      Map(),
+      List(),
       Nil
     )
 
@@ -293,7 +293,7 @@ class TestExamples extends FlatSpec with Matchers {
       "Unprofitable",
       ("Profit", "p") :: Nil,
       Map(),
-      Map(),
+      List(),
       CPDependency(new CPAttribute(CPAttributeName("p", "val")), new CPConstant(CPIntValue(0)), "<") :: Nil
     )
 
@@ -301,7 +301,7 @@ class TestExamples extends FlatSpec with Matchers {
       "ToNotify",
       ("Unprofitable", "u") :: ("Name", "n") :: Nil,
       Map("val" -> new CPAttribute(CPAttributeName("u", "val")), "name" -> new CPAttribute(CPAttributeName("n", "val"))),
-      Map(),
+      List(),
       Nil
     )
 
@@ -343,24 +343,24 @@ class TestExamples extends FlatSpec with Matchers {
       "Name",
       ("Cell", "c") :: Nil,
       Map(),
-      Map(CPAttributeName("c", "col") -> new CPConstant(CPIntValue(1))),
-      Nil
+      List(CPAttributeName("c", "col")),
+      CPDependency(CPAttribute("c", "col"), CPConstant(CPIntValue(1)), "=") :: Nil
     )
 
     val income = new CPInheritedConcept(
       "Income",
       ("Cell", "c") :: Nil,
       Map(),
-      Map(CPAttributeName("c", "col") -> new CPConstant(CPIntValue(2))),
-      Nil
+      List(CPAttributeName("c", "col")),
+      CPDependency(CPAttribute("c", "col"), CPConstant(CPIntValue(2)), "=") :: Nil
     )
 
     val outcome = new CPInheritedConcept(
       "Outcome",
       ("Cell", "c") :: Nil,
       Map(),
-      Map(CPAttributeName("c", "col") -> new CPConstant(CPIntValue(3))),
-      Nil
+      List(CPAttributeName("c", "col")),
+      CPDependency(CPAttribute("c", "col"), CPConstant(CPIntValue(3)), "=") :: Nil
     )
 
     val profit = new CPInheritedConcept(
@@ -368,7 +368,7 @@ class TestExamples extends FlatSpec with Matchers {
       ("Income", "i") :: ("Outcome", "o") :: Nil,
       Map(
         "val" -> new CPSub(new CPAttribute(CPAttributeName("i", "val")), new CPAttribute(CPAttributeName("o", "val")))),
-      Map(),
+      List(),
       Nil
     )
 
@@ -376,7 +376,7 @@ class TestExamples extends FlatSpec with Matchers {
       "Unprofitable",
       ("Profit", "p") :: Nil,
       Map(),
-      Map(),
+      List(),
       CPDependency(new CPAttribute(CPAttributeName("p", "val")), new CPConstant(CPIntValue(0)), "<") :: Nil
     )
 
@@ -384,7 +384,7 @@ class TestExamples extends FlatSpec with Matchers {
       "ToNotify",
       ("Unprofitable", "u") :: ("Name", "n") :: Nil,
       Map("val" -> new CPAttribute(CPAttributeName("u", "val")), "name" -> new CPAttribute(CPAttributeName("n", "val"))),
-      Map(),
+      List(),
       Nil
     )
 
@@ -417,24 +417,24 @@ class TestExamples extends FlatSpec with Matchers {
       "Name",
       ("Cell", "c") :: Nil,
       Map(),
-      Map(CPAttributeName("c", "col") -> new CPConstant(CPIntValue(1))),
-      Nil
+      List(CPAttributeName("c", "col")),
+      CPDependency(CPAttribute("c", "col"), CPConstant(CPIntValue(1)), "=") :: Nil
     )
 
     val income = new CPInheritedConcept(
       "Income",
       ("Cell", "c") :: Nil,
       Map(),
-      Map(CPAttributeName("c", "col") -> new CPConstant(CPIntValue(2))),
-      Nil
+      List(CPAttributeName("c", "col")),
+      CPDependency(CPAttribute("c", "col"), CPConstant(CPIntValue(2)), "=") :: Nil
     )
 
     val outcome = new CPInheritedConcept(
       "Outcome",
       ("Cell", "c") :: Nil,
       Map(),
-      Map(CPAttributeName("c", "col") -> new CPConstant(CPIntValue(3))),
-      Nil
+      List(CPAttributeName("c", "col")),
+      CPDependency(CPAttribute("c", "col"), CPConstant(CPIntValue(3)), "=") :: Nil
     )
 
     val profit = new CPInheritedConcept(
@@ -442,7 +442,7 @@ class TestExamples extends FlatSpec with Matchers {
       ("Income", "i") :: ("Outcome", "o") :: Nil,
       Map(
         "val" -> new CPSub(new CPAttribute(CPAttributeName("i", "val")), new CPAttribute(CPAttributeName("o", "val")))),
-      Map(),
+      List(),
       Nil
     )
 
@@ -450,7 +450,7 @@ class TestExamples extends FlatSpec with Matchers {
       "Unprofitable",
       ("Profit", "p") :: Nil,
       Map(),
-      Map(),
+      List(),
       CPDependency(new CPAttribute(CPAttributeName("p", "val")), new CPConstant(CPIntValue(0)), "<") :: Nil
     )
 
@@ -458,7 +458,7 @@ class TestExamples extends FlatSpec with Matchers {
       "ToNotify",
       ("Unprofitable", "u") :: ("Name", "n") :: Nil,
       Map("val" -> new CPAttribute(CPAttributeName("u", "val")), "name" -> new CPAttribute(CPAttributeName("n", "val"))),
-      Map(),
+      List(),
       Nil
     )
 
@@ -507,24 +507,24 @@ class TestExamples extends FlatSpec with Matchers {
       "Name",
       ("Cell", "c") :: Nil,
       Map(),
-      Map(CPAttributeName("c", "col") -> new CPConstant(CPIntValue(1))),
-      Nil
+      List(CPAttributeName("c", "col")),
+      CPDependency(CPAttribute("c", "col"), CPConstant(CPIntValue(1)), "=") :: Nil
     )
 
     val income = new CPInheritedConcept(
       "Income",
       ("Cell", "c") :: Nil,
       Map(),
-      Map(CPAttributeName("c", "col") -> new CPConstant(CPIntValue(2))),
-      Nil
+      List(CPAttributeName("c", "col")),
+      CPDependency(CPAttribute("c", "col"), CPConstant(CPIntValue(2)), "=") :: Nil
     )
 
     val outcome = new CPInheritedConcept(
       "Outcome",
       ("Cell", "c") :: Nil,
       Map(),
-      Map(CPAttributeName("c", "col") -> new CPConstant(CPIntValue(3))),
-      Nil
+      List(CPAttributeName("c", "col")),
+      CPDependency(CPAttribute("c", "col"), CPConstant(CPIntValue(3)), "=") :: Nil
     )
 
     val profit = new CPInheritedConcept(
@@ -532,7 +532,7 @@ class TestExamples extends FlatSpec with Matchers {
       ("Income", "i") :: ("Outcome", "o") :: Nil,
       Map(
         "val" -> new CPSub(new CPAttribute(CPAttributeName("i", "val")), new CPAttribute(CPAttributeName("o", "val")))),
-      Map(),
+      List(),
       Nil
     )
 

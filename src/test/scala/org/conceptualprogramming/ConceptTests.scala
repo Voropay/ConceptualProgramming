@@ -38,7 +38,7 @@ class ConceptTests extends FlatSpec with Matchers {
       "Profit",
       ("Outcome", "o") :: ("Income", "i") :: Nil,
       Map("val" -> new CPSub(new CPAttribute(CPAttributeName("i", "val")), CPAttribute(CPAttributeName("o", "val")))),
-      Map(),
+      List(),
       CPDependency(new CPConstant(CPIntValue(0)), new CPAttribute(CPAttributeName("", "val")), "<") :: Nil
     )
 
@@ -46,7 +46,7 @@ class ConceptTests extends FlatSpec with Matchers {
       "Profit",
       ("Income", "i") :: ("Outcome", "o") :: Nil,
       Map("val" -> new CPSub(new CPAttribute(CPAttributeName("i", "val")), CPAttribute(CPAttributeName("o", "val")))),
-      Map(),
+      List(),
       CPDependency(new CPConstant(CPIntValue(0)), new CPAttribute(CPAttributeName("", "val")), "<") :: Nil
     )
 
@@ -102,8 +102,9 @@ class ConceptTests extends FlatSpec with Matchers {
       "a",
       ("b", "b") :: Nil,
       Map("val" -> new CPMul(new CPAttribute(CPAttributeName("b", "val")), new CPConstant(CPIntValue(2)))),
-      Map(CPAttributeName("b", "col") -> new CPConstant(CPIntValue(1))),
-      CPDependency(new CPConstant(CPIntValue(50)), new CPAttribute(CPAttributeName("b", "row")), ">") :: Nil
+      List(CPAttributeName("b", "col")),
+      CPDependency(new CPConstant(CPIntValue(50)), new CPAttribute(CPAttributeName("b", "row")), ">") ::
+        CPDependency(CPAttribute("b", "col"), CPConstant(CPIntValue(1)), "=") :: Nil
     )
     c.attributesDependencies.size should equal (3)
     val d1 = CPDependency(new CPAttribute(CPAttributeName("", "val")), new CPMul(new CPAttribute(CPAttributeName("b", "val")), new CPConstant(CPIntValue(2))), "==")

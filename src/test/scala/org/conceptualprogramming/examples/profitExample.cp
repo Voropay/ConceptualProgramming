@@ -1,8 +1,8 @@
 object Table.readFromCSVFile("src/test/scala/org/conceptualprogramming/examples/profitExample.csv", ",", true);
 
-concept Name() :> Cell(*column == 0);
-concept Income() :> Cell(*column == 1);
-concept Outcome() :> Cell(*column == 2);
+concept Name() :> FileTableCell(!columnNum == 1, !id, !pos);
+concept Income() :> FileTableCell(!columnNum == 2, !id, !pos);
+concept Outcome() :> FileTableCell(!columnNum == 3, !id, !pos);
 concept Profit(value == i.value - o.value) :> Income i(), Outcome o();
 concept Totals(
 	*income == Grouping.sum(i.value),

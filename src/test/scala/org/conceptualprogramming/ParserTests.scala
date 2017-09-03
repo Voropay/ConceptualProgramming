@@ -438,14 +438,15 @@ class ParserTests  extends FlatSpec with Matchers {
     val strictConceptStmt3 = stmtParser("concept profit (row ~ i.row ~ o.row, val == i.val - o.val) := income i(), outcome o()").get.asInstanceOf[ConceptDefinitionStatement].definition.asInstanceOf[CPStrictConcept]
     strictConceptStmt2 should equal (strictConceptStmt3)
 
-    val inhConceptStmt1 = stmtParser("concept Income() :> Cell(*col == 2)").get.asInstanceOf[ConceptDefinitionStatement].definition.asInstanceOf[CPInheritedConcept]
+    val inhConceptStmt1 = stmtParser("concept Income() :> Cell(!col == 2)").get.asInstanceOf[ConceptDefinitionStatement].definition.asInstanceOf[CPInheritedConcept]
     inhConceptStmt1.name should equal ("Income")
     inhConceptStmt1.childConcepts.size should equal (1)
     inhConceptStmt1.childConcepts.head should equal (("Cell", "Cell"))
     inhConceptStmt1.overriddenAttributes.isEmpty should be (true)
     inhConceptStmt1.specifiedAttributes.size should equal (1)
-    inhConceptStmt1.specifiedAttributes.get(CPAttributeName("Cell", "col")).get.asInstanceOf[CPConstant].value.getIntValue.get should equal (2)
-    inhConceptStmt1.filterDependencies.isEmpty should be (true)
+    inhConceptStmt1.specifiedAttributes.contains(CPAttributeName("Cell", "col")) should be (true)
+    inhConceptStmt1.filterDependencies.size should equal (1)
+    inhConceptStmt1.filterDependencies.head should equal (CPDependency(CPAttribute("Cell", "col"), CPConstant(CPIntValue(2)), "="))
 
     val inhConceptStmt2 = stmtParser("concept Profit(val == i.val - o.val) :> Income i(), Outcome o()").get.asInstanceOf[ConceptDefinitionStatement].definition.asInstanceOf[CPInheritedConcept]
     inhConceptStmt2.name should equal ("Profit")
@@ -472,6 +473,17 @@ class ParserTests  extends FlatSpec with Matchers {
 
     val inhConceptStmt4 = stmtParser("concept Unprofitable() :> Profit(val < 0)").get.asInstanceOf[ConceptDefinitionStatement].definition.asInstanceOf[CPInheritedConcept]
     inhConceptStmt3 should equal (inhConceptStmt4)
+
+    val inhConceptStmt5 = stmtParser("concept Income() :> Cell(!col == 2, !id)").get.asInstanceOf[ConceptDefinitionStatement].definition.asInstanceOf[CPInheritedConcept]
+    inhConceptStmt5.name should equal ("Income")
+    inhConceptStmt5.childConcepts.size should equal (1)
+    inhConceptStmt5.childConcepts.head should equal (("Cell", "Cell"))
+    inhConceptStmt5.overriddenAttributes.isEmpty should be (true)
+    inhConceptStmt5.specifiedAttributes.size should equal (2)
+    inhConceptStmt5.specifiedAttributes.contains(CPAttributeName("Cell", "col")) should be (true)
+    inhConceptStmt5.specifiedAttributes.contains(CPAttributeName("Cell", "id")) should be (true)
+    inhConceptStmt5.filterDependencies.size should equal (1)
+    inhConceptStmt5.filterDependencies.head should equal (CPDependency(CPAttribute("Cell", "col"), CPConstant(CPIntValue(2)), "="))
 
     val freeConceptStmt= stmtParser("concept NumbersSequence := {for(i=0;i<10;i=i+1){object Number{val: i}}; return Number{}}").get.asInstanceOf[ConceptDefinitionStatement].definition.asInstanceOf[CPFreeConcept]
     freeConceptStmt.name should equal ("NumbersSequence")

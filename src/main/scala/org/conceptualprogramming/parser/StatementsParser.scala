@@ -212,7 +212,7 @@ trait StatementsParser extends ExpressionsParser {
       val inheritedAttributes = parentConcept._2
       val parentConceptDependencies = parentConcept._3
       val childConceptsNames = childConcepts.map(curItem => (curItem._1, curItem._2))
-      val specifiedAttributes = childConcepts.flatMap(_._3).toMap
+      val specifiedAttributes = childConcepts.flatMap(_._3)
       val childConceptsDependencies = childConcepts.flatMap(_._4)
       val additionalDependencies = if(dependencies.isDefined) {
         dependencies.get._2
@@ -268,50 +268,29 @@ trait StatementsParser extends ExpressionsParser {
     }
   }
 
-  def inheritedChildConcept: Parser[(String, String, Map[CPAttributeName, CPExpression], List[CPDependency])] = ident ~ opt(ident) ~ "(" ~ repsep(opt("*") ~ ident ~ (arithmeticalDependencyAttributes | attributesLinkDependencyAttributes), ",") ~ ")" ^^ {
+  def inheritedChildConcept: Parser[(String, String, List[CPAttributeName], List[CPDependency])] = ident ~ opt(ident) ~ "(" ~ repsep(opt("!") ~ ident ~ opt(arithmeticalDependencyAttributes | attributesLinkDependencyAttributes), ",") ~ ")" ^^ {
     case childConceptName ~ alias ~ "(" ~ childConceptAttributes ~ ")" => {
       val aliasName = if(alias.isDefined) {alias.get} else {childConceptName}
       val specifiedAttributes = childConceptAttributes.map(item => {
         if(item._1._1.isEmpty) {
           None
         } else {
-          val attrName = item._1._2
-          item._2 match {
-            case d: ArithmeticalDependencyAttributes => {
-              if(d.operation == "==") {
-                Some((CPAttributeName(aliasName, attrName), d.operand))
-              } else {
-                None
-              }
-            }
-            case d: AttributesLinkDependencyAttributes => Some((CPAttributeName(aliasName, attrName), CPAttribute(d.attributes.head)))
-            case _ => None
-          }
+          Some(CPAttributeName(aliasName, item._1._2))
         }
       })
       val dependencies = childConceptAttributes.map(item => {
         val attrName = item._1._2
-        if(item._1._1.isDefined) {
-          item._2 match {
-            case d: ArithmeticalDependencyAttributes => {
-              if(d.operation != "==") {
-                Some(new CPExpressionDependency(CPOperation.createBinaryArithmeticExpression(CPAttribute(aliasName, attrName), d.operand, d.operation), CPBooleanValue(true)))
-              } else {
-                None
-              }
-            }
-            case d: AttributesLinkDependencyAttributes => Some(new CPAttributesLinkDependency(d.attributes))
-            case _ => None
-          }
+        if(item._2.isEmpty) {
+          None
         } else {
-          item._2 match {
+          item._2.get match {
             case d: ArithmeticalDependencyAttributes => Some(new CPExpressionDependency(CPOperation.createBinaryArithmeticExpression(CPAttribute(aliasName, attrName), d.operand, d.operation), CPBooleanValue(true)))
             case d: AttributesLinkDependencyAttributes => Some(new CPAttributesLinkDependency(CPAttributeName(aliasName, attrName) :: d.attributes))
             case _ => None
           }
         }
       })
-      (childConceptName, aliasName, specifiedAttributes.filter(_.isDefined).map(_.get).toMap, dependencies.filter(_.isDefined).map(_.get))
+      (childConceptName, aliasName, specifiedAttributes.filter(_.isDefined).map(_.get), dependencies.filter(_.isDefined).map(_.get))
     }
   }
 

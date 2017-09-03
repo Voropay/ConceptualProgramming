@@ -12,11 +12,11 @@ case class CPInheritedConcept(
                                name: String,
                                childConcepts: List[Tuple2[String, String]],
                                overriddenAttributes: Map[String, CPExpression],
-                               specifiedAttributes: Map[CPAttributeName, CPExpression],
+                               specifiedAttributes: List[CPAttributeName],
                                filterDependencies: List[CPDependency]
                                ) extends CPAbstractConcept with CPConcept {
 
-  val attributesDependencies: List[CPDependency] = prepareDependencies(overriddenAttributes, specifiedAttributes, filterDependencies)
+  val attributesDependencies: List[CPDependency] = prepareDependencies(overriddenAttributes, filterDependencies)
 
   override def inferValues(query: CPSubstitutions, context: CPExecutionContext): Option[Map[CPAttributeName, CPValue]] = {
     val attributesValues = inferValuesFromDependencies(query, attributesDependencies, context)
@@ -44,19 +44,13 @@ case class CPInheritedConcept(
   override def checkDependencies(attributesValues: List[CPSubstitutions], context: CPExecutionContext): List[CPSubstitutions] = checkDependencies(attributesValues, attributesDependencies, context)
 
   def prepareDependencies(overriddenAttributes: Map[String, CPExpression],
-                          specifiedAttributes: Map[CPAttributeName, CPExpression],
                           filterDependencies: List[CPDependency]): List[CPDependency] = {
     val overridden = overriddenAttributes.map(entry => CPDependency(
       new CPAttribute(CPAttributeName("", entry._1)),
       entry._2,
       "=="
     )).toList
-    val specified = specifiedAttributes.map(entry => CPDependency(
-      new CPAttribute(entry._1),
-      entry._2,
-      "=="
-    )).toList
-    overridden ::: specified ::: filterDependencies
+    overridden ::: filterDependencies
   }
 
   override def equals(other: Any): Boolean = other match {
@@ -65,7 +59,7 @@ case class CPInheritedConcept(
       Utils.compareList(childConcepts, other.childConcepts) &&
       Utils.compareList(filterDependencies, other.filterDependencies) &&
       Utils.compareMap(overriddenAttributes, other.overriddenAttributes) &&
-      Utils.compareMap(specifiedAttributes, other.specifiedAttributes)
+      Utils.compareList(specifiedAttributes, other.specifiedAttributes)
     case _ => false
   }
 

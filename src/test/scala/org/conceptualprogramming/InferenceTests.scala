@@ -102,8 +102,8 @@ class InferenceTests extends FlatSpec with Matchers {
       "Income",
       ("Cell", "c") :: Nil,
       Map(),
-      Map(CPAttributeName("c", "col") -> CPConstant(CPIntValue(1))),
-      Nil
+      List(CPAttributeName("c", "col")),
+      CPDependency(CPAttribute("c", "col"), CPConstant(CPIntValue(1)), "=") :: Nil
     )
     val q1 = new CPSubstitutions(Map(), Map())
     val r1 = c.inferValues(q1, context).get
@@ -130,7 +130,7 @@ class InferenceTests extends FlatSpec with Matchers {
       "Profit",
       ("Income", "i") :: ("Outcome", "o") :: Nil,
       Map("val" -> new CPSub(new CPAttribute(CPAttributeName("i", "val")), CPAttribute(CPAttributeName("o", "val")))),
-      Map(),
+      List(),
       CPDependency(new CPConstant(CPIntValue(0)), new CPAttribute(CPAttributeName("", "val")), "<") :: Nil
     )
     val q11 = new CPSubstitutions(Map(), Map())
@@ -167,8 +167,8 @@ class InferenceTests extends FlatSpec with Matchers {
       "Income",
       ("Cell", "c") :: Nil,
       Map(),
-      Map(CPAttributeName("c", "col") -> new CPConstant(CPIntValue(2))),
-      Nil
+      List(CPAttributeName("c", "col")),
+      CPDependency(CPAttribute("c", "col"), CPConstant(CPIntValue(2)), "=") :: Nil
     )
 
     val query: Map[CPAttributeName, CPValue] = Map()
@@ -244,8 +244,8 @@ class InferenceTests extends FlatSpec with Matchers {
       "Outcome",
       ("Cell", "c") :: Nil,
       Map(),
-      Map(CPAttributeName("c", "col") -> new CPConstant(CPIntValue(3))),
-      Nil
+      List(CPAttributeName("c", "col")),
+      CPDependency(CPAttribute("c", "col"), CPConstant(CPIntValue(3)), "=") :: Nil
     )
 
     val profit = new CPInheritedConcept(
@@ -253,7 +253,7 @@ class InferenceTests extends FlatSpec with Matchers {
       ("Income", "i") :: ("Outcome", "o") :: Nil,
       Map(
         "val" -> new CPSub(new CPAttribute(CPAttributeName("i", "val")), new CPAttribute(CPAttributeName("o", "val")))),
-      Map(),
+      List(),
       Nil
     )
 

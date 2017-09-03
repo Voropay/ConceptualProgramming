@@ -1322,11 +1322,12 @@ class HTMLLibrary extends StandardLibrary {
       "cell",
       ("TableCell", "c") :: ("TableCell", "h") :: Nil,
       CPDependency(CPAttribute("", "cell"), CPChildObject("c"), "=") ::
-        CPDependency(CPAttribute("", "labelText"), CPAttribute("h", "text"), "=") ::
+        CPDependency(CPAttribute("", "labelText"), CPAttribute("h", "value"), "=") ::
         CPDependency(CPAttribute("c", "table"), CPAttribute("h", "table"), "=") ::
         CPDependency(CPAttribute("c", "columnNum"), CPAttribute("h", "columnNum"), "=") ::
         CPDependency(CPAttribute("c", "id"), CPAttribute("h", "id"), "!=") ::
         CPDependency(CPAttribute("h", "tableSection"), CPConstant(CPStringValue("header")), "=") :: Nil)
     context.knowledgeBase.add(cellWithCaption)
+    //TODO: take colspan attribute into account
   }
 }

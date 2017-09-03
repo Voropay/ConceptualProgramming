@@ -509,7 +509,7 @@ class HTMLParserTests extends FlatSpec with Matchers {
     incomeTableHeaderCell1Obj.attributes("tableSection").getStringValue.get should equal("header")
     incomeTableHeaderCell1Obj.attributes("row").getStringValue.get should equal(incomeTableHeaderRowId)
     incomeTableHeaderCell1Obj.attributes("text").getStringValue.get should equal("Month")
-    incomeTableHeaderCell1Obj.attributes("rownum").getIntValue.get should equal(1)
+    incomeTableHeaderCell1Obj.attributes("rowNum").getIntValue.get should equal(1)
     val incomeTableHeaderCell1Id = incomeTableHeaderCell1Obj.attributes("id").getStringValue.get
 
     val incomeTableHeaderCell2Obj = pageObjects.filter(_.attributes.getOrElse("xPath", CPBooleanValue(false)) == CPStringValue("/html[1]/body[1]/table[1]/thead[1]/tr[1]/th[2]")).head
@@ -520,7 +520,7 @@ class HTMLParserTests extends FlatSpec with Matchers {
     incomeTableHeaderCell2Obj.attributes("tableSection").getStringValue.get should equal("header")
     incomeTableHeaderCell2Obj.attributes("row").getStringValue.get should equal(incomeTableHeaderRowId)
     incomeTableHeaderCell2Obj.attributes("text").getStringValue.get should equal("Income")
-    incomeTableHeaderCell2Obj.attributes("rownum").getIntValue.get should equal(1)
+    incomeTableHeaderCell2Obj.attributes("rowNum").getIntValue.get should equal(1)
     val incomeTableHeaderCell2Id = incomeTableHeaderCell2Obj.attributes("id").getStringValue.get
 
     val incomeTableHeaderCell3Obj = pageObjects.filter(_.attributes.getOrElse("xPath", CPBooleanValue(false)) == CPStringValue("/html[1]/body[1]/table[1]/thead[1]/tr[1]/th[3]")).head
@@ -531,7 +531,7 @@ class HTMLParserTests extends FlatSpec with Matchers {
     incomeTableHeaderCell3Obj.attributes("tableSection").getStringValue.get should equal("header")
     incomeTableHeaderCell3Obj.attributes("row").getStringValue.get should equal(incomeTableHeaderRowId)
     incomeTableHeaderCell3Obj.attributes("text").getStringValue.get should equal("Outcome")
-    incomeTableHeaderCell3Obj.attributes("rownum").getIntValue.get should equal(1)
+    incomeTableHeaderCell3Obj.attributes("rowNum").getIntValue.get should equal(1)
     val incomeTableHeaderCell3Id = incomeTableHeaderCell3Obj.attributes("id").getStringValue.get
 
     val incomeTableHeaderCellsList = incomeTableHeaderRowObj.attributes("rowCells").asInstanceOf[CPList].values
@@ -560,20 +560,20 @@ class HTMLParserTests extends FlatSpec with Matchers {
     incomeTableFooterCell1Obj.attributes("tableSection").getStringValue.get should equal("footer")
     incomeTableFooterCell1Obj.attributes("row").getStringValue.get should equal(incomeTableFooterRowId)
     incomeTableFooterCell1Obj.attributes("text").getStringValue.get should equal("Sum")
-    incomeTableFooterCell1Obj.attributes("rownum").getIntValue.get should equal(1)
+    incomeTableFooterCell1Obj.attributes("rowNum").getIntValue.get should equal(1)
     val incomeTableFooterCell1Id = incomeTableFooterCell1Obj.attributes("id").getStringValue.get
 
     val incomeTableFooterCell2Obj = pageObjects.filter(_.attributes.getOrElse("xPath", CPBooleanValue(false)) == CPStringValue("/html[1]/body[1]/table[1]/tfoot[1]/tr[1]/td[2]")).head
     incomeTableFooterCell2Obj.attributes("pos").getIntValue.get should equal(2)
     incomeTableFooterCell2Obj.name should equal("PageTableCell")
     incomeTableFooterCell2Obj.attributes("text").getStringValue.get should equal("340")
-    incomeTableFooterCell2Obj.attributes("rownum").getIntValue.get should equal(1)
+    incomeTableFooterCell2Obj.attributes("rowNum").getIntValue.get should equal(1)
     val incomeTableFooterCell2Id = incomeTableFooterCell2Obj.attributes("id").getStringValue.get
 
     val incomeTableFooterCell3Obj = pageObjects.filter(_.attributes.getOrElse("xPath", CPBooleanValue(false)) == CPStringValue("/html[1]/body[1]/table[1]/tfoot[1]/tr[1]/td[3]")).head
     incomeTableFooterCell3Obj.attributes("pos").getIntValue.get should equal(3)
     incomeTableFooterCell3Obj.attributes("text").getStringValue.get should equal("270")
-    incomeTableFooterCell3Obj.attributes("rownum").getIntValue.get should equal(1)
+    incomeTableFooterCell3Obj.attributes("rowNum").getIntValue.get should equal(1)
     val incomeTableFooterCell3Id = incomeTableFooterCell3Obj.attributes("id").getStringValue.get
 
     val incomeTableFooterCellsList = incomeTableFooterRowObj.attributes("rowCells").asInstanceOf[CPList].values
@@ -601,7 +601,7 @@ class HTMLParserTests extends FlatSpec with Matchers {
     incomeTableCell11Obj.attributes("tableSection").getStringValue.get should equal("body")
     incomeTableCell11Obj.attributes("row").getStringValue.get should equal(incomeTableBodyRow1Id)
     incomeTableCell11Obj.attributes("text").getStringValue.get should equal("January")
-    incomeTableCell11Obj.attributes("rownum").getIntValue.get should equal(1)
+    incomeTableCell11Obj.attributes("rowNum").getIntValue.get should equal(1)
     val incomeTableCell11Id = incomeTableCell11Obj.attributes("id").getStringValue.get
 
     val incomeTableCell12Obj = pageObjects.filter(_.attributes.getOrElse("xPath", CPBooleanValue(false)) == CPStringValue("/html[1]/body[1]/table[1]/tbody[1]/tr[1]/td[2]")).head
@@ -610,7 +610,7 @@ class HTMLParserTests extends FlatSpec with Matchers {
     incomeTableCell12Obj.attributes("tableSection").getStringValue.get should equal("body")
     incomeTableCell12Obj.attributes("row").getStringValue.get should equal(incomeTableBodyRow1Id)
     incomeTableCell12Obj.attributes("text").getStringValue.get should equal("100")
-    incomeTableCell12Obj.attributes("rownum").getIntValue.get should equal(1)
+    incomeTableCell12Obj.attributes("rowNum").getIntValue.get should equal(1)
     val incomeTableCell12Id = incomeTableCell12Obj.attributes("id").getStringValue.get
 
     val incomeTableCell13Obj = pageObjects.filter(_.attributes.getOrElse("xPath", CPBooleanValue(false)) == CPStringValue("/html[1]/body[1]/table[1]/tbody[1]/tr[1]/td[3]")).head
@@ -619,7 +619,7 @@ class HTMLParserTests extends FlatSpec with Matchers {
     incomeTableCell13Obj.attributes("tableSection").getStringValue.get should equal("body")
     incomeTableCell13Obj.attributes("row").getStringValue.get should equal(incomeTableBodyRow1Id)
     incomeTableCell13Obj.attributes("text").getStringValue.get should equal("120")
-    incomeTableCell13Obj.attributes("rownum").getIntValue.get should equal(1)
+    incomeTableCell13Obj.attributes("rowNum").getIntValue.get should equal(1)
     val incomeTableCell13Id = incomeTableCell13Obj.attributes("id").getStringValue.get
 
     val incomeTableRow1CellsList = incomeTableBodyRow1Obj.attributes("rowCells").asInstanceOf[CPList].values
@@ -640,7 +640,7 @@ class HTMLParserTests extends FlatSpec with Matchers {
     incomeTableCell21Obj.attributes("tableSection").getStringValue.get should equal("body")
     incomeTableCell21Obj.attributes("row").getStringValue.get should equal(incomeTableBodyRow2Id)
     incomeTableCell21Obj.attributes("text").getStringValue.get should equal("February")
-    incomeTableCell21Obj.attributes("rownum").getIntValue.get should equal(2)
+    incomeTableCell21Obj.attributes("rowNum").getIntValue.get should equal(2)
     val incomeTableCell21Id = incomeTableCell21Obj.attributes("id").getStringValue.get
 
     val incomeTableCell22Obj = pageObjects.filter(_.attributes.getOrElse("xPath", CPBooleanValue(false)) == CPStringValue("/html[1]/body[1]/table[1]/tbody[1]/tr[2]/td[2]")).head
@@ -649,7 +649,7 @@ class HTMLParserTests extends FlatSpec with Matchers {
     incomeTableCell22Obj.attributes("tableSection").getStringValue.get should equal("body")
     incomeTableCell22Obj.attributes("row").getStringValue.get should equal(incomeTableBodyRow2Id)
     incomeTableCell22Obj.attributes("text").getStringValue.get should equal("80")
-    incomeTableCell22Obj.attributes("rownum").getIntValue.get should equal(2)
+    incomeTableCell22Obj.attributes("rowNum").getIntValue.get should equal(2)
     val incomeTableCell22Id = incomeTableCell22Obj.attributes("id").getStringValue.get
 
     val incomeTableCell23Obj = pageObjects.filter(_.attributes.getOrElse("xPath", CPBooleanValue(false)) == CPStringValue("/html[1]/body[1]/table[1]/tbody[1]/tr[2]/td[3]")).head
@@ -658,7 +658,7 @@ class HTMLParserTests extends FlatSpec with Matchers {
     incomeTableCell23Obj.attributes("tableSection").getStringValue.get should equal("body")
     incomeTableCell23Obj.attributes("row").getStringValue.get should equal(incomeTableBodyRow2Id)
     incomeTableCell23Obj.attributes("text").getStringValue.get should equal("30")
-    incomeTableCell23Obj.attributes("rownum").getIntValue.get should equal(2)
+    incomeTableCell23Obj.attributes("rowNum").getIntValue.get should equal(2)
     val incomeTableCell23Id = incomeTableCell23Obj.attributes("id").getStringValue.get
 
     val incomeTableRow2CellsList = incomeTableBodyRow2Obj.attributes("rowCells").asInstanceOf[CPList].values
@@ -679,7 +679,7 @@ class HTMLParserTests extends FlatSpec with Matchers {
     incomeTableCell31Obj.attributes("tableSection").getStringValue.get should equal("body")
     incomeTableCell31Obj.attributes("row").getStringValue.get should equal(incomeTableBodyRow3Id)
     incomeTableCell31Obj.attributes("text").getStringValue.get should equal("March")
-    incomeTableCell31Obj.attributes("rownum").getIntValue.get should equal(3)
+    incomeTableCell31Obj.attributes("rowNum").getIntValue.get should equal(3)
     val incomeTableCell31Id = incomeTableCell31Obj.attributes("id").getStringValue.get
 
     val incomeTableCell32Obj = pageObjects.filter(_.attributes.getOrElse("xPath", CPBooleanValue(false)) == CPStringValue("/html[1]/body[1]/table[1]/tbody[1]/tr[3]/td[2]")).head
@@ -688,7 +688,7 @@ class HTMLParserTests extends FlatSpec with Matchers {
     incomeTableCell32Obj.attributes("tableSection").getStringValue.get should equal("body")
     incomeTableCell32Obj.attributes("row").getStringValue.get should equal(incomeTableBodyRow3Id)
     incomeTableCell32Obj.attributes("text").getStringValue.get should equal("160")
-    incomeTableCell32Obj.attributes("rownum").getIntValue.get should equal(3)
+    incomeTableCell32Obj.attributes("rowNum").getIntValue.get should equal(3)
     val incomeTableCell32Id = incomeTableCell32Obj.attributes("id").getStringValue.get
 
     val incomeTableCell33Obj = pageObjects.filter(_.attributes.getOrElse("xPath", CPBooleanValue(false)) == CPStringValue("/html[1]/body[1]/table[1]/tbody[1]/tr[3]/td[3]")).head
@@ -697,7 +697,7 @@ class HTMLParserTests extends FlatSpec with Matchers {
     incomeTableCell33Obj.attributes("tableSection").getStringValue.get should equal("body")
     incomeTableCell33Obj.attributes("row").getStringValue.get should equal(incomeTableBodyRow3Id)
     incomeTableCell33Obj.attributes("text").getStringValue.get should equal("120")
-    incomeTableCell33Obj.attributes("rownum").getIntValue.get should equal(3)
+    incomeTableCell33Obj.attributes("rowNum").getIntValue.get should equal(3)
     val incomeTableCell33Id = incomeTableCell33Obj.attributes("id").getStringValue.get
 
     val incomeTableRow3CellsList = incomeTableBodyRow3Obj.attributes("rowCells").asInstanceOf[CPList].values
@@ -751,7 +751,7 @@ class HTMLParserTests extends FlatSpec with Matchers {
     earningsTableHeaderCell1Obj.attributes("tableSection").getStringValue.get should equal("header")
     earningsTableHeaderCell1Obj.attributes("row").getStringValue.get should equal(earningsTableHeaderRowId)
     earningsTableHeaderCell1Obj.attributes("text").getStringValue.get should equal("Month")
-    earningsTableHeaderCell1Obj.attributes("rownum").getIntValue.get should equal(1)
+    earningsTableHeaderCell1Obj.attributes("rowNum").getIntValue.get should equal(1)
     val earningsTableHeaderCell1Id = earningsTableHeaderCell1Obj.attributes("id").getStringValue.get
 
     val earningsTableHeaderCell2Obj = pageObjects.filter(_.attributes.getOrElse("xPath", CPBooleanValue(false)) == CPStringValue("/html[1]/body[1]/table[2]/tbody[1]/tr[1]/th[2]")).head
@@ -762,7 +762,7 @@ class HTMLParserTests extends FlatSpec with Matchers {
     earningsTableHeaderCell2Obj.attributes("tableSection").getStringValue.get should equal("header")
     earningsTableHeaderCell2Obj.attributes("row").getStringValue.get should equal(earningsTableHeaderRowId)
     earningsTableHeaderCell2Obj.attributes("text").getStringValue.get should equal("Savings")
-    earningsTableHeaderCell2Obj.attributes("rownum").getIntValue.get should equal(1)
+    earningsTableHeaderCell2Obj.attributes("rowNum").getIntValue.get should equal(1)
     val earningsTableHeaderCell2Id = earningsTableHeaderCell2Obj.attributes("id").getStringValue.get
 
     val earningsTableHeaderRowCellsList = earningsTableHeaderRowObj.attributes("rowCells").asInstanceOf[CPList].values
@@ -786,7 +786,7 @@ class HTMLParserTests extends FlatSpec with Matchers {
     earningsTableCell11Obj.attributes("tableSection").getStringValue.get should equal("body")
     earningsTableCell11Obj.attributes("row").getStringValue.get should equal(earningsTableRow1Id)
     earningsTableCell11Obj.attributes("text").getStringValue.get should equal("January")
-    earningsTableCell11Obj.attributes("rownum").getIntValue.get should equal(1)
+    earningsTableCell11Obj.attributes("rowNum").getIntValue.get should equal(1)
     val earningsTableCell11Id = earningsTableCell11Obj.attributes("id").getStringValue.get
 
     val earningsTableCell12Obj = pageObjects.filter(_.attributes.getOrElse("xPath", CPBooleanValue(false)) == CPStringValue("/html[1]/body[1]/table[2]/tbody[1]/tr[2]/td[2]")).head
@@ -797,7 +797,7 @@ class HTMLParserTests extends FlatSpec with Matchers {
     earningsTableCell12Obj.attributes("tableSection").getStringValue.get should equal("body")
     earningsTableCell12Obj.attributes("row").getStringValue.get should equal(earningsTableRow1Id)
     earningsTableCell12Obj.attributes("text").getStringValue.get should equal("-20")
-    earningsTableCell12Obj.attributes("rownum").getIntValue.get should equal(1)
+    earningsTableCell12Obj.attributes("rowNum").getIntValue.get should equal(1)
     val earningsTableCell12Id = earningsTableCell12Obj.attributes("id").getStringValue.get
 
     val earningsTableRow1CellsList = earningsTableRow1Obj.attributes("rowCells").asInstanceOf[CPList].values
@@ -821,7 +821,7 @@ class HTMLParserTests extends FlatSpec with Matchers {
     earningsTableCell21Obj.attributes("tableSection").getStringValue.get should equal("body")
     earningsTableCell21Obj.attributes("row").getStringValue.get should equal(earningsTableRow2Id)
     earningsTableCell21Obj.attributes("text").getStringValue.get should equal("February")
-    earningsTableCell21Obj.attributes("rownum").getIntValue.get should equal(2)
+    earningsTableCell21Obj.attributes("rowNum").getIntValue.get should equal(2)
     val earningsTableCell21Id = earningsTableCell21Obj.attributes("id").getStringValue.get
 
     val earningsTableCell22Obj = pageObjects.filter(_.attributes.getOrElse("xPath", CPBooleanValue(false)) == CPStringValue("/html[1]/body[1]/table[2]/tbody[1]/tr[3]/td[2]")).head
@@ -832,7 +832,7 @@ class HTMLParserTests extends FlatSpec with Matchers {
     earningsTableCell22Obj.attributes("tableSection").getStringValue.get should equal("body")
     earningsTableCell22Obj.attributes("row").getStringValue.get should equal(earningsTableRow2Id)
     earningsTableCell22Obj.attributes("text").getStringValue.get should equal("50")
-    earningsTableCell22Obj.attributes("rownum").getIntValue.get should equal(2)
+    earningsTableCell22Obj.attributes("rowNum").getIntValue.get should equal(2)
     val earningsTableCell22Id = earningsTableCell22Obj.attributes("id").getStringValue.get
 
     val earningsTableRow2CellsList = earningsTableRow2Obj.attributes("rowCells").asInstanceOf[CPList].values
@@ -856,7 +856,7 @@ class HTMLParserTests extends FlatSpec with Matchers {
     earningsTableCell31Obj.attributes("tableSection").getStringValue.get should equal("body")
     earningsTableCell31Obj.attributes("row").getStringValue.get should equal(earningsTableRow3Id)
     earningsTableCell31Obj.attributes("text").getStringValue.get should equal("March")
-    earningsTableCell31Obj.attributes("rownum").getIntValue.get should equal(3)
+    earningsTableCell31Obj.attributes("rowNum").getIntValue.get should equal(3)
     val earningsTableCell31Id = earningsTableCell31Obj.attributes("id").getStringValue.get
 
     val earningsTableCell32Obj = pageObjects.filter(_.attributes.getOrElse("xPath", CPBooleanValue(false)) == CPStringValue("/html[1]/body[1]/table[2]/tbody[1]/tr[4]/td[2]")).head
@@ -867,7 +867,7 @@ class HTMLParserTests extends FlatSpec with Matchers {
     earningsTableCell32Obj.attributes("tableSection").getStringValue.get should equal("body")
     earningsTableCell32Obj.attributes("row").getStringValue.get should equal(earningsTableRow3Id)
     earningsTableCell32Obj.attributes("text").getStringValue.get should equal("40")
-    earningsTableCell32Obj.attributes("rownum").getIntValue.get should equal(3)
+    earningsTableCell32Obj.attributes("rowNum").getIntValue.get should equal(3)
     val earningsTableCell32Id = earningsTableCell32Obj.attributes("id").getStringValue.get
 
     val earningsTableRow3CellsList = earningsTableRow3Obj.attributes("rowCells").asInstanceOf[CPList].values

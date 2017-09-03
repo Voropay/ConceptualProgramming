@@ -826,6 +826,8 @@ object HTMLParser {
   def parseTableCell(parent: PageElement, element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
     var tagAttributes = getStandardAttributes(element, attributes)
 
+    tagAttributes += ("value" -> tagAttributes.getOrDefault("text", CPStringValue("")))
+
     val colspan = element.getAttribute("colspan")
     if(colspan != null) {
       tagAttributes += ("colspan" -> CPStringValue(colspan))
@@ -892,6 +894,8 @@ object HTMLParser {
 
   def parseTableHeaderCell(parent: PageElement, element: WebElement, attributes: Map[String, String]): Map[String, PageElement] = {
     var tagAttributes = getStandardAttributes(element, attributes)
+
+    tagAttributes += ("value" -> tagAttributes.getOrDefault("text", CPStringValue("")))
 
     val colspan = element.getAttribute("colspan")
     if(colspan != null) {
@@ -1009,7 +1013,7 @@ object HTMLParser {
         val curCell = elements.get(cellId.getStringValue.get)
 
         if(curCell.isDefined) {
-          curCell.get.attributes.put("rownum", row.attributes.getOrDefault("pos", CPIntValue(0)))
+          curCell.get.attributes.put("rowNum", row.attributes.getOrDefault("pos", CPIntValue(0)))
           val colSpan = curCell.get.attributes.get("colSpan")
           if(colSpan.isDefined && colSpan.get.getIntValue.isDefined) {
             val colSpanInt = colSpan.get.getIntValue.get

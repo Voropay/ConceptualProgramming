@@ -261,6 +261,14 @@ class HTMLConceptsTests extends FlatSpec with Matchers {
     table.size should equal (1)
     table.head.asInstanceOf[CPObjectValue].objectValue.attributes.get("element").get.asInstanceOf[CPObjectValue].objectValue.attributes.get("xPath") should equal (Some(CPStringValue("/html[1]/body[1]/table[2]")))
 
+    val cellsWithCaption = context2.knowledgeBase.getConcepts("cellWithCaption").head
+    val cells = cellsWithCaption.resolve(Map("labelText" -> CPStringValue("Income")), context2)
+    cells.size should equal (4)
+    cells.find(_.attributes("cell").asInstanceOf[CPObjectValue].objectValue.attributes.get("text") == Some(CPStringValue("340"))).isDefined should be (true)
+    cells.find(_.attributes("cell").asInstanceOf[CPObjectValue].objectValue.attributes.get("text") == Some(CPStringValue("100"))).isDefined should be (true)
+    cells.find(_.attributes("cell").asInstanceOf[CPObjectValue].objectValue.attributes.get("text") == Some(CPStringValue("80"))).isDefined should be (true)
+    cells.find(_.attributes("cell").asInstanceOf[CPObjectValue].objectValue.attributes.get("text") == Some(CPStringValue("160"))).isDefined should be (true)
+
   }
 
 }

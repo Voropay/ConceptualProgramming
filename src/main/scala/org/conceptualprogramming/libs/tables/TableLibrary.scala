@@ -1,8 +1,9 @@
 package org.conceptualprogramming.libs.tables
 
+import org.conceptualprogramming.core.CPFilteringConcept
 import org.conceptualprogramming.core.datatypes.composite.CPObjectValue
 import org.conceptualprogramming.libs.StandardLibrary
-import org.concepualprogramming.core.{CPObject, CPExecutionContext}
+import org.concepualprogramming.core.{CPExecutionContext, CPObject}
 import org.concepualprogramming.core.datatypes.{CPBooleanValue, CPValue}
 import org.concepualprogramming.core.datatypes.composite.CPList
 import org.concepualprogramming.core.statements.expressions.functions.BuiltInFunctionDefinition
@@ -16,6 +17,9 @@ import scala.collection.mutable.ListBuffer
 class TableLibrary extends StandardLibrary {
   override def register(context: CPExecutionContext): Unit = {
     context.addFunctionDefinition(readFromCSVFileFunction)
+
+    context.knowledgeBase.add(new CPFilteringConcept("TableCell", ("FileTableCell", "e"), Nil))
+    context.knowledgeBase.add(new CPFilteringConcept("TableCell", ("FileTableHeaderCell", "e"), Nil))
   }
 
   def readFromCSVFileFunction: CPFunctionDefinition = {
@@ -105,7 +109,7 @@ class TableLibrary extends StandardLibrary {
       }
     }
 
-    val res = Some(new TableContent(headers, parsedRows.toList))
+    val res = Some(new TableContent(headers, parsedRows.toList, filePath))
     bufferedSource.close
     res
   }
