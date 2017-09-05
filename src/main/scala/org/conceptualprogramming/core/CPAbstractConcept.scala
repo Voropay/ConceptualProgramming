@@ -129,9 +129,9 @@ abstract class CPAbstractConcept extends CPConcept{
 
   def resolve(query: Map[String, CPValue], context: CPExecutionContext): List[CPObject] = resolveForSubstitutions(CPSubstitutions(query, ""), context)
 
-  def prepareObjects(attributesValues: List[CPSubstitutions], context: CPExecutionContext): List[Option[CPObject]] = attributesValues.map(prepareObjectFromAttributesValues(_))
+  def prepareObjects(attributesValues: List[CPSubstitutions], context: CPExecutionContext): List[Option[CPObject]] = attributesValues.map(prepareObjectFromAttributesValues(_, context))
 
-  def prepareObjectFromAttributesValues(attributesValues: CPSubstitutions): Option[CPObject]
+  def prepareObjectFromAttributesValues(attributesValues: CPSubstitutions, context: CPExecutionContext): Option[CPObject]
 
   def createDecisionNode(query: Map[String, CPValue], context: CPExecutionContext): CPDecisionNode = {
     new DecisionNode(CPSubstitutions(query, ""), context)

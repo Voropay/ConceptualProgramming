@@ -30,7 +30,7 @@ case class CPStrictConcept (
 
   override def checkDependencies(attributesValues: List[CPSubstitutions], context: CPExecutionContext): List[CPSubstitutions] = checkDependencies(attributesValues, attributesDependencies, context)
 
-  def prepareObjectFromAttributesValues(substitutions: CPSubstitutions): Option[CPObject] = {
+  def prepareObjectFromAttributesValues(substitutions: CPSubstitutions, context: CPExecutionContext): Option[CPObject] = {
     val attributesForCurrentConcept = substitutions.attributesValues.filter(entry => entry._1.conceptName == "")
     val conceptAttributesNames = attributesForCurrentConcept.map(entry => entry._1.attributeName -> entry._2)
     if(attributes.find(curAttr => !conceptAttributesNames.contains(curAttr)).isDefined) {

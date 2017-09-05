@@ -63,7 +63,7 @@ case class CPInheritedConcept(
     case _ => false
   }
 
-  def prepareObjectFromAttributesValues(substitutions: CPSubstitutions): Option[CPObject] = {
+  def prepareObjectFromAttributesValues(substitutions: CPSubstitutions, context: CPExecutionContext): Option[CPObject] = {
     val attributesForCurrentConcept = substitutions.attributesValues.filter(entry => entry._1.conceptName == "")
     if(attributesForCurrentConcept.isEmpty) {
       return None

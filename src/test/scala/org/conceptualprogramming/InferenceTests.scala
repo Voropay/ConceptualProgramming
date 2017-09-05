@@ -1,6 +1,6 @@
 package org.conceptualprogramming
 
-import org.conceptualprogramming.core.{CPFilteringConcept, RunPreferences}
+import org.conceptualprogramming.core.{CPExtractingConcept, CPFilteringConcept, RunPreferences}
 import org.conceptualprogramming.core.datatypes.composite.CPObjectValue
 import org.conceptualprogramming.core.dependencies.{CPExistDependency, CPOrDependency}
 import org.conceptualprogramming.core.statements.expressions.{CPChildObject, CPGetFromCollection}
@@ -454,6 +454,18 @@ class InferenceTests extends FlatSpec with Matchers {
     val leftObjects1 = left.resolve(Map("leftPoint" -> new CPObjectValue(p2)), context)
     leftObjects1.size should equal (1)
     leftObjects.head should equal (new CPObject("leftOf", Map("leftPoint" -> new CPObjectValue(p2), "rightPoint" -> new CPObjectValue(p3)), "leftPoint"))
+
+    context.knowledgeBase.add(left)
+    val extractRight = new CPExtractingConcept(
+      "right",
+      CPAttribute("l", "rightPoint"),
+      ("leftOf", "l") :: Nil,
+      CPDependency(CPAttribute("l", "leftPoint"), CPConstant(CPObjectValue(p1)), "=") :: Nil
+    )
+    val rightObjects = extractRight.resolve(Map(), context)
+    rightObjects.size should equal (2)
+    rightObjects.contains(p2) should be (true)
+    rightObjects.contains(p3) should be (true)
   }
 
   "objects without needed attributes" should "not be resolved" in {
@@ -702,6 +714,5 @@ class InferenceTests extends FlatSpec with Matchers {
     ), context)
     res4.size should equal (0)
   }
-
 
 }

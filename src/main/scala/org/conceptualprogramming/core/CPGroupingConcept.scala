@@ -25,7 +25,7 @@ case class CPGroupingConcept (
     val aggregatedAttributes: Map[Map[String, CPValue], Map[String, CPValue]] = aggregateAttributes(groupedSubstitutions, context)
     val conceptAttributesValues: List[CPSubstitutions] = prepareConceptAttributes(groupedSubstitutions, aggregatedAttributes)
     val filteredSubstitutions = conceptAttributesValues.filter(checkGroupedAttributesDependencies(_, context))
-    val objects = filteredSubstitutions.map(prepareObjectFromAttributesValues(_))
+    val objects = filteredSubstitutions.map(prepareObjectFromAttributesValues(_, context))
     return objects
   }
 
@@ -88,7 +88,7 @@ case class CPGroupingConcept (
   }
 
 
-  override def prepareObjectFromAttributesValues(substitutions: CPSubstitutions): Option[CPObject] = {
+  override def prepareObjectFromAttributesValues(substitutions: CPSubstitutions, context: CPExecutionContext): Option[CPObject] = {
     val conceptAttributesNames = substitutions.attributesValues.map(entry => entry._1.attributeName -> entry._2)
     Some(CPObject(name, conceptAttributesNames, defaultAttribute))
   }

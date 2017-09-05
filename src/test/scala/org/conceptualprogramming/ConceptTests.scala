@@ -1,6 +1,6 @@
 package org.conceptualprogramming
 
-import org.conceptualprogramming.core.{CPFilteringConcept, RunPreferences}
+import org.conceptualprogramming.core.{CPExtractingConcept, CPFilteringConcept, RunPreferences}
 import org.conceptualprogramming.core.datatypes.composite.CPObjectValue
 import org.conceptualprogramming.core.statements.ConceptResolvingToVariableStatement
 import org.concepualprogramming.core.dependencies._
@@ -54,6 +54,8 @@ class ConceptTests extends FlatSpec with Matchers {
   }
 
   "Strict Concept" should "prepare objects correctly" in {
+    val context = new CPExecutionContext(new RunPreferences(Map()))
+
     val c1 = new CPStrictConcept(
       "SomeConcept",
       "row" :: "val" :: Nil,
@@ -62,7 +64,8 @@ class ConceptTests extends FlatSpec with Matchers {
       Nil
     )
     val obj1 = c1.prepareObjectFromAttributesValues(
-      CPSubstitutions(Map(CPAttributeName("c1", "val") -> CPIntValue(10), CPAttributeName("c1", "row") -> CPIntValue(1), CPAttributeName("c1", "col") -> CPIntValue(2), CPAttributeName("", "val") -> CPIntValue(10), CPAttributeName("", "row") -> CPIntValue(1)))
+      CPSubstitutions(Map(CPAttributeName("c1", "val") -> CPIntValue(10), CPAttributeName("c1", "row") -> CPIntValue(1), CPAttributeName("c1", "col") -> CPIntValue(2), CPAttributeName("", "val") -> CPIntValue(10), CPAttributeName("", "row") -> CPIntValue(1))),
+      context
     )
     obj1 should not be empty
     obj1.get.get("row").get.getIntValue.get should equal (1)
@@ -78,7 +81,8 @@ class ConceptTests extends FlatSpec with Matchers {
       Nil
     )
     val obj2 = c2.prepareObjectFromAttributesValues(
-      CPSubstitutions(Map(CPAttributeName("c1", "val") -> CPIntValue(10), CPAttributeName("c1", "row") -> CPIntValue(1), CPAttributeName("c1", "col") -> CPIntValue(2), CPAttributeName("", "val") -> CPIntValue(10), CPAttributeName("", "row") -> CPIntValue(1)))
+      CPSubstitutions(Map(CPAttributeName("c1", "val") -> CPIntValue(10), CPAttributeName("c1", "row") -> CPIntValue(1), CPAttributeName("c1", "col") -> CPIntValue(2), CPAttributeName("", "val") -> CPIntValue(10), CPAttributeName("", "row") -> CPIntValue(1))),
+      context
     )
     obj2 shouldBe empty
   }
@@ -190,7 +194,7 @@ class ConceptTests extends FlatSpec with Matchers {
         attrs.get(new CPAttributeName("", "row")).get.getStringValue.get == "2"
     }).isDefined should be (true)
 
-    val objects = filtered.map(concept.prepareObjectFromAttributesValues(_))
+    val objects = filtered.map(concept.prepareObjectFromAttributesValues(_, context))
     objects.size should equal (2)
     objects.find(obj => {
       obj.get.get("sum").get.getIntValue.get == 7  &&
@@ -227,6 +231,36 @@ class ConceptTests extends FlatSpec with Matchers {
     val stmt1 = new ConceptResolvingToVariableStatement("res1", "ObjectsABLessThen2", Map())
     stmt1.execute(context)
     val res1 = context.getVariable("res1").get.asInstanceOf[CPList].values
+    res1.size should equal (1)
+    res1.contains(new CPObjectValue(a)) should equal (true)
+
+  }
+
+  "Extracting concept" should "prepare objects correctly" in {
+    val context = new CPExecutionContext(new RunPreferences(Map()))
+    val a = new CPObject("Object", Map("name" -> CPStringValue("A"), "val" -> CPIntValue(1)), "val")
+    val b = new CPObject("Object", Map("name" -> CPStringValue("B"), "val" -> CPIntValue(2)), "val")
+    val c = new CPObject("CompositeObject", Map("in" -> new CPObjectValue(a), "out" -> new CPObjectValue(b)), "in")
+    val d = new CPObject("CompositeObject", Map("in" -> new CPObjectValue(c), "out" -> new CPObjectValue(b)), "in")
+    val e = new CPObject("CompositeObject", Map("in" -> new CPStringValue("not an object"), "out" -> new CPObjectValue(b)), "in")
+    val f = new CPObject("CompositeObject", Map("out" -> new CPObjectValue(b)), "out")
+    context.knowledgeBase.add(c)
+    context.knowledgeBase.add(d)
+    context.knowledgeBase.add(e)
+    context.knowledgeBase.add(f)
+
+    context.knowledgeBase.add(new CPExtractingConcept("ExtractIn", CPAttribute("obj", "in"), ("CompositeObject", "obj") :: Nil, Nil))
+
+    val stmt = new ConceptResolvingToVariableStatement("res", "ExtractIn", Map())
+    stmt.execute(context)
+    val res = context.getVariable("res").get.asInstanceOf[CPList].values
+    res.size should equal (2)
+    res.contains(new CPObjectValue(a)) should equal (true)
+    res.contains(new CPObjectValue(c)) should equal (true)
+
+    val stmt1 = new ConceptResolvingToVariableStatement("res", "ExtractIn", Map("name" -> CPConstant(CPStringValue("A"))))
+    stmt1.execute(context)
+    val res1 = context.getVariable("res").get.asInstanceOf[CPList].values
     res1.size should equal (1)
     res1.contains(new CPObjectValue(a)) should equal (true)
 

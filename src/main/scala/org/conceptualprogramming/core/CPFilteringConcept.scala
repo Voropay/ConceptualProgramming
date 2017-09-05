@@ -32,7 +32,7 @@ case class CPFilteringConcept(name: String, childConcept: Tuple2[String, String]
 
   override def checkDependencies(attributesValues: List[CPSubstitutions], context: CPExecutionContext): List[CPSubstitutions] = checkDependencies(attributesValues, attributesDependencies, context)
 
-  override def prepareObjectFromAttributesValues(attributesValues: CPSubstitutions): Option[CPObject] = {
+  override def prepareObjectFromAttributesValues(attributesValues: CPSubstitutions, context: CPExecutionContext): Option[CPObject] = {
     attributesValues.objects.get(childConcept._2)
   }
 
