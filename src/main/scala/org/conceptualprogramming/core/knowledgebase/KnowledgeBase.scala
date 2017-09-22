@@ -19,6 +19,9 @@ trait KnowledgeBase {
   def containsConcepts(name: String): Boolean
   def deleteObjects(query: Map[String, CPValue]): Int
   def clear
+  def toString: String
+  def save(filePath: String): Boolean
+  def load(filePath: String): Int
 }
 
 object KnowledgeBase {

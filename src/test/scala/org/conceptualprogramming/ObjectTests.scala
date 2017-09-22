@@ -1,8 +1,10 @@
 package org.conceptualprogramming
 
-import org.concepualprogramming.core.datatypes.{CPStringValue, CPIntValue}
+import org.conceptualprogramming.core.datatypes.composite.{CPMap, CPObjectValue}
+import org.concepualprogramming.core.datatypes.{CPIntValue, CPStringValue}
 import org.concepualprogramming.core.CPObject
-import org.scalatest.{Matchers, FlatSpec}
+import org.concepualprogramming.core.datatypes.composite.CPList
+import org.scalatest.{FlatSpec, Matchers}
 
 import scala.collection.mutable
 
@@ -32,5 +34,20 @@ class ObjectTests extends FlatSpec with Matchers {
     cpObject2.equals(cpObject3) should be (true)
     cpObject1.hashCode should not equal (cpObject2.hashCode)
     cpObject2.hashCode should equal (cpObject3.hashCode)
+  }
+
+  "Object" should "be saved and loaded correctly" in {
+
+    val obj = new CPObject("Cell", Map("row" -> CPIntValue(1), "column" -> CPIntValue(2), "value" -> CPStringValue("first name")), "value")
+    CPObject.fromString(obj.toString) should equal (Some(obj))
+
+    val objList = new CPObject("Row", Map("pos" -> CPIntValue(1), "cells" -> new CPList(CPStringValue("1") :: CPStringValue("2") :: CPStringValue("3") :: Nil)), "pos")
+    CPObject.fromString(objList.toString) should equal (Some(objList))
+
+    val objMap = new CPObject("ColumnsLabels", Map("table" -> CPStringValue("t1"), "labels" -> new CPMap(Map(CPStringValue("1") -> CPStringValue("Period"), CPStringValue("2") -> CPStringValue("Income"), CPStringValue("3") -> CPStringValue("Outcome")))), "labels")
+    CPObject.fromString(objMap.toString) should equal (Some(objMap))
+
+    val objRef = new CPObject("Parent", Map("parent" -> new CPObjectValue(objList), "child" -> new CPObjectValue(obj)), "parent")
+    CPObject.fromString(objRef.toString) should equal (Some(objRef))
   }
 }

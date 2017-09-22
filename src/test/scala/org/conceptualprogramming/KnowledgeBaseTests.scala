@@ -1,10 +1,12 @@
 package org.conceptualprogramming
 
+import java.io.File
+
 import org.concepualprogramming.core.dependencies.CPDependency
-import org.concepualprogramming.core.{CPStrictConcept, CPAttributeName, CPObject}
+import org.concepualprogramming.core.{CPAttributeName, CPObject, CPStrictConcept}
 import org.concepualprogramming.core.datatypes.{CPIntValue, CPStringValue}
-import org.concepualprogramming.core.knowledgebase.{KnowledgeBase, InMemoryKnowledgeBaseImpl}
-import org.scalatest.{Matchers, FlatSpec}
+import org.concepualprogramming.core.knowledgebase.{InMemoryKnowledgeBaseImpl, KnowledgeBase}
+import org.scalatest.{FlatSpec, Matchers}
 
 /**
  * Created by oleksii.voropai on 8/16/2016.
@@ -98,5 +100,25 @@ class KnowledgeBaseTests extends FlatSpec with Matchers {
     val kb1 = KnowledgeBase.instance
     val kb2 = KnowledgeBase.instance
     kb1.eq(kb2) should be (true)
+  }
+
+  "InMemory Knowledge Base" should "save and load objects correctly" in {
+    val kb = KnowledgeBase.instance
+    val cpObject1 = new CPObject("SomeValue", Map("source" -> CPStringValue("test"), "value" -> CPIntValue(10)), "value")
+    val cpObject2 = new CPObject("SomeValue", Map("source" -> CPStringValue("test"), "value" -> CPIntValue(11)), "value")
+    kb.add(cpObject1)
+    kb.add(cpObject2)
+
+    val filePath = "src/test/scala/org/conceptualprogramming/examples/inmemorykb.dump"
+    kb.save(filePath)
+    val kb1 = KnowledgeBase.instance
+    kb1.load(filePath) should equal (2)
+    val objects = kb1.getObjects("SomeValue")
+    objects.size should equal (2)
+    objects.contains(cpObject1) should be (true)
+    objects.contains(cpObject2) should be (true)
+
+    val dumpFile = new File(filePath)
+    dumpFile.delete
   }
 }

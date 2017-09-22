@@ -1,7 +1,9 @@
 package org.concepualprogramming.core
 
+import org.conceptualprogramming.parser.ObjectParser
 import org.concepualprogramming.core.datatypes.CPValue
 import org.concepualprogramming.core.utils.Utils
+
 import scala.collection.immutable.SortedMap
 
 /**
@@ -54,4 +56,16 @@ object CPObject {
     attributes.toMap,
     defaultAttribute)
   def apply(name: String, attributes: Map[String, CPValue], defaultAttribute: String) = new CPObject(name, attributes, defaultAttribute)
+
+  def fromString(sourceCode: String): Option[CPObject] = {
+    val objectParser = new ObjectParser {
+      def apply(code: String): Option[CPObject] = {
+        parse(cpobject, code) match {
+          case Success(res, _) => Some(res)
+          case _ => None
+        }
+      }
+    }
+    objectParser(sourceCode)
+  }
 }

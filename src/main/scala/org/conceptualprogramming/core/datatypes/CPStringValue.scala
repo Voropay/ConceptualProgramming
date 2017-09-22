@@ -131,6 +131,8 @@ class CPStringValue(value: String) extends CPValue with CPPrimitiveType {
       Some(value >= otherVal.get)
     }
   }
+
+  override def toString: String = "\"" + value + "\""
 }
 
 

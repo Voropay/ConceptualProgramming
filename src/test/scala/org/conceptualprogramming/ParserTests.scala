@@ -8,7 +8,7 @@ import org.conceptualprogramming.core.dependencies.{CPExistDependency, CPOrDepen
 import org.conceptualprogramming.core.statements._
 import org.conceptualprogramming.core.statements.expressions._
 import org.conceptualprogramming.core.statements.expressions.operations.CPOperation
-import org.conceptualprogramming.parser.{ConstantsParser, ExpressionsParser, ProgramParser, StatementsParser}
+import org.conceptualprogramming.parser._
 import org.concepualprogramming.core.CPAttributeName
 import org.concepualprogramming.core.CPFreeConcept
 import org.concepualprogramming.core.CPInheritedConcept
@@ -745,5 +745,49 @@ class ParserTests  extends FlatSpec with Matchers {
     numbers50.overriddenAttributes.size should equal (0)
     numbers50.specifiedAttributes.size should equal (0)
     numbers50.filterDependencies.head should equal (new CPExpressionDependency(new CPLess(CPAttribute("n", "val"), new CPVariable("maxNumber")), CPBooleanValue(true)))
+  }
+
+  "object parser" should "correctly parse text" in {
+    val objectParser = new ObjectParser {
+      def apply(code: String): Option[CPObject] = {
+        parse(cpobject, code) match {
+          case Success(res, _) => Some(res)
+          case _ => None
+        }
+      }
+    }
+    val obj = objectParser("CPObject {Cell Map(row -> 1, column -> 2, value -> \"first name\"), default: value}").get
+    obj.name should equal ("Cell")
+    obj.defaultAttribute should equal ("value")
+    obj.attributes.size should equal (3)
+    obj.attributes("row") should equal (CPIntValue(1))
+    obj.attributes("column") should equal (CPIntValue(2))
+    obj.attributes("value") should equal (CPStringValue("first name"))
+
+    val objList = objectParser("CPObject {Row Map(pos -> 1, cells -> List(\"1\", \"2\", \"3\")), default: pos}").get
+    objList.name should equal ("Row")
+    objList.defaultAttribute should equal ("pos")
+    objList.attributes.size should equal (2)
+    objList.attributes("pos") should equal (CPIntValue(1))
+    objList.attributes("cells") should equal (CPList(CPStringValue("1") :: CPStringValue("2") :: CPStringValue("3") :: Nil))
+
+    val objMap = objectParser("CPObject {ColumnsLabels Map(table -> \"t1\", labels -> Map(\"1\" -> \"Period\", \"2\" -> \"Income\", \"3\" -> \"Outcome\")), default: labels}").get
+    objMap.name should equal ("ColumnsLabels")
+    objMap.defaultAttribute should equal ("labels")
+    objMap.attributes.size should equal (2)
+    objMap.attributes("table") should equal (CPStringValue("t1"))
+    val labels: Map[CPValue, CPValue] = Map(
+      CPStringValue("1") -> CPStringValue("Period"),
+      CPStringValue("2") -> CPStringValue("Income"),
+      CPStringValue("3") -> CPStringValue("Outcome")
+    )
+    objMap.attributes("labels") should equal (new CPMap(labels))
+
+    val objRef = objectParser("CPObject {Parent Map(parent -> CPObject{Cell Map(row -> 1, column -> 2, value -> \"first name\"), default: value}, child -> CPObject {Row Map(pos -> 1, cells -> List(\"1\", \"2\", \"3\")), default: pos}), default: parent}").get
+    objRef.name should equal ("Parent")
+    objRef.defaultAttribute should equal ("parent")
+    objRef.attributes.size should equal (2)
+    objRef.attributes("parent").asInstanceOf[CPObjectValue].objectValue should equal (obj)
+    objRef.attributes("child").asInstanceOf[CPObjectValue].objectValue should equal (objList)
   }
 }

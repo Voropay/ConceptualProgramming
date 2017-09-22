@@ -1167,12 +1167,8 @@ class HTMLLibrary extends StandardLibrary {
             new CPEquals(CPAttribute("e", "basicColorName"), CPAttribute("", "givenColor")),
             new CPOr(
               new CPEquals(CPAttribute("e", "backgroundColorName"), CPAttribute("", "givenColor")),
-              new CPOr(
-                new CPEquals(CPAttribute("e", "backgroundBasicColorName"), CPAttribute("", "givenColor")),
-                new CPOr(
-                  new CPEquals(CPAttribute("e", "borderColorName"), CPAttribute("", "givenColor")),
-                  new CPEquals(CPAttribute("e", "borderBasicColorName"), CPAttribute("", "givenColor"))
-                ))))),
+              new CPEquals(CPAttribute("e", "backgroundBasicColorName"), CPAttribute("", "givenColor"))
+              ))),
         CPBooleanValue(true)
       ) :: Nil
     )

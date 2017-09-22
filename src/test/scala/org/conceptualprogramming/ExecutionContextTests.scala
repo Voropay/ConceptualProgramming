@@ -1,5 +1,7 @@
 package org.conceptualprogramming
 
+import java.io.File
+
 import org.conceptualprogramming.core.RunPreferences
 import org.conceptualprogramming.core.datatypes.composite.CPObjectValue
 import org.conceptualprogramming.core.statements.expressions.{CPAddToCollection, CPChildObject, CPObjectExpression}
@@ -13,6 +15,7 @@ import org.concepualprogramming.core.statements.expressions.{CPAttribute, CPCons
 import org.concepualprogramming.core.statements._
 import org.concepualprogramming.core.statements.expressions.functions.{CPCompositeFunctionDefinition, GroupingFunctions, ObjectsFunctions}
 import org.concepualprogramming.core._
+import org.concepualprogramming.core.knowledgebase.KnowledgeBase
 import org.scalatest.{FlatSpec, Matchers}
 
 /**
@@ -37,6 +40,26 @@ class ExecutionContextTests extends FlatSpec with Matchers {
     val obj3 = context.knowledgeBase.getObjects("Var")
     obj3.size should equal (1)
     obj3.head.get("val").get.getIntValue.get should equal (1)
+
+    val context1 = new CPExecutionContext(new RunPreferences(Map()))
+    val cpObject1 = new CPObject("SomeValue", Map("source" -> CPStringValue("test"), "value" -> CPIntValue(10)), "value")
+    val cpObject2 = new CPObject("SomeValue", Map("source" -> CPStringValue("test"), "value" -> CPIntValue(11)), "value")
+    context1.knowledgeBase.add(cpObject1)
+    context1.addFrame
+    context1.knowledgeBase.add(cpObject2)
+
+    val filePath = "src/test/scala/org/conceptualprogramming/examples/framekb.dump"
+    context1.knowledgeBase.save(filePath)
+
+    val context2 = new CPExecutionContext(new RunPreferences(Map()))
+    context2.knowledgeBase.load(filePath) should equal (2)
+    val objects = context2.knowledgeBase.getObjects("SomeValue")
+    objects.size should equal (2)
+    objects.contains(cpObject1) should be (true)
+    objects.contains(cpObject2) should be (true)
+
+    val dumpFile = new File(filePath)
+    dumpFile.delete
   }
 
   "Return statement" should "find objects correctly" in {

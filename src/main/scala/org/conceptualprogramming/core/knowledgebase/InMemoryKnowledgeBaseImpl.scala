@@ -1,6 +1,9 @@
 package org.concepualprogramming.core.knowledgebase
 
-import org.concepualprogramming.core.{CPConcept, CPStrictConcept, CPObject}
+import java.io.{File, FileNotFoundException, IOException, PrintWriter}
+
+import org.conceptualprogramming.parser.ObjectParser
+import org.concepualprogramming.core.{CPConcept, CPObject, CPStrictConcept}
 import org.concepualprogramming.core.datatypes.CPValue
 
 import scala.collection.immutable.TreeMap
@@ -99,4 +102,54 @@ class InMemoryKnowledgeBaseImpl extends KnowledgeBase {
     }
     deleted
   }
+
+  override def toString(): String = {
+    val objects = objectsIndex.values.flatMap(item => item)
+    val objectsText = objects.map(_.toString)
+    objectsText.mkString(";\n")
+  }
+
+  override def save(filePath: String): Boolean = {
+
+    val writer = try {
+      Some(new PrintWriter(new File(filePath)))
+    } catch {
+      case e: FileNotFoundException => None
+      case e: IOException => None
+    }
+    if(writer.isEmpty) {
+      return false
+    }
+
+    val text = toString
+    writer.get.write(text)
+    val res = writer.get.checkError
+    writer.get.close
+    res
+  }
+
+  override def load(filePath: String): Int = {
+    val source = scala.io.Source.fromFile(filePath)
+    val sourceCode = try source.mkString finally source.close()
+    if(sourceCode == null || sourceCode.isEmpty) {
+      return 0
+    }
+
+    val objectParser = new ObjectParser {
+      def apply(code: String): Option[List[CPObject]] = {
+        parse(cpobjects, code) match {
+          case Success(res, _) => Some(res)
+          case _ => None
+        }
+      }
+    }
+
+    val objects = objectParser(sourceCode)
+    if(objects.isEmpty) {
+      return 0
+    }
+    objects.get.foreach(add(_))
+    objects.get.size
+  }
+
 }

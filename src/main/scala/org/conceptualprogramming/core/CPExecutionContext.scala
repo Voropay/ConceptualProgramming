@@ -1,5 +1,7 @@
 package org.concepualprogramming.core
 
+import java.io.{File, FileNotFoundException, IOException, PrintWriter}
+
 import org.conceptualprogramming.core.RunPreferences
 import org.concepualprogramming.core.datatypes.CPValue
 import org.concepualprogramming.core.statements.expressions.CPFunctionDefinition
@@ -289,6 +291,37 @@ case class CPExecutionContext(preferences: RunPreferences) {
         deleted += frame.knowledgeBase.deleteObjects(query)
       }
       deleted
+    }
+
+    override def toString(): String = {
+      frameStack.map(_.knowledgeBase.toString).mkString(";\n")
+    }
+
+    override def save(filePath: String): Boolean = {
+
+      val writer = try {
+        Some(new PrintWriter(new File(filePath)))
+      } catch {
+        case e: FileNotFoundException => None
+        case e: IOException => None
+      }
+      if(writer.isEmpty) {
+        return false
+      }
+
+      val text = toString
+      writer.get.write(text)
+      val res = writer.get.checkError
+      writer.get.close
+      res
+    }
+
+    override def load(filePath: String): Int = {
+      val baseFrame = frameStack.find(!_.transparent)
+      if(baseFrame.isDefined) {
+        return baseFrame.get.knowledgeBase.load(filePath)
+      }
+      return 0
     }
   }
 }

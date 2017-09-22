@@ -1,0 +1,287 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!-- saved from url=(0232)https://service.giosg.com/c/3972/05x5/?url=https%3A%2F%2Fwww.alko.fi%2Fen&cid=x5jb7wiux7wmvbjv2aaapqrb7jd2x2w6zqqhouvphah7dhim&gid=wnrccckt2a7iegyqziaafs2q4ezg3yqr46lamaawhz2tyqim&parent_url=https%3A%2F%2Fwww.alko.fi%2Fen&dlgid=6564 -->
+<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>giosg Live chat client</title>
+    
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="Mon, 26 Jul 1997 05:00:00 GMT">
+    <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
+    <meta name="ROBOTS" content="NOINDEX, NOFOLLOW, NOARCHIVE">
+    <meta name="google" content="notranslate">
+
+    <link type="text/css" href="./visitor.6bbbff012a83504e.css" rel="stylesheet">
+    <style type="text/css" rel="stylesheet">::-webkit-input-placeholder { 
+    text-align: left !important;
+    color: #b2b2b2 !important;
+}
+
+::-moz-placeholder { 
+    text-align: left !important;
+    color: #b2b2b2 !important;
+}
+
+::-ms-input-placeholder { 
+    text-align: left !important;
+    color: #b2b2b2 !important;
+}
+
+:-ms-input-placeholder { 
+    text-align: left !important;
+    color: #b2b2b2 !important;
+}
+
+#giosg_message_history::-webkit-scrollbar, textarea::-webkit-scrollbar {
+    width: 6px;
+}
+#giosg_message_history::-webkit-scrollbar-thumb, textarea::-webkit-scrollbar-thumb {
+    background-color: rgba(129,140,154,0.4);
+    border-radius: 4px;
+}
+#giosg_message_history::-webkit-scrollbar-track, textarea::-webkit-scrollbar-track {
+    background: transparent;
+    border: 0;
+}
+
+#giosg_chat_operator_avatar{
+    display: none;
+}
+
+.giosg-chat-dialog {
+    width: 320px;
+    height: 420px;
+    background-image: none;
+    font: normal 400 15px "LocatorWebRegular", "Open Sans", sans-serif;
+    border: none;
+    border-radius: 0px;
+    -moz-box-shadow: 0 0 5px #ccc;
+    -webkit-box-shadow: 0 0 5px #ccc;
+    box-shadow: 0 0 5px #ccc;
+}
+
+#giosg_message_history {
+    height: 280px;
+    max-width: 300px;
+    padding: 5px;
+    margin: 5px;
+}
+
+#giosg_live_chat_container {
+    height: 370px !important;
+    max-width: 320px;
+    background-color: #fff;
+}
+
+#giosg_chat_history {
+    height: 370px !important;
+}
+
+.live_chat_dialog {
+    margin: 0px
+}
+
+.giosg-chat-dialog .giosg-header {
+    height: 50px;
+    padding: 0;
+    background: none !important;
+    background-color: #2a2a2a !important;
+    border-radius: 0px;
+    font: normal 400 15px "LocatorWebRegular", "Open Sans", sans-serif;
+    color: #fff;
+}
+
+.giosg-chat-dialog .giosg-header .chat-text-container{
+    height: 50px;
+    margin-left:50px;
+    line-height: 50px;
+}
+
+.giosg-chat-dialog .chat-icon{
+    height: 22px;
+    margin: 11px 15px;
+}
+
+.giosg-chat-dialog .giosg-header .close {
+    height: 50px;       
+    width: 50px;
+    margin: 0;
+    opacity: 1;
+    color: #fff !important;
+    font-weight: 100;
+    font-size: 15px;
+    transition: background-color 0.3s ease;
+    -webkit-transition: background-color 0.3s ease;
+    -moz-transition: background-color 0.3s ease;
+    -o-transition: background-color 0.3s ease;
+    -ms-transition: background-color 0.3s ease;
+}
+
+.giosg-chat-dialog .giosg-header .close:hover {
+    background-color: #e3333c;
+    opacity: 1;
+}
+
+#txtctrlscont {
+    width: 100%;
+    height: 50px;
+    background-color: #fff;
+    border-top: solid 1px #ccc;
+}
+
+#txtctrlscont .btn_send {
+    height: 40px;
+    width: 40px;
+    margin: 5px;
+    float: right;
+    background-image: none;
+    border: solid 1px #ccc;
+    border-radius: 20px;
+    transition: background-color 0.3s ease;
+    -webkit-transition: background-color 0.3s ease;
+    -moz-transition: background-color 0.3s ease;
+    -o-transition: background-color 0.3s ease;
+    -ms-transition: background-color 0.3s ease;
+}
+
+#txtctrlscont .btn_send:hover {
+    cursor: pointer;
+    background-color: #ccc;
+}
+
+#txtctrlscont .btn_send .send-btn-icon {
+    max-height: 12px;
+    opacity: .4;
+}
+
+#txtctrlscont .giosg_chat_message_box {
+    background-image: none;
+    overflow-y: scroll;
+    height: 40px;
+    width: 260px;
+    margin: 5px;
+}
+
+#giosg_chat_dialog_footer {
+    height: 40px !important;
+    width: 310px !important;
+    padding: 5px;
+    position: absolute;
+    z-index: -1;
+    bottom: 0;
+}
+
+#no_ops_online {
+    color: #e3333c;
+}</style>
+
+    <script type="text/html" template="do-not-contact-btn"><button id="do_not_contact" class="do_not_contact"><%- disableSuggestText %></button></script>
+    <script type="text/html" template="chat-msg-operator"><div class="chatmsg-row">
+    <% if (infoRow) { %>
+    <div class="chatmsg-sender"></div>
+    <div class="chatmessageinfo op-msg"><%- messageTime %>&nbsp;&#124;&nbsp;<%- messageFrom %></div>
+    <% } %>
+    <div class="chatmessage op-msg"><%= messageBody %></div>
+    <% if (messageAttachments.length) { %>
+    <div class="giosg-chat-attachments">
+        <% _.forEach(messageAttachments, function(attachment) { %>
+        <div class="giosg-chat-attachment">
+            <% if (attachment.title) { %>
+            <div class="giosg-chat-attachment-title">
+                <% if (attachment.title_link_url) { %>
+                <a href="<%- attachment.title_link_url %>" target="<%- attachment.link_target%>" data-title="<%- attachment.title %>" data-attachment-id="<%- attachment.id%>" data-message-id="<%- messageId %>"><%- attachment.title %></a>
+                <% } else { %>
+                <%- attachment.title %>
+                <% } %>
+            </div>
+            <% } %>
+            <% if (attachment.text) { %>
+            <div class="giosg-chat-attachment-text"><%= attachment.text_html %></div>
+            <% } %>
+            <% if (attachment.image_url) { %>
+            <div class="giosg-chat-attachment-image">
+                <% if (attachment.image_link_url) { %>
+                <a href="<%- attachment.image_link_url %>" target="<%- attachment.link_target %>" data-title="<%- attachment.title %>"data-message-id="<%- messageId %>" data-attachment-id="<%- attachment.id %>"><img src="<%- attachment.image_url %>"></a>
+                <% } else { %>
+                <img src="<%- attachment.image_url %>">
+                <% } %>
+            </div>
+            <% } %>
+            <% _.forEach(attachment.actions, function(action) {
+                if (action.type === 'button') { %>
+                    <button class="giosg-chat-attachment-action giosg-chat-attachment-action-<%- action.style %><% if (action.is_selected) { %> giosg-chat-attachment-action-selected<% } %><% if (action.is_disabled) {%> giosg-chat-attachment-action-disabled<% } %>" type="button"data-value="<%- action.value %>" data-message-id="<%- messageId %>" data-attachment-id="<%- attachment.id %>" data-action-id="<%- action.id %>"><%- action.text %></button>
+                <% } else { %>
+                    <a class="giosg-chat-attachment-action giosg-chat-attachment-action-<%- action.style %> <% if (action.is_selected) { %> giosg-chat-attachment-action-selected<% } %><% if (action.is_disabled) { %> giosg-chat-attachment-action-disabled<% } %>" href="<%- action.value %>"data-value="<%- action.value %>" target="<%- action.link_target %>" data-message-id="<%- messageId %>" data-attachment-id="<%- attachment.id %>"data-action-id="<%- action.id %>"><%- action.text %></a>
+                <% }
+            }); %>
+        </div>
+        <% }); %>
+    </div>
+    <% } %>
+</div></script>
+    <script type="text/html" template="chat-msg-visitor"><div class="chatmsg-row">
+    <% if (infoRow) { %>
+    <div class="chatmsg-sender"></div>
+    <div class="chatmessageinfo vis-msg"><%= messageTime %>&nbsp;&#124;&nbsp;<%= messageFrom %></div>
+    <% } %>
+    <div class="chatmessage vis-msg"><%= messageBody %></div>
+</div></script>
+    <script type="text/html" template="base_ui"><div id="giosg_message_history"></div>
+<small id="chatState" class="chat_state_notification" style="text-align:center; color:#aaaaaa; display:none;">&nbsp;</small>
+<div id="no_ops_online"></div>
+<div id="txtctrlscont" style="padding-bottom:0px;">
+    <div class="msg-area">
+        <textarea maxlength="1000" id="giosg_chat_message_box" class="giosg_chat_message_box" spellcheck="false" autocorrect="false"></textarea>
+        <button type="button" id="btn_send" class="btn_send"><img class="send-btn-icon" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHsAAABqCAYAAACcTS5BAAAACXBIWXMAAC4jAAAuIwF4pT92AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAABQRJREFUeNrsnetR20AUhY2T/7gD3AFOBaiDOBVYHUR0YCpAVBC5A7kCRAXIFSBXEFMB2ctcZWTjhx773nNmdkwScDz349y9+9Du1cfHx8hlLRbxTLxMRIv4r+o/U7vt8ZZb0Sr+uhRtV7+uVlnhcqyuXIItwEYMs263Bj7GO8Mv+LUUvwQVYMtx7Zxde2dxHLcMn1ou4O8A+zLcOh3PuV07mjE3omUMvgLsfcg13MXIP1kD3hhsAXgqXhLRYocd3FVrAi+g50HAZhcnlvfBOvr4lMHvvIMtIJODl6LdjKBmZU/QUx3QlcMGZHugK4PNY+LU0FjYZeiJAJ45AZuHT/Rhf4LdoAo+kT1jJxW2AJ1wyr4GLyl6onjKSu1SYMPNyiv3uQBeDn2jsaS+uQJoZaLC9pWzpjln8wd4BA9tokmZuG9a7w1bgKa0vUD8jRRvUR/gnWFz/0zTfXeIu9EhWtS1H+8Em0EXGDu7CXwM0M6KhrcFr/nLgw3QfgBv62xMe9oPfDIYtniTFFW3H8DHF0DT2vNvxNIJ3XIG7l6N806ScoR5btd0Lyr0tKuzM4B2Uks2ajvYPA2KSRN3+++sVRpH+vY3nR9z9hKgvUnnk5OwebkSwyx/0nlyztlLxMgrJU13jxuunqEo89vdTWcniI2Xiveqcbb6X8TFW/2iR45qZ88RD681b6ZxwA4INnaGel6o0bD629tbFTU7cchbbcnZEeIQhCKCPUMcgtCUYE8RhyB0Q7CxtywQjRECwIYAGwJsCLAhwIYAG9IBe4MwhAO7QhiC0OdCSIk4BKGKYBeIQxAq4OyQYPOpOy+Ihdd6p6Mx66FXjnh4rbw5zgbsUGDz3RVrxMTPIVd9TUVzBi1FXLxUVn/xHzafbY1CzbPCrGliPMXpt/auodiDDXf76+pjzibhaU4/lByeXPwFNh98+oBYOa2XY5fKHF3PFt9IfTeWPt1N3/Gxfzi3eSHmH4TcS99VJ9icztF/u6XVuTvBxud/8vMHV4ihE9pcMmermwQWi5im2/AMt9399PTSvSFtNxzGKNisBt3qgphWsPmNIgC3FnSrDSittxIDuNugO8E+AI4pVcdAty7QThRtVKnjnFMzVXevS9x6PxEi/jMq2u4Re73j6L6gBzm74XA6k4WGZjdgoVQnr4NQ7uyGw6nfIODY1qQubf8YClqKsw9cTifpUV+Ow+nlyL7L0g+A06G3uAtsuJtjGRekK4XdgE5DtGdw6zykSs4tZgzRd4UffAd2nSBTNkxlpWzdsGMwtAOyDtg41vq0tgw50wFZKWzurzHu/qo1AzbyuJUqZyOF71fWVHDlp7YL6ZKKoddUvLwBsB2AVTs7RFdTH1xwy3X2w8aczRMq9Jt87TnYisHSpEdhK1zVzk4Mg94cjO/vBsAcMcxd/cqPRzkrac62wNUrXnaFTkjmCYeZQdAPAK0pjfNql4mtxp+PupgatwaXxg1erk7989ymoU0Izs4NgH4SkPFokk7YvOlQ54UyW07bBdBpLNAEaN0bFGjXxgygNffZAjRVvn80fUbao57I3rWBNG4XaKW7NuDsy6CjkfqtRloX9OHs46Dr/eGA7LOzFU+FArJlzlYxlt4wYPTJtjib0/erRBcT3AzVtZ3OnkgATJkhxxy2/bBLBtYljW8ZcAHA7hVoNA/9eAFuUTcsTjg+zuYxNi1lzhhqvYOjRBXthv4JMABLiVV3IqKX5AAAAABJRU5ErkJggg=="/></button>
+    </div>
+</div></script>
+
+    
+
+<script type="text/javascript">
+var settings = {
+    tabKey: "05x5",
+    appDomain: "service.giosg.com",
+    domainId: 6394,
+    domainLanguage: "en",
+    companyId: 3972,
+    organizationId: "aef5e1ea-5cb2-11e7-a767-00163ed8ec9a",
+    permissionToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1MDU5MTkyNjMsInBlcm1pc3Npb25zIjpbIi9hcHBzL3Zpc2l0b3IvY3pkam14YmttejRobWxlN3FtYWFrYWFib3lkcmJxcmI3amQyeDJ3NnpxcWhvdXZwaGFoN2RoaW0vIl19.HiNlT2PhpVdWjHnv1BqPIA81I328utEeYVDYG_pqiXw",
+    visitorGid: "wnrccckt2a7iegyqziaafs2q4ezg3yqr46lamaawhz2tyqim",
+    chatGid: "czdjmxbkmz4hmle7qmaakaaboydrbqrb7jd2x2w6zqqhouvphah7dhim",
+    cid: "x5jb7wiux7wmvbjv2aaapqrb7jd2x2w6zqqhouvphah7dhim",
+    unpackedCid: "c221fa47abeadecc207752af380ff19d",
+    sgid: "65vier7pzdoimmog7yaakaacontqeeglkov5q3pcchtzmbqacy7hkpcbbq",
+    priority: parseInt(41),
+    pagePriority: parseInt(5),
+    dialog: {"id": 6564, "config": {"doNotContactMeText": "\u00c4l\u00e4 ota minuun en\u00e4\u00e4 yhteytt\u00e4.", "positionOffsetY": 0, "language": "fi", "positionOffsetX": 106, "chatNoLongerActive": "T\u00e4m\u00e4 keskustelu ei ole en\u00e4\u00e4 aktiivinen.", "anchorPosition": 4, "operatorHasTypedText": "Palveluneuvoja on kirjoittanut", "showAnimationDuration": 400, "operatorIsTypingText": "Palveluneuvoja kirjoittaa..", "sendButtonText": "L\u00c4HET\u00c4", "hideAnimationDuration": 400, "noOperatorsText": "Chat-asiakaspalvelijamme ovat varattuja.", "avarageWaitTime": "Keskim\u00e4\u00e4r\u00e4inen odotusaika:", "visitorNameText": "Sin\u00e4", "defaultInputMessage": "Kirjoita viestisi t\u00e4h\u00e4n..", "titleText": "CHAT"}, "footer_logo_asset_id": null, "footer_logo_asset": null, "modified": "2017-08-24T09:31:28.640906", "created": "2017-08-04T11:53:06.602484", "name": "CHAT (Alko styled)", "template_do_not_contact": "\u003Cbutton id=\"do_not_contact\" class=\"do_not_contact\"\u003E\u003C%- disableSuggestText %\u003E\u003C/button\u003E", "template_message_operator": "\u003Cdiv class=\"chatmsg-row\"\u003E\n    \u003C% if (infoRow) { %\u003E\n    \u003Cdiv class=\"chatmsg-sender\"\u003E\u003C/div\u003E\n    \u003Cdiv class=\"chatmessageinfo op-msg\"\u003E\u003C%- messageTime %\u003E&nbsp;&#124;&nbsp;\u003C%- messageFrom %\u003E\u003C/div\u003E\n    \u003C% } %\u003E\n    \u003Cdiv class=\"chatmessage op-msg\"\u003E\u003C%= messageBody %\u003E\u003C/div\u003E\n    \u003C% if (messageAttachments.length) { %\u003E\n    \u003Cdiv class=\"giosg-chat-attachments\"\u003E\n        \u003C% _.forEach(messageAttachments, function(attachment) { %\u003E\n        \u003Cdiv class=\"giosg-chat-attachment\"\u003E\n            \u003C% if (attachment.title) { %\u003E\n            \u003Cdiv class=\"giosg-chat-attachment-title\"\u003E\n                \u003C% if (attachment.title_link_url) { %\u003E\n                \u003Ca href=\"\u003C%- attachment.title_link_url %\u003E\" target=\"\u003C%- attachment.link_target%\u003E\" data-title=\"\u003C%- attachment.title %\u003E\" data-attachment-id=\"\u003C%- attachment.id%\u003E\" data-message-id=\"\u003C%- messageId %\u003E\"\u003E\u003C%- attachment.title %\u003E\u003C/a\u003E\n                \u003C% } else { %\u003E\n                \u003C%- attachment.title %\u003E\n                \u003C% } %\u003E\n            \u003C/div\u003E\n            \u003C% } %\u003E\n            \u003C% if (attachment.text) { %\u003E\n            \u003Cdiv class=\"giosg-chat-attachment-text\"\u003E\u003C%= attachment.text_html %\u003E\u003C/div\u003E\n            \u003C% } %\u003E\n            \u003C% if (attachment.image_url) { %\u003E\n            \u003Cdiv class=\"giosg-chat-attachment-image\"\u003E\n                \u003C% if (attachment.image_link_url) { %\u003E\n                \u003Ca href=\"\u003C%- attachment.image_link_url %\u003E\" target=\"\u003C%- attachment.link_target %\u003E\" data-title=\"\u003C%- attachment.title %\u003E\"data-message-id=\"\u003C%- messageId %\u003E\" data-attachment-id=\"\u003C%- attachment.id %\u003E\"\u003E\u003Cimg src=\"\u003C%- attachment.image_url %\u003E\"\u003E\u003C/a\u003E\n                \u003C% } else { %\u003E\n                \u003Cimg src=\"\u003C%- attachment.image_url %\u003E\"\u003E\n                \u003C% } %\u003E\n            \u003C/div\u003E\n            \u003C% } %\u003E\n            \u003C% _.forEach(attachment.actions, function(action) {\n                if (action.type === 'button') { %\u003E\n                    \u003Cbutton class=\"giosg-chat-attachment-action giosg-chat-attachment-action-\u003C%- action.style %\u003E\u003C% if (action.is_selected)\u00a0{ %\u003E giosg-chat-attachment-action-selected\u003C% } %\u003E\u003C% if (action.is_disabled)\u00a0{%\u003E giosg-chat-attachment-action-disabled\u003C% } %\u003E\" type=\"button\"data-value=\"\u003C%- action.value %\u003E\" data-message-id=\"\u003C%- messageId %\u003E\" data-attachment-id=\"\u003C%- attachment.id %\u003E\" data-action-id=\"\u003C%- action.id %\u003E\"\u003E\u003C%- action.text %\u003E\u003C/button\u003E\n                \u003C% } else { %\u003E\n                    \u003Ca class=\"giosg-chat-attachment-action giosg-chat-attachment-action-\u003C%- action.style %\u003E \u003C% if (action.is_selected)\u00a0{ %\u003E giosg-chat-attachment-action-selected\u003C% } %\u003E\u003C% if (action.is_disabled)\u00a0{ %\u003E giosg-chat-attachment-action-disabled\u003C% } %\u003E\" href=\"\u003C%- action.value %\u003E\"data-value=\"\u003C%- action.value %\u003E\" target=\"\u003C%- action.link_target %\u003E\" data-message-id=\"\u003C%- messageId %\u003E\" data-attachment-id=\"\u003C%- attachment.id %\u003E\"data-action-id=\"\u003C%- action.id %\u003E\"\u003E\u003C%- action.text %\u003E\u003C/a\u003E\n                \u003C% }\n            }); %\u003E\n        \u003C/div\u003E\n        \u003C% }); %\u003E\n    \u003C/div\u003E\n    \u003C% } %\u003E\n\u003C/div\u003E", "template_message_visitor": "\u003Cdiv class=\"chatmsg-row\"\u003E\n    \u003C% if (infoRow) { %\u003E\n    \u003Cdiv class=\"chatmsg-sender\"\u003E\u003C/div\u003E\n    \u003Cdiv class=\"chatmessageinfo vis-msg\"\u003E\u003C%= messageTime %\u003E&nbsp;&#124;&nbsp;\u003C%= messageFrom %\u003E\u003C/div\u003E\n    \u003C% } %\u003E\n    \u003Cdiv class=\"chatmessage vis-msg\"\u003E\u003C%= messageBody %\u003E\u003C/div\u003E\n\u003C/div\u003E", "template_main_dialog": "\u003Cdiv class=\"giosg-chat-dialog\"\u003E\n    \u003Cdiv class=\"giosg-header\"\u003E\n        \u003Cdiv id=\"giosg_chat_operator_avatar\" class=\"avatar_image\"\u003E\n            \u003Cdiv id=\"avatar-image\" \u003E&nbsp;\u003C/div\u003E\n        \u003C/div\u003E\n        \u003Cspan class=\"giosg_live_chat_dialog-title\"\u003E\n            \u003Cimg class=\"chat-icon\" src=\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAWCAYAAADeiIy1AAABXElEQVR4Ab3Rv0pbYRjH8YeDk1CNZnNUVBzFVHsDaWk3b6BK7kD0DrwGHYTcgZPQ0mZxr3Kgi38EZxflaMBBJKSf8QxHDi9pHD6/4YWX7/DEcDhM8Ym/DOhTvOGJV+7oECmRj/zhOxkfaLxhigladNlJCXXpEIlWuEj58INvRKIm9+8e6nDHK08UJUHwk69EolkewuzQpcUEUzRKguA3n4lEDYowF6wQNX7xZZTQPU2iRo82kWiax4TQ6Dd6YJaoccAukWiDPExBg6ixwAt7LLNKizUmiZKMJTbpsZUSCuY55oqcM855ZpsgY8A1p7SJMI9MEyNYp88+i9wQAAk3qtXkkkNOqkI5G0SiXQ4IAG45qgpt0WOTJTKiZJI1WqyyzB4vLBAAzDBXFQranHLNgIxgm2fOOSPnimPmiXpQ9XjDIvv0WSfqpYdOOOSSJjGu0BG3BIwvNMcM8T/9Ayd5BW/hjFEpAAAAAElFTkSuQmCC\"/\u003E\n            &nbsp;\u003Cspan class=\"chat-text-container\" id=\"giosg-chat-title\"\u003E\u003C%- dialog.config.titleText %\u003E\u003C/span\u003E\n        \u003C/span\u003E\n        \u003Cbutton class=\"close\" href=\"#\"\u003E\u2715\u003C/button\u003E\n        \n    \u003C/div\u003E\n    \u003Cdiv class=\"giosg-chat-dialog-body\"\u003E\n        \u003Cdiv id=\"giosg_live_chat_container\"\u003E\u003C/div\u003E\n        \u003Cdiv id=\"giosg_chat_dialog_footer\"\u003E\n            \u003C% if (!config.noPoweredByImg) { %\u003E\n            \u003C!-- Do not remove/modify. Contact giosg support details. --\u003E\n            \u003Ca href=\"https://www.giosg.com/features?utm_campaign=Conversion%20Marketing&utm_medium=giosg%20chat&utm_source=Giosg%20Chat%20Logo\" target=\"_blank\"\u003E\u003Cimg class=\"giosg giosg_powered_byimg hidden-tablet\" width=\"85px\" height=\"37px\" src=\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFUAAAAlCAYAAAAz16WbAAAE9UlEQVRo3u2Yf0zUZRzHyUsEyx9LIJPgPKECrna4tElIP9xIs6LSCoMjoFT0AIG0RVC50ao/qIWlma3YWtS5moS6iog513I2fuQKCoez0zLUIWp3h52iPL2/33ue6+Hp+aZsdkfb89leu+99nue+fPfi+X6eH2FhKlSoUKFChQoVKv6P0THfkwnqKXcqI5dH6iZAKK8qI5dH6kpwhGJXRlT89+G177CAPFACskA4zU8CNpDqy/80Rcu1p3vHt6WfsWF0WkEiZZLsvk/8VJYNtoNe8B1YD+KNnmPmrV4TyATFoATcCyINH9xZnQYcoBhkcHkLsIFUEB8KoRsAEegHdvADy0EqoVKtkEq4ekraM9zl/D3t+0uiIG8fIBQPd62xViL0IXAMEIFTYMWIzlufi4as3YAINIFCIdcWbKFvCzJPAo9E8jCkHqJSZ0HqAGT6mNTv086Usnved2pZZH53+VEqbxUwcSP3MSa2oNdRzPLTzSRFELkPtPO5G+NJrN65pSgizFl1RBA3IBGs8Sf4IJhCbZw0H3gAjAeRtBTwUqskE9UaJnW/lThYPueAo4EJNSgJs/X2n9eQooGcOC0XHUNqOIHl3OgtDkiNI6l6snX5C5y0TpAETCAGbBKk2oI9Sms5aWsl7Vu49lKJ1NVMqmuWX2rWidyJmixI+8NAaCz91MU7Bh+p0b5Pm0oKLHM9TGojmMKJXZCQfP7++LST/tr6WUUnFTYMZkjq7K+cVHOwpe7gpFkl7Uu49mckUsuY1ENmv9TFp7Pn0VHaIhHaRdt2gb3a9Yq+wkZd3GyvKS7lHP+6D4FPwIMjbvJt3pVhDS+yV/0Xg8mrgZOaEmypn3PSUiTtWZcq9fDfUu+i4o6DCE7oh8JE5ae7bKcwWdUCt1Bff0+0kGy9Q/Pq8LCtVaepsAMGUutDKfUdTlqhpL1ytCN1kefRaExSTJoL1IHdcqHlqKm5b0pWAVeBPPAVE2tJ9ZHEG4i/Pn7p6KHChsBkidTOUEpdyEk7CqZzbVPBsYtIfZJJ7bnlQi7LL+kraC3oqiBSkRz5PaVk5Ql7sl5To8hm1NRmCHxYEPy4LnaOh9wUS97Vk7ue2sxJaxSELhYmquBKpfI6OHGDdIn1Fl0N6Esp/+f2gNQ9tw2bOua7zZBZE1in3uFe77IQfVLI6rcn5PQWX1Tq8r7CjeyecdYh9qq7gBVcASLAusDsbya1eucvHDNRAnhxXWAD+EiypAqJVG3H9KNkXarRAi5o14N5Tc+y3+ydN5TEL/x1MkC6lxyPIjFan4XepXPzuyr6/0XqeyNG5BzP60IdHQA+PpeQRK4P/GDbunsg7JxEYh/Yw323hnKb6gBN4BvgBMngdiYYUis5qQkQeR6cBR6KD7sqT2/S8DTWb9nBVVdD3kugE2iCfwPbwCKDLWolOCzZUTVDulVSO2eAl8HXdHf1BpgA6jipN4+184DXuFGbJ9TTCSBCINzoXhA57lL/LiQmgbtBOrh21A/urHZxUqeESl4amCjkFoCznNRrxtR//OPnJ+uHKf8Uyu+2WkMpVJPmBq2gEbQJtbVkzB2rOas3UnEHwU56kOIS6mtyqKSWGUxSGl7w9Jg8q3RWNxscoGh0S0dxEKWO085KQTldStWDOlAErhuzB8DO6giQSV/3LeB98ApYqk7HVahQoUKFChUqVKhQMar4CyyNXzM10sCSAAAAAElFTkSuQmCC\" /\u003E\u003C/a\u003E\n            \u003C% } %\u003E\n            \u003C% if (domainLogo) { %\u003E\n            \u003Cimg class=\"customerfooterlogo\" src=\"\u003C%= domainLogo %\u003E\"\u003E\n            \u003C% } %\u003E\n        \u003C/div\u003E\n    \u003C/div\u003E\n\u003C/div\u003E", "template_iframe_ui": "\u003Cdiv id=\"giosg_message_history\"\u003E\u003C/div\u003E\n\u003Csmall id=\"chatState\" class=\"chat_state_notification\" style=\"text-align:center; color:#aaaaaa; display:none;\"\u003E&nbsp;\u003C/small\u003E\n\u003Cdiv id=\"no_ops_online\"\u003E\u003C/div\u003E\n\u003Cdiv id=\"txtctrlscont\" style=\"padding-bottom:0px;\"\u003E\n    \u003Cdiv class=\"msg-area\"\u003E\n        \u003Ctextarea maxlength=\"1000\" id=\"giosg_chat_message_box\" class=\"giosg_chat_message_box\" spellcheck=\"false\" autocorrect=\"false\"\u003E\u003C/textarea\u003E\n        \u003Cbutton type=\"button\" id=\"btn_send\" class=\"btn_send\"\u003E\u003Cimg class=\"send-btn-icon\" src=\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHsAAABqCAYAAACcTS5BAAAACXBIWXMAAC4jAAAuIwF4pT92AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAABQRJREFUeNrsnetR20AUhY2T/7gD3AFOBaiDOBVYHUR0YCpAVBC5A7kCRAXIFSBXEFMB2ctcZWTjhx773nNmdkwScDz349y9+9Du1cfHx8hlLRbxTLxMRIv4r+o/U7vt8ZZb0Sr+uhRtV7+uVlnhcqyuXIItwEYMs263Bj7GO8Mv+LUUvwQVYMtx7Zxde2dxHLcMn1ou4O8A+zLcOh3PuV07mjE3omUMvgLsfcg13MXIP1kD3hhsAXgqXhLRYocd3FVrAi+g50HAZhcnlvfBOvr4lMHvvIMtIJODl6LdjKBmZU/QUx3QlcMGZHugK4PNY+LU0FjYZeiJAJ45AZuHT/Rhf4LdoAo+kT1jJxW2AJ1wyr4GLyl6onjKSu1SYMPNyiv3uQBeDn2jsaS+uQJoZaLC9pWzpjln8wd4BA9tokmZuG9a7w1bgKa0vUD8jRRvUR/gnWFz/0zTfXeIu9EhWtS1H+8Em0EXGDu7CXwM0M6KhrcFr/nLgw3QfgBv62xMe9oPfDIYtniTFFW3H8DHF0DT2vNvxNIJ3XIG7l6N806ScoR5btd0Lyr0tKuzM4B2Uks2ajvYPA2KSRN3+++sVRpH+vY3nR9z9hKgvUnnk5OwebkSwyx/0nlyztlLxMgrJU13jxuunqEo89vdTWcniI2Xiveqcbb6X8TFW/2iR45qZ88RD681b6ZxwA4INnaGel6o0bD629tbFTU7cchbbcnZEeIQhCKCPUMcgtCUYE8RhyB0Q7CxtywQjRECwIYAGwJsCLAhwIYAG9IBe4MwhAO7QhiC0OdCSIk4BKGKYBeIQxAq4OyQYPOpOy+Ihdd6p6Mx66FXjnh4rbw5zgbsUGDz3RVrxMTPIVd9TUVzBi1FXLxUVn/xHzafbY1CzbPCrGliPMXpt/auodiDDXf76+pjzibhaU4/lByeXPwFNh98+oBYOa2XY5fKHF3PFt9IfTeWPt1N3/Gxfzi3eSHmH4TcS99VJ9icztF/u6XVuTvBxud/8vMHV4ihE9pcMmermwQWi5im2/AMt9399PTSvSFtNxzGKNisBt3qgphWsPmNIgC3FnSrDSittxIDuNugO8E+AI4pVcdAty7QThRtVKnjnFMzVXevS9x6PxEi/jMq2u4Re73j6L6gBzm74XA6k4WGZjdgoVQnr4NQ7uyGw6nfIODY1qQubf8YClqKsw9cTifpUV+Ow+nlyL7L0g+A06G3uAtsuJtjGRekK4XdgE5DtGdw6zykSs4tZgzRd4UffAd2nSBTNkxlpWzdsGMwtAOyDtg41vq0tgw50wFZKWzurzHu/qo1AzbyuJUqZyOF71fWVHDlp7YL6ZKKoddUvLwBsB2AVTs7RFdTH1xwy3X2w8aczRMq9Jt87TnYisHSpEdhK1zVzk4Mg94cjO/vBsAcMcxd/cqPRzkrac62wNUrXnaFTkjmCYeZQdAPAK0pjfNql4mtxp+PupgatwaXxg1erk7989ymoU0Izs4NgH4SkPFokk7YvOlQ54UyW07bBdBpLNAEaN0bFGjXxgygNffZAjRVvn80fUbao57I3rWBNG4XaKW7NuDsy6CjkfqtRloX9OHs46Dr/eGA7LOzFU+FArJlzlYxlt4wYPTJtjib0/erRBcT3AzVtZ3OnkgATJkhxxy2/bBLBtYljW8ZcAHA7hVoNA/9eAFuUTcsTjg+zuYxNi1lzhhqvYOjRBXthv4JMABLiVV3IqKX5AAAAABJRU5ErkJggg==\"/\u003E\u003C/button\u003E\n    \u003C/div\u003E\n\u003C/div\u003E", "template_conversation_list": "\u003Cdiv id=\"conversation-list\"\u003E\n  \u003Cdiv class=\"convs-header\"\u003E\u003Cspan\u003EConversations\u003C/span\u003E\u003C/div\u003E\n  \u003C% for (var i = 0; i \u003C chats.length; i++) { %\u003E\n  \u003Cdiv class=\"convs-row \u003C% if (chats[i].unseen) { %\u003Eunseen\u003C% } %\u003E\" room-id=\"\u003C%= chats[i].parent %\u003E\"\u003E\u003Cdiv class=\"roomname\"\u003E\u003C%- chats[i].roomName %\u003E\u003C/div\u003E\u003C/div\u003E\n  \u003C% }; %\u003E\n\u003C/div\u003E\n\n", "custom_css": "::-webkit-input-placeholder { \n    text-align: left !important;\n    color: #b2b2b2 !important;\n}\n\n::-moz-placeholder { \n    text-align: left !important;\n    color: #b2b2b2 !important;\n}\n\n::-ms-input-placeholder { \n    text-align: left !important;\n    color: #b2b2b2 !important;\n}\n\n:-ms-input-placeholder { \n    text-align: left !important;\n    color: #b2b2b2 !important;\n}\n\n#giosg_message_history::-webkit-scrollbar, textarea::-webkit-scrollbar {\n    width: 6px;\n}\n#giosg_message_history::-webkit-scrollbar-thumb, textarea::-webkit-scrollbar-thumb {\n    background-color: rgba(129,140,154,0.4);\n    border-radius: 4px;\n}\n#giosg_message_history::-webkit-scrollbar-track, textarea::-webkit-scrollbar-track {\n    background: transparent;\n    border: 0;\n}\n\n#giosg_chat_operator_avatar{\n    display: none;\n}\n\n.giosg-chat-dialog {\n    width: 320px;\n    height: 420px;\n    background-image: none;\n    font: normal 400 15px \"LocatorWebRegular\", \"Open Sans\", sans-serif;\n    border: none;\n    border-radius: 0px;\n    -moz-box-shadow: 0 0 5px #ccc;\n    -webkit-box-shadow: 0 0 5px #ccc;\n    box-shadow: 0 0 5px #ccc;\n}\n\n#giosg_message_history {\n    height: 280px;\n    max-width: 300px;\n    padding: 5px;\n    margin: 5px;\n}\n\n#giosg_live_chat_container {\n    height: 370px !important;\n    max-width: 320px;\n    background-color: #fff;\n}\n\n#giosg_chat_history {\n    height: 370px !important;\n}\n\n.live_chat_dialog {\n    margin: 0px\n}\n\n.giosg-chat-dialog .giosg-header {\n    height: 50px;\n    padding: 0;\n    background: none !important;\n    background-color: #2a2a2a !important;\n    border-radius: 0px;\n    font: normal 400 15px \"LocatorWebRegular\", \"Open Sans\", sans-serif;\n    color: #fff;\n}\n\n.giosg-chat-dialog .giosg-header .chat-text-container{\n    height: 50px;\n    margin-left:50px;\n    line-height: 50px;\n}\n\n.giosg-chat-dialog .chat-icon{\n    height: 22px;\n    margin: 11px 15px;\n}\n\n.giosg-chat-dialog .giosg-header .close {\n    height: 50px;       \n    width: 50px;\n    margin: 0;\n    opacity: 1;\n    color: #fff !important;\n    font-weight: 100;\n    font-size: 15px;\n    transition: background-color 0.3s ease;\n    -webkit-transition: background-color 0.3s ease;\n    -moz-transition: background-color 0.3s ease;\n    -o-transition: background-color 0.3s ease;\n    -ms-transition: background-color 0.3s ease;\n}\n\n.giosg-chat-dialog .giosg-header .close:hover {\n    background-color: #e3333c;\n    opacity: 1;\n}\n\n#txtctrlscont {\n    width: 100%;\n    height: 50px;\n    background-color: #fff;\n    border-top: solid 1px #ccc;\n}\n\n#txtctrlscont .btn_send {\n    height: 40px;\n    width: 40px;\n    margin: 5px;\n    float: right;\n    background-image: none;\n    border: solid 1px #ccc;\n    border-radius: 20px;\n    transition: background-color 0.3s ease;\n    -webkit-transition: background-color 0.3s ease;\n    -moz-transition: background-color 0.3s ease;\n    -o-transition: background-color 0.3s ease;\n    -ms-transition: background-color 0.3s ease;\n}\n\n#txtctrlscont .btn_send:hover {\n    cursor: pointer;\n    background-color: #ccc;\n}\n\n#txtctrlscont .btn_send .send-btn-icon {\n    max-height: 12px;\n    opacity: .4;\n}\n\n#txtctrlscont .giosg_chat_message_box {\n    background-image: none;\n    overflow-y: scroll;\n    height: 40px;\n    width: 260px;\n    margin: 5px;\n}\n\n#giosg_chat_dialog_footer {\n    height: 40px !important;\n    width: 310px !important;\n    padding: 5px;\n    position: absolute;\n    z-index: -1;\n    bottom: 0;\n}\n\n#no_ops_online {\n    color: #e3333c;\n}", "custom_mobile_css": ".navbar-fixed-top {\n    height: 50px;\n    background-color: #2a2a2a !important;\n}\n\n.nav-giosg-brand{\n    display: none !important;\n}\n\n#chat-room-name{\n    height: 50px;\n    width: 100%;\n    position: initial;\n    font: normal 16px \"LocatorWebRegular\", \"Open Sans\", sans-serif;\n    line-height: 50px;\n    color: #fff;\n}\n\n#btn_close_dialog {\n    width: 50px;\n}\n\n#btn_close_dialog .glyphicon-chevron-left:before{\n    content: '\\E079';\n    position: relative;\n    top: -2px;\n    padding-left: 14px;\n    padding-right: 18px;\n    font-size: 13px;\n    font-weight: normal;\n    color: white;\n}\n\n.input-group {\n    width: 100%;\n}\n\n.giosg-chat-message-composition {\n    width: 100%;\n    height: 50px;\n    padding: 0 !important;\n    background-color: #fff;\n    border-top: solid 1px #ccc;\n}\n\n#giosg_chat_message_box {\n    width: 100%;\n    min-height: 50px;\n    box-shadow: none;\n    border-radius: 0;\n    border: none;\n}\n\n#btn_send {\n    width: 50px;\n    right: 0;\n    background-color: #2a2a2a;\n    border-radius: 0;\n    border: none;\n}\n\n.img-circle {\n    display: none;\n}\n\n.well {\n    border: none;\n}\n\n#chat-room-name {\n    display: none;\n}", "company": 3972, "migrated_from_domain": null},
+    allowDisableSuggest: false,
+    disableSuggestText: 'Do not contact me anymore.',
+    autoSuggestCloseDelay: "0",
+    parentUrl: "https://www.alko.fi/en",
+    room: null,
+    allowedRooms: [{"id": "4fxjlamtrwicck2z7iaaflfc6jbfzmyr46c5iaawh3os5tam", "language": {"id": "en"}}, {"id": "646v6gzy4g5brdbexeaafmidydjfzmyr46z4yaawh365rwym", "language": {"id": "en"}}, {"id": "eymulxi2boqazydggqaafit5mvffzmyr46ywcaawh24msrim", "language": {"id": "en"}}, {"id": "dvsheevqpnnraxgwniaafl3gqzofzmqr46twoaawh3mozgqm", "language": {"id": "en"}}],
+    isMobile: false,
+    isTablet: false,
+    targetToken: "AH23X4gE9MnBnxamjdnk2ZVPFBIRXRToaCDG0RpqkjmMLPVSorhrS_uITxkye82og6Idkbha_Yl0m18J64A67eMnGDHUe__gOwzls_iO_4SdJleYQfCn99F_oq0XhmaqSmGQglI1yK6LBixj7bVzbPzRDMkhf0BU1w==",
+    giosg_session_id: "6ca5bcd8-9d4a-11e7-b1b5-00163e3d13a8"
+};
+</script>
+
+    <script type="text/javascript" src="./visitor.5a8adcc1da9aec58.js.download"></script>
+    <script>app.start(settings);</script>
+</head>
+
+<body class="live_chat_dialog">
+    <div class="ui-content"><button id="do_not_contact" class="do_not_contact">Älä ota minuun enää yhteyttä.</button>
+    <div id="giosg_message_history"></div>
+<small id="chatState" class="chat_state_notification" style="text-align:center; color:#aaaaaa; display:none;">&nbsp;</small>
+<div id="no_ops_online" class="animated tada" style="display: none;">Chat-asiakaspalvelijamme ovat varattuja.</div>
+<div id="txtctrlscont" style="padding-bottom:0px;">
+    <div class="msg-area">
+        <textarea maxlength="1000" id="giosg_chat_message_box" class="giosg_chat_message_box" spellcheck="false" autocorrect="false" placeholder="Kirjoita viestisi tähän.." style="display: inline-block;"></textarea>
+        <button type="button" id="btn_send" class="btn_send" value="LÄHETÄ" style="display: inline-block;"><img class="send-btn-icon" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHsAAABqCAYAAACcTS5BAAAACXBIWXMAAC4jAAAuIwF4pT92AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAABQRJREFUeNrsnetR20AUhY2T/7gD3AFOBaiDOBVYHUR0YCpAVBC5A7kCRAXIFSBXEFMB2ctcZWTjhx773nNmdkwScDz349y9+9Du1cfHx8hlLRbxTLxMRIv4r+o/U7vt8ZZb0Sr+uhRtV7+uVlnhcqyuXIItwEYMs263Bj7GO8Mv+LUUvwQVYMtx7Zxde2dxHLcMn1ou4O8A+zLcOh3PuV07mjE3omUMvgLsfcg13MXIP1kD3hhsAXgqXhLRYocd3FVrAi+g50HAZhcnlvfBOvr4lMHvvIMtIJODl6LdjKBmZU/QUx3QlcMGZHugK4PNY+LU0FjYZeiJAJ45AZuHT/Rhf4LdoAo+kT1jJxW2AJ1wyr4GLyl6onjKSu1SYMPNyiv3uQBeDn2jsaS+uQJoZaLC9pWzpjln8wd4BA9tokmZuG9a7w1bgKa0vUD8jRRvUR/gnWFz/0zTfXeIu9EhWtS1H+8Em0EXGDu7CXwM0M6KhrcFr/nLgw3QfgBv62xMe9oPfDIYtniTFFW3H8DHF0DT2vNvxNIJ3XIG7l6N806ScoR5btd0Lyr0tKuzM4B2Uks2ajvYPA2KSRN3+++sVRpH+vY3nR9z9hKgvUnnk5OwebkSwyx/0nlyztlLxMgrJU13jxuunqEo89vdTWcniI2Xiveqcbb6X8TFW/2iR45qZ88RD681b6ZxwA4INnaGel6o0bD629tbFTU7cchbbcnZEeIQhCKCPUMcgtCUYE8RhyB0Q7CxtywQjRECwIYAGwJsCLAhwIYAG9IBe4MwhAO7QhiC0OdCSIk4BKGKYBeIQxAq4OyQYPOpOy+Ihdd6p6Mx66FXjnh4rbw5zgbsUGDz3RVrxMTPIVd9TUVzBi1FXLxUVn/xHzafbY1CzbPCrGliPMXpt/auodiDDXf76+pjzibhaU4/lByeXPwFNh98+oBYOa2XY5fKHF3PFt9IfTeWPt1N3/Gxfzi3eSHmH4TcS99VJ9icztF/u6XVuTvBxud/8vMHV4ihE9pcMmermwQWi5im2/AMt9399PTSvSFtNxzGKNisBt3qgphWsPmNIgC3FnSrDSittxIDuNugO8E+AI4pVcdAty7QThRtVKnjnFMzVXevS9x6PxEi/jMq2u4Re73j6L6gBzm74XA6k4WGZjdgoVQnr4NQ7uyGw6nfIODY1qQubf8YClqKsw9cTifpUV+Ow+nlyL7L0g+A06G3uAtsuJtjGRekK4XdgE5DtGdw6zykSs4tZgzRd4UffAd2nSBTNkxlpWzdsGMwtAOyDtg41vq0tgw50wFZKWzurzHu/qo1AzbyuJUqZyOF71fWVHDlp7YL6ZKKoddUvLwBsB2AVTs7RFdTH1xwy3X2w8aczRMq9Jt87TnYisHSpEdhK1zVzk4Mg94cjO/vBsAcMcxd/cqPRzkrac62wNUrXnaFTkjmCYeZQdAPAK0pjfNql4mtxp+PupgatwaXxg1erk7989ymoU0Izs4NgH4SkPFokk7YvOlQ54UyW07bBdBpLNAEaN0bFGjXxgygNffZAjRVvn80fUbao57I3rWBNG4XaKW7NuDsy6CjkfqtRloX9OHs46Dr/eGA7LOzFU+FArJlzlYxlt4wYPTJtjib0/erRBcT3AzVtZ3OnkgATJkhxxy2/bBLBtYljW8ZcAHA7hVoNA/9eAFuUTcsTjg+zuYxNi1lzhhqvYOjRBXthv4JMABLiVV3IqKX5AAAAABJRU5ErkJggg=="></button>
+    </div>
+</div></div>
+    <div style="display:none;"><input type="hidden" name="csrfmiddlewaretoken" value="SgM2ds8290BybInPH8644l2iTuebKMMEWA2F6qVOZT4nLciNboFdd4YCWvqULugU"></div>
+
+
+</body></html>
