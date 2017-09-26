@@ -131,29 +131,37 @@ class HTMLConceptsTests extends FlatSpec with Matchers {
     val rightPartOfThePageObjects = rightPartOfThePage.resolve(Map("page" -> fname.attributes("page")), context)
     rightPartOfThePageObjects.size should equal (4)
 
-    context.knowledgeBase.deleteObjects(Map("page" -> fname.attributes("page")))
+    val sameRow = context.knowledgeBase.getConcepts("inTheSameRow").head
+    val sameRowObjects = sameRow.resolve(Map("element1" -> new CPObjectValue(textarea)), context)
+    sameRowObjects.size should equal (7)
+    sameRowObjects.find(checkObj(_, "name", "element2", CPStringValue("country"))).isDefined should be (true)
+    sameRowObjects.find(checkObj(_, "name", "element2", CPStringValue("role"))).isDefined should be (true)
+    sameRowObjects.find(checkObj(_, "type", "element2", CPStringValue("submit"))).isDefined should be (true)
 
-    context.knowledgeBase.add(loginObjects)
-    val title = context.knowledgeBase.getObjects("PageTitle", Map()).head
+    val context1 = pe.initContext(new RunPreferences(Map()))
 
-    val topOfThePage = context.knowledgeBase.getConcepts("atTheTopOfThePage").head
-    val topOfThePageObjects = topOfThePage.resolve(Map("page" -> title.attributes("page")), context)
+    context1.knowledgeBase.add(loginObjects)
+    val title = context1.knowledgeBase.getObjects("PageTitle", Map()).head
+
+    val topOfThePage = context1.knowledgeBase.getConcepts("atTheTopOfThePage").head
+    val topOfThePageObjects = topOfThePage.resolve(Map("page" -> title.attributes("page")), context1)
     topOfThePageObjects.size should equal (5)
 
-    val bottomPartOfThePage = context.knowledgeBase.getConcepts("atTheBottomOfThePage").head
-    val bottomOfThePageObjects = bottomPartOfThePage.resolve(Map("page" -> title.attributes("page")), context)
+    val bottomPartOfThePage = context1.knowledgeBase.getConcepts("atTheBottomOfThePage").head
+    val bottomOfThePageObjects = bottomPartOfThePage.resolve(Map("page" -> title.attributes("page")), context1)
     bottomOfThePageObjects.size should equal (9)
 
-    val centerPartOfThePage = context.knowledgeBase.getConcepts("inTheCenterOfThePage").head
-    val centerPartOfThePageObjects = centerPartOfThePage.resolve(Map("page" -> title.attributes("page")), context)
+    val centerPartOfThePage = context1.knowledgeBase.getConcepts("inTheCenterOfThePage").head
+    val centerPartOfThePageObjects = centerPartOfThePage.resolve(Map("page" -> title.attributes("page")), context1)
     centerPartOfThePageObjects.size should equal (10)
+
+
   }
 
   "color concept" should "work correctly" in {
     val pe = new ProgramExecutor
     val context = pe.initContext(new RunPreferences(Map()))
     context.knowledgeBase.add(loginObjects)
-
     val color = context.knowledgeBase.getConcepts("ofColor").head
     val brownObjects = color.resolve(Map("givenColor" -> CPStringValue("Brown")), context)
     brownObjects.size should equal (1)

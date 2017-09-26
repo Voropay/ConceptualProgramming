@@ -36,6 +36,23 @@ case class CPOrDependency(dependencies: List[CPDependency]) extends CPDependency
     dependencies.find(!_.isDefined(context)).isEmpty
   }
 
+  override def strictCheck(context: CPExecutionContext): Boolean = {
+    val dependenciesState = dependencies.map(curDependency  => {
+      if(!curDependency.isDefined(context)) {
+        None
+      } else {
+        Some(curDependency.check(context))
+      }
+    })
+    if(dependenciesState.contains(Some(true))) {
+      true
+    } else if(dependenciesState.contains(Some(false)) && dependenciesState.contains(None)) {
+      false
+    } else {
+      true
+    }
+  }
+
   override def externalExpressions(internalConcepts: List[String]): List[CPExpression] = {
     dependencies.flatMap(_.externalExpressions(internalConcepts))
   }

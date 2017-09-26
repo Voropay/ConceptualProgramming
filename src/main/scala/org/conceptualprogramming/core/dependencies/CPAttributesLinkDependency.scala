@@ -58,6 +58,10 @@ case class CPAttributesLinkDependency(attributesNames: List[CPAttributeName]) ex
     }).isEmpty
   }
 
+  override def strictCheck(context: CPExecutionContext): Boolean = {
+    isDefined(context) && check(context)
+  }
+
   override def externalExpressions(internalConcepts: List[String]): List[CPExpression] = {
     val externalAttributes = attributesNames.filter(item => !internalConcepts.contains(item.conceptName))
     externalAttributes.map(new CPAttribute(_))

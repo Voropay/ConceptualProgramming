@@ -1154,6 +1154,86 @@ class HTMLLibrary extends StandardLibrary {
     )
     context.knowledgeBase.add(centerOfThePage)
 
+    val sameRow = new CPStrictConcept(
+      "inTheSameRow",
+      "element1" :: "element2" :: Nil,
+      "element1",
+      ("WebPageElement", "e1") :: ("WebPageElement", "e2") :: Nil,
+      CPDependency(
+        new CPAttribute(CPAttributeName("", "element1")),
+        new CPChildObject("e1"),
+        "="
+      ) ::
+        CPDependency(
+          new CPAttribute(CPAttributeName("", "element2")),
+          new CPChildObject("e2"),
+          "="
+        ) ::
+        CPDependency(
+          new CPAttribute(CPAttributeName("", "element1")),
+          new CPAttribute(CPAttributeName("", "element2")),
+          "!="
+        ) ::
+        new CPExpressionDependency(
+          new CPOr(
+            new CPAnd(
+              new CPEqualsOrGreater(
+                new CPAttribute(CPAttributeName("e1", "positionY")),
+                new CPAttribute(CPAttributeName("e2", "positionY"))
+              ),
+              new CPEqualsOrLess(
+                new CPAdd(
+                  new CPAttribute(CPAttributeName("e1", "positionY")),
+                  new CPAttribute(CPAttributeName("e1", "height"))
+                ),
+                new CPAdd(
+                  new CPAttribute(CPAttributeName("e2", "positionY")),
+                  new CPAttribute(CPAttributeName("e2", "height"))
+                )
+              )
+            ),
+
+            new CPOr(
+              new CPAnd(
+                new CPEqualsOrLess(
+                  new CPAttribute(CPAttributeName("e1", "positionY")),
+                  new CPAdd(
+                    new CPAttribute(CPAttributeName("e2", "positionY")),
+                    new CPAttribute(CPAttributeName("e2", "height"))
+                  )
+                ),
+                new CPEqualsOrLess(
+                  new CPAdd(
+                    new CPAttribute(CPAttributeName("e2", "positionY")),
+                    new CPAttribute(CPAttributeName("e2", "height"))
+                  ),
+                  new CPAdd(
+                    new CPAttribute(CPAttributeName("e1", "positionY")),
+                    new CPAttribute(CPAttributeName("e1", "height"))
+                  )
+                )
+              ),
+              new CPAnd(
+                new CPEqualsOrLess(
+                  new CPAttribute(CPAttributeName("e1", "positionY")),
+                  new CPAttribute(CPAttributeName("e2", "positionY"))
+                ),
+                new CPEqualsOrLess(
+                  new CPAttribute(CPAttributeName("e2", "positionY")),
+                  new CPAdd(
+                    new CPAttribute(CPAttributeName("e1", "positionY")),
+                    new CPAttribute(CPAttributeName("e1", "height"))
+                  )
+                )
+              )
+            )
+          ),
+          CPBooleanValue(true)
+        ) :: Nil
+    )
+    context.knowledgeBase.add(sameRow)
+
+
   }
 
   def registerColorConcepts(context: CPExecutionContext): Unit = {

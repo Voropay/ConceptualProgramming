@@ -62,6 +62,10 @@ case class CPExistDependency(definition: CPConcept, conceptExternalExpressions: 
     }
   }
 
+  override def strictCheck(context: CPExecutionContext): Boolean = {
+    isDefined(context) && check(context)
+  }
+
   def filterExternalAttributes(attributesValues: Map[CPAttributeName, CPValue]): Map[CPAttributeName, CPValue] = {
     attributesValues.filter(curAttrValue => {
       conceptExternalExpressions.find(curExpr => {

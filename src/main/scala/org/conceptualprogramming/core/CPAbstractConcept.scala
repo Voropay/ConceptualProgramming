@@ -34,7 +34,7 @@ abstract class CPAbstractConcept extends CPConcept{
     attributesValues.filter(curAttrValues => {
       dependencies.find(curDependency => {
         context.setSubstitutions(Some(curAttrValues))
-        !curDependency.isDefined(context)
+        !curDependency.strictCheck(context)
       }).isEmpty
     })
   }

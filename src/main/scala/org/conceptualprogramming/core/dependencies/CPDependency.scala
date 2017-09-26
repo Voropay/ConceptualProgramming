@@ -11,6 +11,7 @@ import org.concepualprogramming.core.datatypes.{CPBooleanValue, CPValue}
 trait CPDependency {
   def infer(context: CPExecutionContext): Map[CPAttributeName, CPValue]
   def check(context: CPExecutionContext): Boolean
+  def strictCheck(context: CPExecutionContext): Boolean
   def isDefined(context: CPExecutionContext): Boolean
   def externalExpressions(internalConcepts: List[String]): List[CPExpression]
 }

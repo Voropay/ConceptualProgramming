@@ -12,15 +12,25 @@ case class CPOr(operand1: CPExpression, operand2: CPExpression) extends CPExpres
   override def calculate(context: CPExecutionContext): Option[CPValue] = {
     val value1 = operand1.calculate(context)
     val value2 = operand2.calculate(context)
-    if(value1.isEmpty || value2.isEmpty) {
+    if(value1.isEmpty && value2.isEmpty) {
       return None
     }
-    val bool1 = value1.get.getBooleanValue
-    val bool2 = value2.get.getBooleanValue
-    if(bool1.isEmpty || bool2.isEmpty) {
+    if(value1.isDefined && value1.get.getBooleanValue.isEmpty) {
       return None
     }
-    return Some(CPBooleanValue(bool1.get || bool2.get))
+    if(value2.isDefined && value2.get.getBooleanValue.isEmpty) {
+      return None
+    }
+    if(value1.isDefined && value1.get.getBooleanValue.get) {
+      return Some(CPBooleanValue(true))
+    }
+    if (value2.isDefined && value2.get.getBooleanValue.get) {
+      return Some(CPBooleanValue(true))
+    }
+    if(value1.isDefined && !value1.get.getBooleanValue.get && value2.isDefined && !value2.get.getBooleanValue.get) {
+      return Some(CPBooleanValue(false))
+    }
+    return None
   }
 
   override def equals(other: Any) = {
@@ -30,7 +40,22 @@ case class CPOr(operand1: CPExpression, operand2: CPExpression) extends CPExpres
     }
   }
 
-  override def isDefined(context: CPExecutionContext): Boolean = operand1.isDefined(context) && operand2.isDefined(context)
+  override def isDefined(context: CPExecutionContext): Boolean = {
+    val value1 = operand1.calculate(context)
+    val value2 = operand2.calculate(context)
+    if(value1.isDefined && value1.get.getBooleanValue.isDefined && value1.get.getBooleanValue.get) {
+      true
+    } else if(value2.isDefined && value2.get.getBooleanValue.isDefined && value2.get.getBooleanValue.get) {
+      true
+    } else if(
+      value1.isDefined && value1.get.getBooleanValue.isDefined && !value1.get.getBooleanValue.get &&
+      value2.isDefined && value2.get.getBooleanValue.isDefined && !value2.get.getBooleanValue.get
+    ) {
+      true
+    } else {
+      false
+    }
+  }
 
   override def infer(result: CPValue, context: CPExecutionContext): Map[CPAttributeName, CPValue] = {
     val op1Defined = operand1.isDefined(context)
