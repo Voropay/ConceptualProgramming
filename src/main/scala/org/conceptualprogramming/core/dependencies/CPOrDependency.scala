@@ -21,7 +21,7 @@ case class CPOrDependency(dependencies: List[CPDependency]) extends CPDependency
   }
 
   override def check(context: CPExecutionContext): Boolean = {
-    if(!isDefined(context)) {
+    if(dependencies.find(!_.isDefined(context)).isDefined) {
       return true
     }
     for(curDependency <- dependencies) {
@@ -33,7 +33,20 @@ case class CPOrDependency(dependencies: List[CPDependency]) extends CPDependency
   }
 
   override def isDefined(context: CPExecutionContext): Boolean = {
-    dependencies.find(!_.isDefined(context)).isEmpty
+    val dependenciesState = dependencies.map(curDependency  => {
+      if(!curDependency.isDefined(context)) {
+        None
+      } else {
+        Some(curDependency.check(context))
+      }
+    })
+    if(dependenciesState.contains(Some(true))) {
+      true
+    } else if(dependenciesState.contains(None)) {
+      false
+    } else {
+      true
+    }
   }
 
   override def strictCheck(context: CPExecutionContext): Boolean = {
