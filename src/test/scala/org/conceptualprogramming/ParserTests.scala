@@ -55,6 +55,7 @@ class ParserTests  extends FlatSpec with Matchers {
     constantsParser("false").get.getBooleanValue.get should equal (false)
     constantsParser("10").get.getIntValue.get should equal (10)
     constantsParser("10.5").get.getFloatingValue.get should equal (10.5)
+    constantsParser("10.0").get.asInstanceOf[CPIntValue] should equal (CPIntValue(10))
     constantsParser("\"string\"").get.getStringValue.get should equal ("string")
     constantsParser("2017-01-28").get.getDateValue.get should equal (LocalDate.of(2017, 1, 28))
   }

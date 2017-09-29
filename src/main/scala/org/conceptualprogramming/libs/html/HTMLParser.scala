@@ -495,6 +495,12 @@ object HTMLParser {
     if(href != null) {
       tagAttributes += ("href" -> CPStringValue(href))
     }
+
+    val title = element.getAttribute("title")
+    if(title != null) {
+      tagAttributes += ("title" -> CPStringValue(title))
+    }
+
     val linkObj = new PageElement("PageLink", tagAttributes)
     processChildTags(linkObj, element, linkObj, attributes, nestedElements)
   }

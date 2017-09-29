@@ -44,6 +44,10 @@ class InMemoryKnowledgeBaseImpl extends KnowledgeBase {
         return objects.get
       } else {
         val filteredObjects = objects.get.filter(obj => {
+          //It's needed to select objects that doesn't have required attributes as well.
+          //Because now concept resolving query can contain external attributes i.e. "color" filtering concept contains "givenColor" attribute
+          // which is then compared to text and background color.
+          //val notMatchedAttribute = query.find(entry => obj.attributes.get(entry._1).isEmpty || (obj.attributes.get(entry._1).get != entry._2))
           val notMatchedAttribute = obj.attributes.find(entry => query.get(entry._1).isDefined && !query.get(entry._1).get.equals(entry._2))
           notMatchedAttribute.isEmpty
         })
