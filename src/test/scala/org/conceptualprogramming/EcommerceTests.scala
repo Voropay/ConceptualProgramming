@@ -8,6 +8,7 @@ import org.conceptualprogramming.core.{CPFilteringConcept, RunPreferences}
 import org.conceptualprogramming.core.statements.ProgramExecutor
 import org.conceptualprogramming.core.statements.expressions.CPChildObject
 import org.conceptualprogramming.libs.html.HTMLParser
+import org.conceptualprogramming.parser.ProgramParser
 import org.concepualprogramming.core.{CPStrictConcept, CPSubstitutions}
 import org.concepualprogramming.core.datatypes.CPStringValue
 import org.concepualprogramming.core.dependencies.CPDependency
@@ -19,8 +20,10 @@ import org.scalatest.{FlatSpec, Matchers}
 /**
   * Created by oleksii.voropai on 9/12/2017.
   */
+
 class EcommerceTests extends FlatSpec with Matchers {
-  "eCommerce example" should "work correctly" in {
+
+  "eCommerce example concepts" should "work correctly" in {
     //val driverFilePath = new File("resources/chromedriver.exe")
     //System.setProperty("webdriver.chrome.driver", driverFilePath.getAbsolutePath)
 
@@ -91,4 +94,52 @@ class EcommerceTests extends FlatSpec with Matchers {
     context.knowledgeBase.add(searchForm)
 
   }
+
+  "eCommerce example" should "be parsed correctly" in {
+    val executor = new ProgramExecutor
+    val context = executor.initContext(new RunPreferences(Map()))
+
+    context.knowledgeBase.load("src/test/scala/org/conceptualprogramming/examples/alko/homepage.dump")
+
+    val eCommerceExample =
+      """
+        |concept ProductLink :- PageLink (text == "PRODUCTS");
+        |concept StoresLink :- PageLink (text == "STORES");
+        |
+        |concept OtherMenuItems :- PageLink e (),
+        |    Exist(ProductLink p (), inTheSameRow r (element1 == $e, element2 == $p)),
+        |    Exist(StoresLink s (), inTheSameRow r (element1 == $e, element2 == $s));
+        |
+        |concept SearchLink :- PageLink e (title == "Search Magnifier Icon"), Exist(OtherMenuItems m (), $e == $m);
+        |
+        |concept SearchForm (form == $f, input == $i, submit == $s) :=
+        |    PageForm f (),
+        |    PageInput i (form == f.id),
+        |    PageInput s (type == "submit", form == f.id),
+        |    withLabel l (labelText == "Search...", element == $i);
+        |
+        |searchForm <- SearchForm {};
+        |return searchForm[0]["input"]["id"];
+      """.stripMargin
+
+    val eCommerceCode = ProgramParser(eCommerceExample)
+    eCommerceCode.isDefined should be (true)
+    eCommerceCode.get.body.size should equal (7)
+    eCommerceCode.get.execute(context)
+    val res = context.getValueResult
+    res should equal (Some(CPStringValue("js-search-bar")))
+  }
+/*
+  "eCommerce example" should "be executed correctly" in {
+    val preferences = RunPreferences(Array("-sourceFile=src/test/scala/org/conceptualprogramming/examples/alko/alko.cp"))
+    val executor = new ProgramExecutor
+    val source = scala.io.Source.fromFile(preferences.getSourceFile)
+    val sourceCode = try source.mkString finally source.close()
+    val res = executor.execute(sourceCode, preferences)
+    res should equal ("done")
+    //HTML.followLink(searchForm[0]["submit"]);
+    //HTML.closeWebPage(url);
+
+  }
+  */
 }
