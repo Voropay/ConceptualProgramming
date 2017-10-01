@@ -98,7 +98,7 @@ abstract class CPAbstractConcept extends CPConcept{
       return List()
     }
     if(conceptsList.tail.isEmpty) {
-      return results
+      return results.distinct
     }
 
     var finalResults: List[CPSubstitutions] = Nil
@@ -108,7 +108,8 @@ abstract class CPAbstractConcept extends CPConcept{
         finalResults = finalResults ::: tailResult
       }
     }
-    return finalResults
+
+    return finalResults.distinct
   }
 
   def inferValues(attributesValues: CPSubstitutions, context: CPExecutionContext): Option[Map[CPAttributeName, CPValue]]

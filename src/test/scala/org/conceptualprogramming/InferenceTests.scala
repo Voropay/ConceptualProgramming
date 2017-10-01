@@ -715,4 +715,21 @@ class InferenceTests extends FlatSpec with Matchers {
     res4.size should equal (0)
   }
 
+  "No duplicates" should "be resolved" in {
+    val context = new CPExecutionContext(new RunPreferences(Map()))
+    context.knowledgeBase.add(new CPObject("Point", Map("pos" -> CPIntValue(1)), "pos"))
+    context.knowledgeBase.add(new CPObject("Point", Map("pos" -> CPIntValue(2)), "pos"))
+    context.knowledgeBase.add(new CPObject("Point", Map("pos" -> CPIntValue(3)), "pos"))
+    context.knowledgeBase.add(new CPObject("Point", Map("pos" -> CPIntValue(4)), "pos"))
+
+    val c1 = new CPFilteringConcept("c1", ("Point", "p"), CPDependency(CPAttribute("p", "pos"), CPConstant(CPIntValue(4)), "=") :: Nil)
+    val c2 = new CPFilteringConcept("c1", ("Point", "p"), CPDependency(CPAttribute("p", "pos"), CPConstant(CPIntValue(3)), ">") :: Nil)
+    context.knowledgeBase.add(c1)
+    context.knowledgeBase.add(c2)
+    val c3 = new CPFilteringConcept("c3", ("c1", "c"), Nil)
+    val res = c3.resolve(Map(), context)
+    res.size should equal (1)
+    res.head.attributes("pos") should equal (CPIntValue(4))
+  }
+
 }

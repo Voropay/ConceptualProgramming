@@ -8,7 +8,7 @@ import org.conceptualprogramming.core.{CPFilteringConcept, RunPreferences}
 import org.conceptualprogramming.core.statements.ProgramExecutor
 import org.conceptualprogramming.core.statements.expressions.CPChildObject
 import org.conceptualprogramming.libs.html.HTMLParser
-import org.concepualprogramming.core.CPSubstitutions
+import org.concepualprogramming.core.{CPStrictConcept, CPSubstitutions}
 import org.concepualprogramming.core.datatypes.CPStringValue
 import org.concepualprogramming.core.dependencies.CPDependency
 import org.concepualprogramming.core.statements.expressions.{CPAttribute, CPConstant}
@@ -72,5 +72,23 @@ class EcommerceTests extends FlatSpec with Matchers {
     val searchLinkObj = searchLink.resolve(Map(), context)
     searchLinkObj.size should equal (1)
     context.knowledgeBase.add(searchLink)
+
+    val searchForm = new CPStrictConcept("SearchForm", "form" :: "input" :: "submit" :: Nil, "input",
+      ("PageForm", "f") :: ("PageInput", "i") :: ("PageInput", "s") :: ("withLabel", "l") :: Nil,
+      CPDependency(CPAttribute("", "form"), CPChildObject("f"), "=") ::
+        CPDependency(CPAttribute("", "input"), CPChildObject("i"), "=") ::
+        CPDependency(CPAttribute("", "submit"), CPChildObject("s"), "=") ::
+        CPDependency(CPAttribute("l", "labelText"), CPConstant(CPStringValue("Search...")), "=") ::
+        CPDependency(CPAttribute("l", "element"), CPChildObject("i"), "=") ::
+        CPDependency(CPAttribute("s", "type"), CPConstant(CPStringValue("submit")), "=") ::
+        CPDependency(CPAttribute("i", "form"), CPAttribute("f", "id"), "=") ::
+        CPDependency(CPAttribute("s", "form"), CPAttribute("f", "id"), "=") ::
+        Nil
+    )
+
+    val searchFormObj = searchForm.resolve(Map(), context)
+    searchFormObj.size should equal (1)
+    context.knowledgeBase.add(searchForm)
+
   }
 }

@@ -28,7 +28,7 @@ object Utils {
       return false
     }
     for(entry <- map1) {
-      if(!map2.contains(entry._1) || !map2.get(entry._1).get.equals(entry._2)) {
+      if(!map2.contains(entry._1) || map2.get(entry._1).get != entry._2) {
         return false
       }
     }
