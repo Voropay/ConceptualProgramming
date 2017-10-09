@@ -29,19 +29,15 @@ case class CPChildObject(childObject: String) extends CPExpression {
   override def infer(result: CPValue, context: CPExecutionContext): Map[CPAttributeName, CPValue] = {
     result match {
       case obj:CPObjectValue => {
-        if(obj.objectValue.name == childObject) {
-          val subst = context.getSubstitutions
-          val attrsToAdd = obj.objectValue.attributes.filter(curAttr => {
-            val attrName = CPAttributeName(childObject, curAttr._1)
-            subst.isEmpty || !subst.get.attributesValues.contains(attrName)
-          })
-          attrsToAdd.map(curAttr => {
-            val attrName = CPAttributeName(childObject, curAttr._1)
-            (attrName, curAttr._2)
-          })
-        } else {
-          Map()
-        }
+        val subst = context.getSubstitutions
+        val attrsToAdd = obj.objectValue.attributes.filter(curAttr => {
+          val attrName = CPAttributeName(childObject, curAttr._1)
+          subst.isEmpty || !subst.get.attributesValues.contains(attrName)
+        })
+        attrsToAdd.map(curAttr => {
+          val attrName = CPAttributeName(childObject, curAttr._1)
+          (attrName, curAttr._2)
+        })
       }
       case _ => Map()
     }

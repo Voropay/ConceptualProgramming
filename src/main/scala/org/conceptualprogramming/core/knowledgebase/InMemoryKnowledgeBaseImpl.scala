@@ -14,6 +14,7 @@ import scala.collection.immutable.TreeMap
 class InMemoryKnowledgeBaseImpl extends KnowledgeBase {
   var objectsIndex = TreeMap[String, List[CPObject]]()
   var conceptsIndex = TreeMap[String, List[CPConcept]]()
+  var objectsByIdIndex = TreeMap[String, List[CPObject]]()
 
   override def add(concept: CPConcept): Boolean = {
     if(contains(concept)) {
@@ -30,6 +31,11 @@ class InMemoryKnowledgeBaseImpl extends KnowledgeBase {
     }
     val newObjects = obj :: objectsIndex.getOrElse(obj.name, List())
     objectsIndex = objectsIndex + (obj.name -> newObjects)
+    val id = obj.attributes.get("id")
+    if(id.isDefined && id.get.getStringValue.isDefined) {
+      val newObjectsById = obj :: objectsByIdIndex.getOrElse(id.get.getStringValue.get, List())
+      objectsByIdIndex = objectsByIdIndex + (id.get.getStringValue.get -> newObjectsById)
+    }
     true
   }
 
@@ -38,7 +44,17 @@ class InMemoryKnowledgeBaseImpl extends KnowledgeBase {
   override def getObjects(name: String): List[CPObject] = objectsIndex.getOrElse(name, List())
 
   override def getObjects(name: String, query: Map[String, CPValue]): List[CPObject] = {
-    val objects = objectsIndex.get(name)
+    val objects = if(query.contains("id") && query("id").getStringValue.isDefined) {
+      val objectsById = objectsByIdIndex.get(query("id").getStringValue.get)
+      if(objectsById.isDefined) {
+        Some(objectsById.get.filter(_.name == name))
+      } else {
+        None
+      }
+    } else {
+      objectsIndex.get(name)
+    }
+
     if(objects.isDefined) {
       if(query.isEmpty) {
         return objects.get
@@ -67,11 +83,12 @@ class InMemoryKnowledgeBaseImpl extends KnowledgeBase {
   }
 
   override def contains(obj: CPObject): Boolean = {
-    if(!objectsIndex.contains(obj.name)) {
-      return false
+    val objects = if(obj.attributes.contains("id") && obj.attributes("id").getStringValue.isDefined) {
+      objectsByIdIndex.get(obj.attributes("id").getStringValue.get)
+    } else {
+      objectsIndex.get(obj.name)
     }
-    val concepts = objectsIndex.get(obj.name).get
-    concepts.find(_.equals(obj)).isDefined
+    objects.isDefined && objects.get.find(_.equals(obj)).isDefined
   }
 
   override def clear: Unit = {
@@ -104,6 +121,24 @@ class InMemoryKnowledgeBaseImpl extends KnowledgeBase {
         }
       }
     }
+
+    for(key <- objectsByIdIndex.keys) {
+      val objects = objectsByIdIndex.get(key).get
+      val objectsLeft = objects.filter(obj => {
+        val notMatchedQuery = query.find(entry => {
+          obj.attributes.get(entry._1).isEmpty || obj.attributes.get(entry._1).get != entry._2
+        })
+        notMatchedQuery.isDefined
+      })
+      if(objectsLeft.size != objects.size) {
+        if(objectsLeft.isEmpty) {
+          objectsByIdIndex = objectsByIdIndex - key
+        } else {
+          objectsByIdIndex = objectsByIdIndex + (key -> objectsLeft)
+        }
+      }
+    }
+
     deleted
   }
 

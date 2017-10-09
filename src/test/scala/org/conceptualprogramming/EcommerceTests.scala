@@ -7,11 +7,13 @@ import org.conceptualprogramming.core.dependencies.CPExistDependency
 import org.conceptualprogramming.core.{CPFilteringConcept, RunPreferences}
 import org.conceptualprogramming.core.statements.ProgramExecutor
 import org.conceptualprogramming.core.statements.expressions.CPChildObject
+import org.conceptualprogramming.core.utils.TimeLog
 import org.conceptualprogramming.libs.html.HTMLParser
 import org.conceptualprogramming.parser.ProgramParser
 import org.concepualprogramming.core.{CPStrictConcept, CPSubstitutions}
-import org.concepualprogramming.core.datatypes.CPStringValue
+import org.concepualprogramming.core.datatypes.{CPIntValue, CPStringValue}
 import org.concepualprogramming.core.dependencies.CPDependency
+import org.concepualprogramming.core.knowledgebase.KnowledgeBase
 import org.concepualprogramming.core.statements.expressions.{CPAttribute, CPConstant}
 import org.openqa.selenium.WebDriver
 import org.openqa.selenium.chrome.ChromeDriver
@@ -22,8 +24,8 @@ import org.scalatest.{FlatSpec, Matchers}
   */
 
 class EcommerceTests extends FlatSpec with Matchers {
-
-  "eCommerce example concepts" should "work correctly" in {
+/*
+  "eCommerce homePage concepts" should "work correctly" in {
     //val driverFilePath = new File("resources/chromedriver.exe")
     //System.setProperty("webdriver.chrome.driver", driverFilePath.getAbsolutePath)
 
@@ -95,7 +97,7 @@ class EcommerceTests extends FlatSpec with Matchers {
 
   }
 
-  "eCommerce example" should "be parsed correctly" in {
+  "eCommerce homePage example" should "be parsed correctly" in {
     val executor = new ProgramExecutor
     val context = executor.initContext(new RunPreferences(Map()))
 
@@ -128,6 +130,42 @@ class EcommerceTests extends FlatSpec with Matchers {
     eCommerceCode.get.execute(context)
     val res = context.getValueResult
     res should equal (Some(CPStringValue("js-search-bar")))
+  }
+*/
+  "eCommerce searchResults Page concepts" should "work correctly" in {
+    //val driverFilePath = new File("resources/chromedriver.exe")
+    //System.setProperty("webdriver.chrome.driver", driverFilePath.getAbsolutePath)
+
+    //val url = "file:///C:/projects/AI/ConceptualProgramming/src/test/scala/org/conceptualprogramming/examples/alko/SearchResults.html"
+    //val driver: WebDriver = new ChromeDriver
+    //driver.get(url)
+
+    //val pageObjects = HTMLParser.parsePage(driver, url)
+    //driver.close()
+    //val kb = KnowledgeBase.instance
+    //kb.add(pageObjects)
+    //kb.save("src/test/scala/org/conceptualprogramming/examples/alko/searchresults.dump")
+    //println(TimeLog.aggregatedResults)
+
+ /*   val executor = new ProgramExecutor
+    val context = executor.initContext(new RunPreferences(Map()))
+
+    val size = context.knowledgeBase.load("src/test/scala/org/conceptualprogramming/examples/alko/searchresults.dump")
+
+    val whiteDiv = new CPFilteringConcept("WhiteDiv", ("PageDivision", "e"),
+      CPDependency(CPAttribute("e", "backgroundBasicColorName"), CPConstant(CPStringValue("White")), "=") ::
+        CPDependency(CPAttribute("e", "height"), CPConstant(CPIntValue(0)), ">") ::
+        CPExistDependency.byChildConcepts(
+          ("PageForm", "f") :: ("inside", "i") :: Nil,
+          CPDependency(CPAttribute("i", "insideElement"), CPChildObject("f"), "=") ::
+            CPDependency(CPAttribute("i", "outsideElement"), CPChildObject("e"), "=") :: Nil, Map(), true) :: Nil)
+    val id = TimeLog.start("WhiteDiv")
+    val whiteDivObj = whiteDiv.resolve(Map(), context)
+    TimeLog.stop(id)
+    println(TimeLog.aggregatedResults)
+println(whiteDivObj)
+*/
+
   }
 /*
   "eCommerce example" should "be executed correctly" in {
