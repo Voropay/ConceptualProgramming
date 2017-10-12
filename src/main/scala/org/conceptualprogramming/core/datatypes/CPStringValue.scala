@@ -3,6 +3,10 @@ package org.concepualprogramming.core.datatypes
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
+import org.concepualprogramming.core.CPExecutionContext
+import org.concepualprogramming.core.statements.expressions.functions.BuiltInFunctionDefinition
+import org.concepualprogramming.core.statements.expressions.{CPExpression, CPFunctionDefinition}
+
 /**
  * Created by oleksii.voropai on 8/6/2016.
  */
@@ -138,4 +142,138 @@ class CPStringValue(value: String) extends CPValue with CPPrimitiveType {
 
 object CPStringValue {
   def apply(value: String) = new CPStringValue(value)
+
+  def register(context: CPExecutionContext): Unit = {
+    context.addFunctionDefinition(createSizeFunction)
+    context.addFunctionDefinition(createSubstringFunction)
+    context.addFunctionDefinition(createIndexOfFunction)
+    context.addFunctionDefinition(createStartsWithFunction)
+  }
+
+  def createSizeFunction: CPFunctionDefinition = {
+    def size(args: Map[String, CPExpression], context: CPExecutionContext): Option[CPValue] = {
+      val strExpr = args.get("string")
+      if(strExpr.isEmpty) {
+        return None
+      }
+      val str = strExpr.get.calculate(context)
+      if(str.isEmpty || str.get.getStringValue.isEmpty) {
+        return None
+      }
+
+      Some(CPIntValue(str.get.getStringValue.get.size))
+    }
+    new BuiltInFunctionDefinition(
+      "String.size",
+      "string" :: Nil,
+      size,
+      CPFunctionDefinition.checkAttributesDefined
+    )
+  }
+
+  def createSubstringFunction: CPFunctionDefinition = {
+    def substring(args: Map[String, CPExpression], context: CPExecutionContext): Option[CPValue] = {
+      val strExpr = args.get("string")
+      if(strExpr.isEmpty) {
+        return None
+      }
+      val strVal = strExpr.get.calculate(context)
+      if(strVal.isEmpty || strVal.get.getStringValue.isEmpty) {
+        return None
+      }
+      val str = strVal.get.getStringValue.get
+
+      val startExpr = args.get("start")
+      if(strExpr.isEmpty) {
+        return None
+      }
+      val startVal = startExpr.get.calculate(context)
+      if(startVal.isEmpty || startVal.get.getIntValue.isEmpty) {
+        return None
+      }
+      val start = startVal.get.getIntValue.get
+
+      val sizeExpr = args.get("size")
+      if(sizeExpr.isEmpty) {
+        return Some(CPStringValue(str.substring(start)))
+      } else {
+        val sizeVal = sizeExpr.get.calculate(context)
+        if(sizeVal.isEmpty || sizeVal.get.getIntValue.isEmpty) {
+          return None
+        }
+        return Some(CPStringValue(str.substring(start, start + sizeVal.get.getIntValue.get)))
+      }
+    }
+    new BuiltInFunctionDefinition(
+      "String.substring",
+      "string" :: "start" :: "size" :: Nil,
+      substring,
+      CPFunctionDefinition.checkAttributesDefined
+    )
+  }
+
+  def createIndexOfFunction: CPFunctionDefinition = {
+    def indexOf(args: Map[String, CPExpression], context: CPExecutionContext): Option[CPValue] = {
+      val strExpr = args.get("string")
+      if(strExpr.isEmpty) {
+        return None
+      }
+      val strVal = strExpr.get.calculate(context)
+      if(strVal.isEmpty || strVal.get.getStringValue.isEmpty) {
+        return None
+      }
+      val str = strVal.get.getStringValue.get
+
+      val substrExpr = args.get("substring")
+      if(substrExpr.isEmpty) {
+        return None
+      }
+      val substrVal = substrExpr.get.calculate(context)
+      if(substrVal.isEmpty || substrVal.get.getStringValue.isEmpty) {
+        return None
+      }
+      val substr = substrVal.get.getStringValue.get
+
+      return Some(CPIntValue(str.indexOf(substr)))
+    }
+    new BuiltInFunctionDefinition(
+      "String.indexOf",
+      "string" :: "substring" :: Nil,
+      indexOf,
+      CPFunctionDefinition.checkAttributesDefined
+    )
+  }
+
+  def createStartsWithFunction: CPFunctionDefinition = {
+    def startsWith(args: Map[String, CPExpression], context: CPExecutionContext): Option[CPValue] = {
+      val strExpr = args.get("string")
+      if(strExpr.isEmpty) {
+        return None
+      }
+      val strVal = strExpr.get.calculate(context)
+      if(strVal.isEmpty || strVal.get.getStringValue.isEmpty) {
+        return None
+      }
+      val str = strVal.get.getStringValue.get
+
+      val substrExpr = args.get("substring")
+      if(substrExpr.isEmpty) {
+        return None
+      }
+      val substrVal = substrExpr.get.calculate(context)
+      if(substrVal.isEmpty || substrVal.get.getStringValue.isEmpty) {
+        return None
+      }
+      val substr = substrVal.get.getStringValue.get
+
+      return Some(CPBooleanValue(str.startsWith(substr)))
+    }
+    new BuiltInFunctionDefinition(
+      "String.startsWith",
+      "string" :: "substring" :: Nil,
+      startsWith,
+      CPFunctionDefinition.checkAttributesDefined
+    )
+  }
+
 }

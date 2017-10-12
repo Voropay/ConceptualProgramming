@@ -514,8 +514,33 @@ class DataTypesTests extends FlatSpec with Matchers {
       case _ => false
     }
     keysOutputCheck should equal (true)
+  }
 
+  "String functions" should "work correctly" in {
+    val context = new CPExecutionContext(new RunPreferences(Map()))
+    CPStringValue.register(context)
 
+    val str = new CPStringValue("abcdef")
+    val size = new CPFunctionCall("String.size", List(CPConstant(str)))
+    size.calculate(context).get.getIntValue.get should equal (6)
+
+    val substring1 = new CPFunctionCall("String.substring", List(CPConstant(str), CPConstant(CPIntValue(2))))
+    substring1.calculate(context).get.getStringValue.get should equal ("cdef")
+
+    val substring2 = new CPFunctionCall("String.substring", List(CPConstant(str), CPConstant(CPIntValue(2)), CPConstant(CPIntValue(3))))
+    substring2.calculate(context).get.getStringValue.get should equal ("cde")
+
+    val indexOf1 = new CPFunctionCall("String.indexOf", List(CPConstant(str), CPConstant(CPStringValue("bcd"))))
+    indexOf1.calculate(context).get.getIntValue.get should equal (1)
+
+    val indexOf2 = new CPFunctionCall("String.indexOf", List(CPConstant(str), CPConstant(CPStringValue("zzz"))))
+    indexOf2.calculate(context).get.getIntValue.get should equal (-1)
+
+    val startsWith1 = new CPFunctionCall("String.startsWith", List(CPConstant(str), CPConstant(CPStringValue("abc"))))
+    startsWith1.calculate(context).get.getBooleanValue.get should equal (true)
+
+    val startsWith2 = new CPFunctionCall("String.startsWith", List(CPConstant(str), CPConstant(CPStringValue("bcd"))))
+    startsWith2.calculate(context).get.getBooleanValue.get should equal (false)
   }
 }
 

@@ -54,6 +54,7 @@ class ProgramExecutor {
     CPList.register(context)
     CPMap.register(context)
     CPObjectValue.register(context)
+    CPStringValue.register(context)
     val tableLibrary = new TableLibrary()
     tableLibrary.register(context)
     val htmlLibrary = new HTMLLibrary()

@@ -3,7 +3,7 @@ package org.conceptualprogramming
 import java.io.File
 
 import org.conceptualprogramming.core.datatypes.composite.CPObjectValue
-import org.conceptualprogramming.core.dependencies.CPExistDependency
+import org.conceptualprogramming.core.dependencies.{CPExistDependency, CPOrDependency}
 import org.conceptualprogramming.core.{CPFilteringConcept, RunPreferences}
 import org.conceptualprogramming.core.statements.ProgramExecutor
 import org.conceptualprogramming.core.statements.expressions.CPChildObject
@@ -11,10 +11,11 @@ import org.conceptualprogramming.core.utils.TimeLog
 import org.conceptualprogramming.libs.html.HTMLParser
 import org.conceptualprogramming.parser.ProgramParser
 import org.concepualprogramming.core.{CPStrictConcept, CPSubstitutions}
-import org.concepualprogramming.core.datatypes.{CPIntValue, CPStringValue}
-import org.concepualprogramming.core.dependencies.CPDependency
+import org.concepualprogramming.core.datatypes.{CPBooleanValue, CPFloatingValue, CPIntValue, CPStringValue}
+import org.concepualprogramming.core.dependencies.{CPDependency, CPExpressionDependency}
 import org.concepualprogramming.core.knowledgebase.KnowledgeBase
-import org.concepualprogramming.core.statements.expressions.{CPAttribute, CPConstant}
+import org.concepualprogramming.core.statements.expressions.operations.{CPAdd, CPDiv, CPMul, CPSub}
+import org.concepualprogramming.core.statements.expressions.{CPAttribute, CPConstant, CPFunctionCall}
 import org.openqa.selenium.WebDriver
 import org.openqa.selenium.chrome.ChromeDriver
 import org.scalatest.{FlatSpec, Matchers}
@@ -147,24 +148,125 @@ class EcommerceTests extends FlatSpec with Matchers {
     //kb.save("src/test/scala/org/conceptualprogramming/examples/alko/searchresults.dump")
     //println(TimeLog.aggregatedResults)
 
- /*   val executor = new ProgramExecutor
+   val executor = new ProgramExecutor
     val context = executor.initContext(new RunPreferences(Map()))
 
     val size = context.knowledgeBase.load("src/test/scala/org/conceptualprogramming/examples/alko/searchresults.dump")
 
-    val whiteDiv = new CPFilteringConcept("WhiteDiv", ("PageDivision", "e"),
-      CPDependency(CPAttribute("e", "backgroundBasicColorName"), CPConstant(CPStringValue("White")), "=") ::
-        CPDependency(CPAttribute("e", "height"), CPConstant(CPIntValue(0)), ">") ::
-        CPExistDependency.byChildConcepts(
-          ("PageForm", "f") :: ("inside", "i") :: Nil,
-          CPDependency(CPAttribute("i", "insideElement"), CPChildObject("f"), "=") ::
-            CPDependency(CPAttribute("i", "outsideElement"), CPChildObject("e"), "=") :: Nil, Map(), true) :: Nil)
-    val id = TimeLog.start("WhiteDiv")
-    val whiteDivObj = whiteDiv.resolve(Map(), context)
-    TimeLog.stop(id)
-    println(TimeLog.aggregatedResults)
-println(whiteDivObj)
-*/
+    val productTile = new CPFilteringConcept("ProductTile", ("PageDivision", "e"),
+      attributesDependencies = CPDependency(CPAttribute("e", "backgroundBasicColorName"), CPConstant(CPStringValue("White")), "=") ::
+        new CPExpressionDependency(
+          CPFunctionCall("String.startsWith", List(CPAttribute("e", "id"), CPConstant(CPStringValue("product-tile-")))),
+          CPBooleanValue(true)
+        ) :: Nil
+    )
+    val productTileObj = productTile.resolve(Map(), context)
+    productTileObj.size should equal (10)
+    context.knowledgeBase.add(productTile)
+
+    val availabilitySpan = new CPFilteringConcept(
+      "ProductAvailability",
+      ("PageSpan", "e"),
+      new CPOrDependency(
+        CPDependency(CPAttribute("e", "backgroundColorName"), CPConstant(CPStringValue("DarkOliveGreen")), "=") ::
+        CPDependency(CPAttribute("e", "backgroundColorName"), CPConstant(CPStringValue("Yellow")), "=") ::
+        CPDependency(CPAttribute("e", "backgroundColorName"), CPConstant(CPStringValue("Crimson")), "=") :: Nil
+      ) :: Nil
+    )
+
+    val availabilityObj = availabilitySpan.resolve(Map(), context)
+    availabilityObj.size should equal (10)
+    context.knowledgeBase.add(availabilitySpan)
+
+    val priceSpan = new CPStrictConcept(
+      "ProductPrice",
+      "leftPart" :: "rightPart" :: "value" :: Nil,
+      "value",
+      ("PageSpan", "left") :: ("PageSpan", "right") :: Nil,
+      CPDependency(CPAttribute("left", "parent"), CPAttribute("right", "parent"), "=") ::
+        CPDependency(
+          new CPFunctionCall("String.substring", List(CPAttribute("left", "xPath"), CPConstant(CPIntValue(0)),
+            CPSub(CPFunctionCall("String.size", List(CPAttribute("left", "xPath"))), CPConstant(CPIntValue(8))))
+          ),
+          new CPFunctionCall("String.substring", List(CPAttribute("right", "xPath"), CPConstant(CPIntValue(0)),
+            CPSub(CPFunctionCall("String.size", List(CPAttribute("right", "xPath"))), CPConstant(CPIntValue(8))))),
+          "="
+        ) ::
+        CPDependency(CPAttribute("left", "pos"), CPAttribute("right", "pos"), "<") ::
+        CPDependency(CPAttribute("left", "text"), CPConstant(CPStringValue("")), ">") ::
+        CPDependency(CPAttribute("right", "text"), CPConstant(CPStringValue("")), ">") ::
+        CPDependency(CPAttribute("", "leftPart"), CPChildObject("left"), "=") ::
+        CPDependency(CPAttribute("", "rightPart"), CPChildObject("right"), "=") ::
+        CPDependency(CPAttribute("", "value"), CPMul(
+          CPConstant(CPFloatingValue(1.0)),
+          CPAdd(CPAdd(CPAttribute("left", "text"), CPConstant(CPStringValue("."))), CPAttribute("right", "text"))), "=") ::
+        Nil
+    )
+
+    val priceObj = priceSpan.resolve(Map(), context)
+    priceObj.size should equal (10)
+    context.knowledgeBase.add(priceSpan)
+
+    val productName = new CPFilteringConcept(
+      "ProductName", ("PageDivision", "e"),
+      CPDependency(CPAttribute("e", "text"), CPConstant(CPStringValue("")), ">") ::
+        CPDependency(CPAttribute("e", "basicColorName"), CPConstant(CPStringValue("Black")), "=") ::
+        Nil
+    )
+    val nameObj = productName.resolve(Map(), context)
+    (nameObj.size >= 10) should be (true)
+    context.knowledgeBase.add(productName)
+
+
+    //val delimiter = new CPFilteringConcept(
+     // "Delimiter", ("PageDivision", "e"),
+      //CPDependency(CPAttribute("e", "backgroundBasicColorName"), CPConstant(CPStringValue("Black")), "=") ::
+        //CPDependency(CPDiv(CPAttribute("e", "width"), CPAttribute("e", "height")), CPConstant(CPFloatingValue(10)), ">") ::
+        //CPExistDependency.byName("WebPageElement", Map("parent" -> CPAttribute("e", "id")), false) ::
+        //Nil
+    //)
+    //val delimiterObj = delimiter.resolve(Map(), context)
+    //delimiterObj.size should equal (10)
+    //context.knowledgeBase.add(delimiter)
+
+    val productCountry = new CPFilteringConcept(
+      "ProductCountry", ("PageDivision", "e"),
+      CPDependency(CPAttribute("e", "text"), CPConstant(CPStringValue("")), ">") ::
+        CPDependency(CPAttribute("e", "basicColorName"), CPConstant(CPStringValue("Gray")), "=") ::
+        Nil
+    )
+    context.knowledgeBase.add(productCountry)
+    val countryObj = productCountry.resolve(Map(), context)
+    (countryObj.size >= 10) should be (true)
+
+    val product = new CPStrictConcept(
+      "Product",
+      "name" :: "price" :: "country" :: "availability" :: Nil,
+      "name",
+      ("ProductTile", "tileEl") ::
+        ("ProductName", "nameEl") :: ("atTheBottomOf", "nameRel") ::
+        ("ProductPrice", "priceEl") :: ("atTheTopOf", "priceRel") ::
+        ("ProductCountry", "countryEl") :: ("atTheBottomOf", "countryRel") ::
+        ("ProductAvailability", "availabilityEl") :: ("atTheTopOf", "availabilityRel") :: Nil,
+      CPDependency(CPAttribute("nameRel", "inner"), CPChildObject("nameEl"), "=") ::
+        CPDependency(CPAttribute("nameRel", "outer"), CPChildObject("tileEl"), "=") ::
+        CPDependency(CPAttribute("priceRel", "inner"), CPAttribute("priceEl", "leftPart"), "=") ::
+        CPDependency(CPAttribute("priceRel", "outer"), CPChildObject("tileEl"), "=") ::
+        CPDependency(CPAttribute("countryRel", "inner"), CPChildObject("countryEl"), "=") ::
+        CPDependency(CPAttribute("countryRel", "outer"), CPChildObject("tileEl"), "=") ::
+        CPDependency(CPAttribute("availabilityRel", "inner"), CPChildObject("availabilityEl"), "=") ::
+        CPDependency(CPAttribute("availabilityRel", "outer"), CPChildObject("tileEl"), "=") ::
+        CPDependency(CPAttribute("", "name"), CPAttribute("nameEl", "text"), "=") ::
+        CPDependency(CPAttribute("", "price"), CPAttribute("priceEl", "value"), "=") ::
+        CPDependency(CPAttribute("", "country"), CPAttribute("countryEl", "text"), "=") ::
+        CPDependency(CPAttribute("", "availability"), CPAttribute("availabilityEl", "backgroundColorName"), "=") ::
+        Nil
+    )
+
+    val productObj = product.resolve(Map(), context)
+    productObj.size should equal (10)
+    context.knowledgeBase.add(product)
+    println(productObj)
 
   }
 /*

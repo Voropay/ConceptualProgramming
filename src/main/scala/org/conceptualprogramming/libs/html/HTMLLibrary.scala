@@ -1233,6 +1233,170 @@ class HTMLLibrary extends StandardLibrary {
     )
     context.knowledgeBase.add(sameRow)
 
+    val leftPartOf = new CPStrictConcept(
+      "onTheLeftPartOf",
+      "inner" :: "outer" :: Nil,
+      "inner",
+      ("WebPageElement", "i") :: ("WebPageElement", "o") :: Nil,
+      CPDependency(CPAttribute("", "inner"), CPChildObject("i"), "=") ::
+        CPDependency(CPAttribute("", "outer"), CPChildObject("o"), "=") ::
+        CPDependency(CPAttribute("i", "page"), CPAttribute("o", "page"), "=") ::
+        CPDependency(CPAttribute("i", "positionX"), CPConstant(CPIntValue(0)), ">") ::
+        CPDependency(CPAttribute("i", "positionY"), CPConstant(CPIntValue(0)), ">") ::
+        CPDependency(
+          CPAttribute("o", "positionX"),
+          CPAttribute("i", "positionX"),
+          "<="
+        ) ::
+        CPDependency(
+          CPAdd(CPAttribute("i", "positionX"), CPAttribute("i", "width")),
+          CPAdd(CPAttribute("o", "positionX"), CPDiv(CPAttribute("o", "width"), new CPConstant(CPFloatingValue(2)))),
+          "<="
+        ) ::
+        CPDependency(
+          CPAttribute("o", "positionY"),
+          CPAttribute("i", "positionY"),
+          "<="
+        ) ::
+        CPDependency(
+          CPAdd(CPAttribute("i", "positionY"), CPAttribute("i", "height")),
+          CPAdd(CPAttribute("o", "positionY"), CPAttribute("o", "height")),
+          "<="
+        ) :: Nil
+    )
+    context.knowledgeBase.add(leftPartOf)
+
+    val rightPartOf = new CPStrictConcept(
+      "onTheRightPartOf",
+      "inner" :: "outer" :: Nil,
+      "inner",
+      ("WebPageElement", "i") :: ("WebPageElement", "o") :: Nil,
+      CPDependency(CPAttribute("", "inner"), CPChildObject("i"), "=") ::
+        CPDependency(CPAttribute("", "outer"), CPChildObject("o"), "=") ::
+        CPDependency(CPAttribute("i", "page"), CPAttribute("o", "page"), "=") ::
+        CPDependency(CPAttribute("i", "positionX"), CPConstant(CPIntValue(0)), ">") ::
+        CPDependency(CPAttribute("i", "positionY"), CPConstant(CPIntValue(0)), ">") ::
+        CPDependency(
+          CPAdd(CPAttribute("o", "positionX"), CPDiv(CPAttribute("o", "width"), new CPConstant(CPFloatingValue(2)))),
+          CPAttribute("i", "positionX"),
+          "<="
+        ) ::
+        CPDependency(
+          CPAdd(CPAttribute("i", "positionX"), CPAttribute("i", "width")),
+          CPAdd(CPAttribute("o", "positionX"), CPAttribute("o", "width")),
+          "<="
+        ) ::
+        CPDependency(
+          CPAttribute("o", "positionY"),
+          CPAttribute("i", "positionY"),
+          "<="
+        ) ::
+        CPDependency(
+          CPAdd(CPAttribute("i", "positionY"), CPAttribute("i", "height")),
+          CPAdd(CPAttribute("o", "positionY"), CPAttribute("o", "height")),
+          "<="
+        ) :: Nil
+    )
+    context.knowledgeBase.add(rightPartOf)
+
+    val topPartOf = new CPStrictConcept(
+      "atTheTopOf",
+      "inner" :: "outer" :: Nil,
+      "inner",
+      ("WebPageElement", "i") :: ("WebPageElement", "o") :: Nil,
+      CPDependency(CPAttribute("", "inner"), CPChildObject("i"), "=") ::
+        CPDependency(CPAttribute("", "outer"), CPChildObject("o"), "=") ::
+        CPDependency(CPAttribute("i", "page"), CPAttribute("o", "page"), "=") ::
+        CPDependency(CPAttribute("i", "positionX"), CPConstant(CPIntValue(0)), ">") ::
+        CPDependency(CPAttribute("i", "positionY"), CPConstant(CPIntValue(0)), ">") ::
+        CPDependency(
+          CPAttribute("o", "positionX"),
+          CPAttribute("i", "positionX"),
+          "<="
+        ) ::
+        CPDependency(
+          CPAdd(CPAttribute("i", "positionX"), CPAttribute("i", "width")),
+          CPAdd(CPAttribute("o", "positionX"), CPAttribute("o", "width")),
+          "<="
+        ) ::
+        CPDependency(
+          CPAttribute("o", "positionY"),
+          CPAttribute("i", "positionY"),
+          "<="
+        ) ::
+        CPDependency(
+          CPAdd(CPAttribute("i", "positionY"), CPAttribute("i", "height")),
+          CPAdd(CPAttribute("o", "positionY"), CPDiv(CPAttribute("o", "height"), new CPConstant(CPFloatingValue(2)))),
+          "<="
+        ) :: Nil
+    )
+    context.knowledgeBase.add(topPartOf)
+
+    val bottomPartOf = new CPStrictConcept(
+      "atTheBottomOf",
+      "inner" :: "outer" :: Nil,
+      "inner",
+      ("WebPageElement", "i") :: ("WebPageElement", "o") :: Nil,
+      CPDependency(CPAttribute("", "inner"), CPChildObject("i"), "=") ::
+        CPDependency(CPAttribute("", "outer"), CPChildObject("o"), "=") ::
+        CPDependency(CPAttribute("i", "page"), CPAttribute("o", "page"), "=") ::
+        CPDependency(CPAttribute("i", "positionX"), CPConstant(CPIntValue(0)), ">") ::
+        CPDependency(CPAttribute("i", "positionY"), CPConstant(CPIntValue(0)), ">") ::
+        CPDependency(
+          CPAttribute("o", "positionX"),
+          CPAttribute("i", "positionX"),
+          "<="
+        ) ::
+        CPDependency(
+          CPAdd(CPAttribute("i", "positionX"), CPAttribute("i", "width")),
+          CPAdd(CPAttribute("o", "positionX"), CPAttribute("o", "width")),
+          "<="
+        ) ::
+        CPDependency(
+          CPAdd(CPAttribute("o", "positionY"), CPDiv(CPAttribute("o", "height"), new CPConstant(CPFloatingValue(2)))),
+          CPAttribute("i", "positionY"),
+          "<="
+        ) ::
+        CPDependency(
+          CPAdd(CPAttribute("i", "positionY"), CPAttribute("i", "height")),
+          CPAdd(CPAttribute("o", "positionY"), CPAttribute("o", "height")),
+          "<="
+        ) :: Nil
+    )
+    context.knowledgeBase.add(bottomPartOf)
+
+    val centralPartOf = new CPStrictConcept(
+      "inTheCenterOf",
+      "inner" :: "outer" :: Nil,
+      "inner",
+      ("WebPageElement", "i") :: ("WebPageElement", "o") :: Nil,
+      CPDependency(CPAttribute("", "inner"), CPChildObject("i"), "=") ::
+        CPDependency(CPAttribute("", "outer"), CPChildObject("o"), "=") ::
+        CPDependency(CPAttribute("i", "page"), CPAttribute("o", "page"), "=") ::
+        CPDependency(CPAttribute("i", "positionX"), CPConstant(CPIntValue(0)), ">") ::
+        CPDependency(CPAttribute("i", "positionY"), CPConstant(CPIntValue(0)), ">") ::
+        CPDependency(
+          CPAttribute("o", "positionX"),
+          CPAttribute("i", "positionX"),
+          "<="
+        ) ::
+        CPDependency(
+          CPAdd(CPAttribute("i", "positionX"), CPAttribute("i", "width")),
+          CPAdd(CPAttribute("o", "positionX"), CPAttribute("o", "width")),
+          "<="
+        ) ::
+        CPDependency(
+          CPAdd(CPAttribute("o", "positionY"), CPMul(CPAttribute("o", "height"), new CPConstant(CPFloatingValue(0.25)))),
+          CPAttribute("i", "positionY"),
+          "<="
+        ) ::
+        CPDependency(
+          CPAdd(CPAttribute("i", "positionY"), CPAttribute("i", "height")),
+          CPAdd(CPAttribute("o", "positionY"), CPMul(CPAttribute("o", "height"), new CPConstant(CPFloatingValue(0.75)))),
+          "<="
+        ) :: Nil
+    )
+    context.knowledgeBase.add(centralPartOf)
 
   }
 

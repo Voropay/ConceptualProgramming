@@ -156,6 +156,34 @@ class HTMLConceptsTests extends FlatSpec with Matchers {
     centerPartOfThePageObjects.size should equal (10)
 
 
+    val form = context.knowledgeBase.getObjects("PageForm").head
+    val leftPart = context.knowledgeBase.getConcepts("onTheLeftPartOf").head
+    val leftObjects1 = leftPart.resolve(Map("outer" -> new CPObjectValue(form)), context)
+    leftObjects1.find(checkObj(_, "name", "inner", CPStringValue("description"))).isDefined should be (true)
+    leftObjects1.size should equal (8)
+
+
+    val rightPart = context.knowledgeBase.getConcepts("onTheRightPartOf").head
+    val rightObjects1 = rightPart.resolve(Map("outer" -> new CPObjectValue(form)), context)
+    rightObjects1.find(checkObj(_, "type", "inner", CPStringValue("submit"))).isDefined should be (true)
+    rightObjects1.size should equal (4)
+
+    val loginForm = context1.knowledgeBase.getObjects("PageForm").head
+    val topPart = context1.knowledgeBase.getConcepts("atTheTopOf").head
+    val topObjects1 = topPart.resolve(Map("outer" -> new CPObjectValue(loginForm)), context1)
+    topObjects1.find(checkObj(_, "name", "inner", CPStringValue("LoginForm_Login"))).isDefined should be (true)
+    topObjects1.size should equal (5)
+
+    val bottomPart = context1.knowledgeBase.getConcepts("atTheBottomOf").head
+    val bottomObjects1 = bottomPart.resolve(Map("outer" -> new CPObjectValue(loginForm)), context1)
+    bottomObjects1.find(checkObj(_, "name", "inner", CPStringValue("submit"))).isDefined should be (true)
+    bottomObjects1.size should equal (5)
+
+    val centralPart = context1.knowledgeBase.getConcepts("inTheCenterOf").head
+    val centralObjects1 = centralPart.resolve(Map("outer" -> new CPObjectValue(loginForm)), context1)
+    centralObjects1.find(checkObj(_, "name", "inner", CPStringValue("LoginForm_RegistrationDomain"))).isDefined should be (true)
+    centralObjects1.size should equal (4)
+
   }
 
   "color concept" should "work correctly" in {
