@@ -99,7 +99,7 @@ class EcommerceTests extends FlatSpec with Matchers {
     context.knowledgeBase.add(searchForm)
 
   }
-/*
+
   "eCommerce homePage example" should "be parsed correctly" in {
     val executor = new ProgramExecutor
     val context = executor.initContext(new RunPreferences(Map()))
@@ -134,7 +134,7 @@ class EcommerceTests extends FlatSpec with Matchers {
     val res = context.getValueResult
     res should equal (Some(CPStringValue("js-search-bar")))
   }
-*/
+
   "eCommerce searchResults Page concepts" should "work correctly" in {
     //val driverFilePath = new File("resources/chromedriver.exe")
     //System.setProperty("webdriver.chrome.driver", driverFilePath.getAbsolutePath)
