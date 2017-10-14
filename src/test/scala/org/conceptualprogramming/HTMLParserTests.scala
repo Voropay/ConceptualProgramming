@@ -21,6 +21,7 @@ class HTMLParserTests extends FlatSpec with Matchers {
 
   "color extraction" should "work correctly" in {
     ColorUtils.extractColorName("rgba(255, 0, 0, 1)") should equal("Red")
+    ColorUtils.extractBasicColorName("rgba(248, 165, 66, 1)") should equal("Brown")
   }
 
   "div tag" should "be parsed correctly" in {

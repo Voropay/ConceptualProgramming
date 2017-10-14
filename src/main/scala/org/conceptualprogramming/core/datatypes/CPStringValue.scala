@@ -148,6 +148,7 @@ object CPStringValue {
     context.addFunctionDefinition(createSubstringFunction)
     context.addFunctionDefinition(createIndexOfFunction)
     context.addFunctionDefinition(createStartsWithFunction)
+    context.addFunctionDefinition(createEndsWithFunction)
   }
 
   def createSizeFunction: CPFunctionDefinition = {
@@ -188,7 +189,7 @@ object CPStringValue {
         return None
       }
       val startVal = startExpr.get.calculate(context)
-      if(startVal.isEmpty || startVal.get.getIntValue.isEmpty) {
+      if(startVal.isEmpty || startVal.get.getIntValue.isEmpty || startVal.get.getIntValue.get < 0) {
         return None
       }
       val start = startVal.get.getIntValue.get
@@ -201,7 +202,11 @@ object CPStringValue {
         if(sizeVal.isEmpty || sizeVal.get.getIntValue.isEmpty) {
           return None
         }
-        return Some(CPStringValue(str.substring(start, start + sizeVal.get.getIntValue.get)))
+        val size = sizeVal.get.getIntValue.get
+        if(start + size < 0) {
+          return None
+        }
+        return Some(CPStringValue(str.substring(start, start + size)))
       }
     }
     new BuiltInFunctionDefinition(
@@ -272,6 +277,38 @@ object CPStringValue {
       "String.startsWith",
       "string" :: "substring" :: Nil,
       startsWith,
+      CPFunctionDefinition.checkAttributesDefined
+    )
+  }
+
+  def createEndsWithFunction: CPFunctionDefinition = {
+    def endsWith(args: Map[String, CPExpression], context: CPExecutionContext): Option[CPValue] = {
+      val strExpr = args.get("string")
+      if(strExpr.isEmpty) {
+        return None
+      }
+      val strVal = strExpr.get.calculate(context)
+      if(strVal.isEmpty || strVal.get.getStringValue.isEmpty) {
+        return None
+      }
+      val str = strVal.get.getStringValue.get
+
+      val substrExpr = args.get("substring")
+      if(substrExpr.isEmpty) {
+        return None
+      }
+      val substrVal = substrExpr.get.calculate(context)
+      if(substrVal.isEmpty || substrVal.get.getStringValue.isEmpty) {
+        return None
+      }
+      val substr = substrVal.get.getStringValue.get
+
+      return Some(CPBooleanValue(str.endsWith(substr)))
+    }
+    new BuiltInFunctionDefinition(
+      "String.endsWith",
+      "string" :: "substring" :: Nil,
+      endsWith,
       CPFunctionDefinition.checkAttributesDefined
     )
   }

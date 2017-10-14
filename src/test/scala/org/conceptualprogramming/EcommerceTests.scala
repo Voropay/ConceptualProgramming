@@ -14,8 +14,10 @@ import org.concepualprogramming.core.{CPStrictConcept, CPSubstitutions}
 import org.concepualprogramming.core.datatypes.{CPBooleanValue, CPFloatingValue, CPIntValue, CPStringValue}
 import org.concepualprogramming.core.dependencies.{CPDependency, CPExpressionDependency}
 import org.concepualprogramming.core.knowledgebase.KnowledgeBase
-import org.concepualprogramming.core.statements.expressions.operations.{CPAdd, CPDiv, CPMul, CPSub}
-import org.concepualprogramming.core.statements.expressions.{CPAttribute, CPConstant, CPFunctionCall}
+import org.concepualprogramming.core.statements.expressions.functions.CPCompositeFunctionDefinition
+import org.concepualprogramming.core.statements.{CompositeStatement, IfStatement, NOPStatement, ReturnValueStatement}
+import org.concepualprogramming.core.statements.expressions.operations._
+import org.concepualprogramming.core.statements.expressions.{CPAttribute, CPConstant, CPFunctionCall, CPVariable}
 import org.openqa.selenium.WebDriver
 import org.openqa.selenium.chrome.ChromeDriver
 import org.scalatest.{FlatSpec, Matchers}
@@ -25,7 +27,7 @@ import org.scalatest.{FlatSpec, Matchers}
   */
 
 class EcommerceTests extends FlatSpec with Matchers {
-/*
+
   "eCommerce homePage concepts" should "work correctly" in {
     //val driverFilePath = new File("resources/chromedriver.exe")
     //System.setProperty("webdriver.chrome.driver", driverFilePath.getAbsolutePath)
@@ -97,7 +99,7 @@ class EcommerceTests extends FlatSpec with Matchers {
     context.knowledgeBase.add(searchForm)
 
   }
-
+/*
   "eCommerce homePage example" should "be parsed correctly" in {
     val executor = new ProgramExecutor
     val context = executor.initContext(new RunPreferences(Map()))
@@ -169,7 +171,7 @@ class EcommerceTests extends FlatSpec with Matchers {
       ("PageSpan", "e"),
       new CPOrDependency(
         CPDependency(CPAttribute("e", "backgroundColorName"), CPConstant(CPStringValue("DarkOliveGreen")), "=") ::
-        CPDependency(CPAttribute("e", "backgroundColorName"), CPConstant(CPStringValue("Yellow")), "=") ::
+        CPDependency(CPAttribute("e", "backgroundColorName"), CPConstant(CPStringValue("Brown")), "=") ::
         CPDependency(CPAttribute("e", "backgroundColorName"), CPConstant(CPStringValue("Crimson")), "=") :: Nil
       ) :: Nil
     )
@@ -177,6 +179,47 @@ class EcommerceTests extends FlatSpec with Matchers {
     val availabilityObj = availabilitySpan.resolve(Map(), context)
     availabilityObj.size should equal (10)
     context.knowledgeBase.add(availabilitySpan)
+
+    val convertColorsBody = new CompositeStatement(
+      new IfStatement(
+          new CPEquals(CPVariable("color"), CPConstant(CPStringValue("DarkOliveGreen"))),
+          new ReturnValueStatement(CPConstant(CPStringValue("green"))),
+          new NOPStatement()
+      ) ::
+        new IfStatement(
+          new CPEquals(CPVariable("color"), CPConstant(CPStringValue("Brown"))),
+          new ReturnValueStatement(CPConstant(CPStringValue("yellow"))),
+          new NOPStatement()
+        ) ::
+        new IfStatement(
+          new CPEquals(CPVariable("color"), CPConstant(CPStringValue("Crimson"))),
+          new ReturnValueStatement(CPConstant(CPStringValue("red"))),
+          new NOPStatement()
+        ) ::
+        new ReturnValueStatement(CPConstant(CPStringValue("unknown"))) ::
+        Nil
+    )
+
+    val convertColors = new CPCompositeFunctionDefinition("convertColors", "color" :: Nil, convertColorsBody)
+    convertColors.calculate(Map("color" -> CPConstant(CPStringValue("DarkOliveGreen"))), context) should equal (Some(CPStringValue("green")))
+    convertColors.calculate(Map("color" -> CPConstant(CPStringValue("Brown"))), context) should equal (Some(CPStringValue("yellow")))
+    convertColors.calculate(Map("color" -> CPConstant(CPStringValue("Crimson"))), context) should equal (Some(CPStringValue("red")))
+    convertColors.calculate(Map("color" -> CPConstant(CPStringValue("Other"))), context) should equal (Some(CPStringValue("unknown")))
+    context.addFunctionDefinition(convertColors)
+
+    val colorsTest = new CPStrictConcept(
+      "ConvertedColors",
+      "converted" :: "origin" :: Nil,
+      "converted",
+      ("ProductAvailability", "av") :: Nil,
+      CPDependency(CPAttribute("", "origin"), CPAttribute("av", "backgroundColorName"), "=") ::
+        CPDependency(CPAttribute("", "converted"), CPFunctionCall("convertColors", CPAttribute("av", "backgroundColorName") :: Nil), "=") ::
+        Nil
+    )
+    val colorsObj = colorsTest.resolve(Map(), context)
+    colorsObj.size should equal (10)
+
+
 
     val priceSpan = new CPStrictConcept(
       "ProductPrice",
@@ -217,18 +260,6 @@ class EcommerceTests extends FlatSpec with Matchers {
     (nameObj.size >= 10) should be (true)
     context.knowledgeBase.add(productName)
 
-
-    //val delimiter = new CPFilteringConcept(
-     // "Delimiter", ("PageDivision", "e"),
-      //CPDependency(CPAttribute("e", "backgroundBasicColorName"), CPConstant(CPStringValue("Black")), "=") ::
-        //CPDependency(CPDiv(CPAttribute("e", "width"), CPAttribute("e", "height")), CPConstant(CPFloatingValue(10)), ">") ::
-        //CPExistDependency.byName("WebPageElement", Map("parent" -> CPAttribute("e", "id")), false) ::
-        //Nil
-    //)
-    //val delimiterObj = delimiter.resolve(Map(), context)
-    //delimiterObj.size should equal (10)
-    //context.knowledgeBase.add(delimiter)
-
     val productCountry = new CPFilteringConcept(
       "ProductCountry", ("PageDivision", "e"),
       CPDependency(CPAttribute("e", "text"), CPConstant(CPStringValue("")), ">") ::
@@ -239,35 +270,55 @@ class EcommerceTests extends FlatSpec with Matchers {
     val countryObj = productCountry.resolve(Map(), context)
     (countryObj.size >= 10) should be (true)
 
+    val productVolume = new CPFilteringConcept(
+      "ProductVolume", ("PageDivision", "e"),
+      CPDependency(CPAttribute("e", "text"), CPConstant(CPStringValue("")), ">") ::
+        CPDependency(CPAttribute("e", "basicColorName"), CPConstant(CPStringValue("Gray")), "=") ::
+        new CPExpressionDependency(
+          new CPFunctionCall("String.endsWith", List(CPAttribute("e", "text"), CPConstant(CPStringValue(" l")))),
+          CPBooleanValue(true)
+        ) ::
+        Nil
+    )
+    context.knowledgeBase.add(productVolume)
+    val volumeObj = productVolume.resolve(Map(), context)
+    volumeObj.size should equal (10)
+
     val product = new CPStrictConcept(
       "Product",
-      "name" :: "price" :: "country" :: "availability" :: Nil,
+      "name" :: "price" :: "volume" :: "country" :: "availability" :: Nil,
       "name",
       ("ProductTile", "tileEl") ::
         ("ProductName", "nameEl") :: ("atTheBottomOf", "nameRel") ::
         ("ProductPrice", "priceEl") :: ("atTheTopOf", "priceRel") ::
+        ("ProductVolume", "volumeEl") :: ("atTheTopOf", "volumeRel") ::
         ("ProductCountry", "countryEl") :: ("atTheBottomOf", "countryRel") ::
         ("ProductAvailability", "availabilityEl") :: ("atTheTopOf", "availabilityRel") :: Nil,
       CPDependency(CPAttribute("nameRel", "inner"), CPChildObject("nameEl"), "=") ::
         CPDependency(CPAttribute("nameRel", "outer"), CPChildObject("tileEl"), "=") ::
         CPDependency(CPAttribute("priceRel", "inner"), CPAttribute("priceEl", "leftPart"), "=") ::
         CPDependency(CPAttribute("priceRel", "outer"), CPChildObject("tileEl"), "=") ::
+        CPDependency(CPAttribute("volumeRel", "inner"), CPChildObject("volumeEl"), "=") ::
+        CPDependency(CPAttribute("volumeRel", "outer"), CPChildObject("tileEl"), "=") ::
         CPDependency(CPAttribute("countryRel", "inner"), CPChildObject("countryEl"), "=") ::
         CPDependency(CPAttribute("countryRel", "outer"), CPChildObject("tileEl"), "=") ::
         CPDependency(CPAttribute("availabilityRel", "inner"), CPChildObject("availabilityEl"), "=") ::
         CPDependency(CPAttribute("availabilityRel", "outer"), CPChildObject("tileEl"), "=") ::
         CPDependency(CPAttribute("", "name"), CPAttribute("nameEl", "text"), "=") ::
         CPDependency(CPAttribute("", "price"), CPAttribute("priceEl", "value"), "=") ::
+        CPDependency(CPAttribute("", "volume"), CPFunctionCall("String.substring", List(
+          CPAttribute("volumeEl", "text"),
+          CPConstant(CPIntValue(0)),
+          CPSub(CPFunctionCall("String.size", List(CPAttribute("volumeEl", "text"))), CPConstant(CPIntValue(2)))
+        )), "=") ::
         CPDependency(CPAttribute("", "country"), CPAttribute("countryEl", "text"), "=") ::
-        CPDependency(CPAttribute("", "availability"), CPAttribute("availabilityEl", "backgroundColorName"), "=") ::
+        CPDependency(CPAttribute("", "availability"), CPFunctionCall("convertColors", CPAttribute("availabilityEl", "backgroundColorName") :: Nil), "=") ::
         Nil
     )
 
     val productObj = product.resolve(Map(), context)
     productObj.size should equal (10)
     context.knowledgeBase.add(product)
-    println(productObj)
-
   }
 /*
   "eCommerce example" should "be executed correctly" in {

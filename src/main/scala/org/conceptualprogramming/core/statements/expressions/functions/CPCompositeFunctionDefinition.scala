@@ -13,11 +13,11 @@ case class CPCompositeFunctionDefinition (name: String, argsNames: List[String],
     if(argsNames.find(!args.contains(_)).isDefined) {
       return None
     }
-    context.addFrame
     val argsVals = args.map(entry => (entry._1 -> entry._2.calculate(context)))
     if(argsVals.find(_._2.isEmpty).isDefined) {
       return None
     }
+    context.addFrame
     argsVals.foreach(entry => context.setVariable(entry._1, entry._2.get))
     body.execute(context)
     val res = context.getValueResult

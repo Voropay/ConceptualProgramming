@@ -541,6 +541,12 @@ class DataTypesTests extends FlatSpec with Matchers {
 
     val startsWith2 = new CPFunctionCall("String.startsWith", List(CPConstant(str), CPConstant(CPStringValue("bcd"))))
     startsWith2.calculate(context).get.getBooleanValue.get should equal (false)
+
+    val endsWith1 = new CPFunctionCall("String.endsWith", List(CPConstant(str), CPConstant(CPStringValue("ef"))))
+    endsWith1.calculate(context).get.getBooleanValue.get should equal (true)
+
+    val endsWith2 = new CPFunctionCall("String.endsWith", List(CPConstant(str), CPConstant(CPStringValue("abcd"))))
+    endsWith2.calculate(context).get.getBooleanValue.get should equal (false)
   }
 }
 
