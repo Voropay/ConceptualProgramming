@@ -20,7 +20,7 @@ trait ConstantsParser extends JavaTokenParsers {
   def intConstant: Parser[CPIntValue] = wholeNumber ^^  {value => CPIntValue(value.toInt)}
   def floatingConstant: Parser[CPValue] = floatingPointNumber ^^  {value => {
     val floatingValue = value.toDouble
-    if(floatingValue != floatingValue.toInt.toDouble) {
+    if(value.contains(".") || floatingValue != floatingValue.toInt.toDouble) {
       CPFloatingValue(floatingValue)
     } else {
       CPIntValue(floatingValue.toInt)

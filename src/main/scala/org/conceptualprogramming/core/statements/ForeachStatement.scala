@@ -10,7 +10,7 @@ import org.concepualprogramming.core.statements.expressions.CPExpression
 /**
  * Created by oleksii.voropai on 4/12/2017.
  */
-class ForeachStatement(iteratorName: String, collection: CPExpression, body: CPStatement) extends CPStatement {
+case class ForeachStatement(iteratorName: String, collection: CPExpression, body: CPStatement) extends CPStatement {
 
   override def execute(context: CPExecutionContext): Unit = {
     context.addTransparentFrame

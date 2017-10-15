@@ -53,9 +53,9 @@ class ParserTests  extends FlatSpec with Matchers {
     }
     constantsParser("true").get.getBooleanValue.get should equal (true)
     constantsParser("false").get.getBooleanValue.get should equal (false)
-    constantsParser("10").get.getIntValue.get should equal (10)
-    constantsParser("10.5").get.getFloatingValue.get should equal (10.5)
-    constantsParser("10.0").get.asInstanceOf[CPIntValue] should equal (CPIntValue(10))
+    constantsParser("10").get should equal (CPIntValue(10))
+    constantsParser("10.5").get should equal (CPFloatingValue(10.5))
+    constantsParser("10.0").get should equal (CPFloatingValue(10))
     constantsParser("\"string\"").get.getStringValue.get should equal ("string")
     constantsParser("2017-01-28").get.getDateValue.get should equal (LocalDate.of(2017, 1, 28))
   }
@@ -280,6 +280,14 @@ class ParserTests  extends FlatSpec with Matchers {
     forBody.variableName should equal ("sum")
     forBody.operand.asInstanceOf[CPAdd].operand1.asInstanceOf[CPVariable].name should equal ("sum")
     forBody.operand.asInstanceOf[CPAdd].operand2.asInstanceOf[CPVariable].name should equal ("i")
+
+    val foreachStmt = stmtParser("for(product in products){i=i+1}").get.asInstanceOf[ForeachStatement]
+    foreachStmt.iteratorName should equal ("product")
+    foreachStmt.collection should equal (CPVariable("products"))
+    val foreachBody = foreachStmt.body.asInstanceOf[CompositeStatement].body.head.asInstanceOf[VariableStatement]
+    foreachBody.variableName should equal ("i")
+    foreachBody.operand.asInstanceOf[CPAdd].operand1 should equal (CPVariable("i"))
+    foreachBody.operand.asInstanceOf[CPAdd].operand2 should equal (CPConstant(CPIntValue(1)))
 
     val whileStmt = stmtParser("while(a < 1000) {a = a * a}").get.asInstanceOf[WhileStatement]
     val whileCond = whileStmt.condition.asInstanceOf[CPLess]

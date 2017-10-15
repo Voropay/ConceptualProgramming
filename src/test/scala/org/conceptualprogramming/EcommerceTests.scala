@@ -10,6 +10,7 @@ import org.conceptualprogramming.core.statements.expressions.CPChildObject
 import org.conceptualprogramming.core.utils.TimeLog
 import org.conceptualprogramming.libs.html.HTMLParser
 import org.conceptualprogramming.parser.ProgramParser
+import org.concepualprogramming.core.datatypes.composite.CPList
 import org.concepualprogramming.core.{CPStrictConcept, CPSubstitutions}
 import org.concepualprogramming.core.datatypes.{CPBooleanValue, CPFloatingValue, CPIntValue, CPStringValue}
 import org.concepualprogramming.core.dependencies.{CPDependency, CPExpressionDependency}
@@ -319,6 +320,84 @@ class EcommerceTests extends FlatSpec with Matchers {
     val productObj = product.resolve(Map(), context)
     productObj.size should equal (10)
     context.knowledgeBase.add(product)
+  }
+
+  "eCommerce searchResults example" should "be parsed correctly" in {
+    val executor = new ProgramExecutor
+    val context = executor.initContext(new RunPreferences(Map()))
+
+    context.knowledgeBase.load("src/test/scala/org/conceptualprogramming/examples/alko/searchresults.dump")
+
+    val eCommerceExample =
+      """
+        |concept ProductTile :- PageDivision e (),
+        |    e.backgroundBasicColorName == "White",
+        |    String.startsWith(e.id, "product-tile-");
+        |
+        |concept ProductAvailability :- PageSpan e (),
+        |    e.backgroundColorName == "DarkOliveGreen" OR
+        |    e.backgroundColorName == "Brown" OR
+        |    e.backgroundColorName == "Crimson";
+        |
+        |def convertColors(color) {
+        |    if (color == "DarkOliveGreen") {
+        |        return "green";
+        |    };
+        |    if (color == "Brown") {
+        |        return "green";
+        |    };
+        |    if (color == "Crimson") {
+        |        return "red";
+        |    };
+        |    return "unknown";
+        |};
+        |
+        |concept ProductPrice (
+        |    value == 1.0 * (left.text + "." + right.text),
+        |    leftPart == $left,
+        |    rightPart == $right
+        |    ) := PageSpan left (), PageSpan right (),
+        |    left.parent == right.parent,
+        |    String.substring(left.xPath, 0, String.size(left.xPath) - 8) == String.substring(right.xPath, 0, String.size(right.xPath) - 8),
+        |    left.pos < right.pos,
+        |    left.text > "",
+        |    right.text > "";
+        |
+        |concept ProductName :- PageDivision e (), e.text > "", e.basicColorName == "Black";
+        |
+        |concept ProductCountry :- PageDivision e (), e.text > "", e.basicColorName == "Gray";
+        |
+        |concept ProductVolume :- PageDivision e (), e.text > "", e.basicColorName == "Gray", String.endsWith(e.text, " l");
+        |
+        |concept Product (
+        |    name == nameEl.text,
+        |    price == priceEl.value,
+        |    volume == String.substring(volumeEl.text, 0, String.size(volumeEl.text) - 2),
+        |    country == countryEl.text,
+        |    availability == convertColors(availabilityEl.backgroundColorName)
+        |    ) :=
+        |    ProductTile tileEl (),
+        |    ProductName nameEl (), atTheBottomOf nameRel (inner == $nameEl, outer == $tileEl),
+        |    ProductPrice priceEl (), atTheTopOf priceRel (inner == priceEl.leftPart, outer == $tileEl),
+        |    ProductVolume volumeEl (), atTheTopOf volumeRel (inner == $volumeEl, outer == $tileEl),
+        |    ProductCountry countryEl (), atTheBottomOf countryRel (inner == $countryEl, outer == $tileEl),
+        |    ProductAvailability availabilityEl (), atTheTopOf availabilityRel (inner == $availabilityEl, outer == $tileEl);
+        |
+        |products <- Product {};
+        |output = "Products found:\n";
+        |for(product in products) {
+        |    output = output + product["name"] + ", " +  product["volume"] + " l, " +
+        |             product["price"] + " €, " + product["country"] + ", " + product["availability"] + "\n";
+        |};
+        |return output;
+      """.stripMargin
+
+    val eCommerceCode = ProgramParser(eCommerceExample)
+    eCommerceCode.isDefined should be (true)
+    eCommerceCode.get.body.size should equal (12)
+    eCommerceCode.get.execute(context)
+    val res = context.getValueResult.get.getStringValue.get
+    res should equal ("Products found:\\nYamada-Nishiki Tokubetsu Junmai-shu Sake, 0.72 l, 19.99 €, Japan, green\\nKirin Junmai Daiginjo Sake, 0.72 l, 47.8 €, Japan, red\\nKura no Machi Tokubetsu Junmai Ginjo Sake, 0.3 l, 5.21 €, Japan, green\\nHakutsuru Sayuri Nigori Sake, 0.3 l, 11.97 €, Japan, green\\nHakutsuru Tanrei Junmai Sake, 0.18 l, 6.58 €, Japan, green\\nMasaki Yamadanishiki Junmai Genshu Sake, 0.3 l, 9.73 €, Japan, green\\nAizu Homare Junmai Daiginjo Banshu Sake, 0.72 l, 49.4 €, Japan, green\\nTakehara Junmai True Mirror Sake, 0.72 l, 26.81 €, Japan, green\\nHakutsuru Superior Junmai Ginjo Sake, 0.72 l, 25.5 €, Japan, green\\nTatenokawa Junmai Daiginjo Sake, 0.3 l, 20.9 €, Japan, green\\n")
   }
 /*
   "eCommerce example" should "be executed correctly" in {

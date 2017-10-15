@@ -29,7 +29,7 @@ import scala.util.Properties
  */
 trait StatementsParser extends ExpressionsParser {
   def statement: Parser[CPStatement] = variableAssignmentStatement | returnObjectStatement | returnVariableStatement |
-                                       ifStatement | forStatement | whileStatement | functionDefinitionStatement | procedureCallStatement | addToCollectionStatement |
+                                       ifStatement | forStatement | foreachStatement | whileStatement | functionDefinitionStatement | procedureCallStatement | addToCollectionStatement |
                                        conceptDefinitionStatement | conceptDefinitionResolvingToVariableStatement | conceptResolvingToVariableStatement |
                                        conceptDefinitionResolvingStatement | conceptResolvingStatement | objectDefinitionStatement |
                                        compositeStatement
@@ -59,6 +59,9 @@ trait StatementsParser extends ExpressionsParser {
       endStmt,
       loopBody
     )
+  }
+  def foreachStatement: Parser[CPStatement] = "for" ~ "(" ~ ident ~ "in" ~ expression ~ ")" ~(compositeStatement | statement) ^^ {
+    case "for" ~ "(" ~ iteratorName ~ "in" ~ collection ~ ")" ~ loopBody => new ForeachStatement(iteratorName, collection, loopBody)
   }
   def whileStatement: Parser[CPStatement] = "while" ~ "(" ~ opt(expression) ~ ")" ~ (compositeStatement | statement) ^^ {
     case "while" ~ "(" ~ exitCond ~ ")" ~ loopBody => new WhileStatement(exitCond.getOrElse(new CPConstant(CPBooleanValue(true))), loopBody)
