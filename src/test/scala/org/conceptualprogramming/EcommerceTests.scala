@@ -384,10 +384,10 @@ class EcommerceTests extends FlatSpec with Matchers {
         |    ProductAvailability availabilityEl (), atTheTopOf availabilityRel (inner == $availabilityEl, outer == $tileEl);
         |
         |products <- Product {};
-        |output = "Products found:\n";
+        |output = "Products found: ";
         |for(product in products) {
         |    output = output + product["name"] + ", " +  product["volume"] + " l, " +
-        |             product["price"] + " €, " + product["country"] + ", " + product["availability"] + "\n";
+        |             product["price"] + " €, " + product["country"] + ", " + product["availability"] + ". ";
         |};
         |return output;
       """.stripMargin
@@ -397,19 +397,24 @@ class EcommerceTests extends FlatSpec with Matchers {
     eCommerceCode.get.body.size should equal (12)
     eCommerceCode.get.execute(context)
     val res = context.getValueResult.get.getStringValue.get
-    res should equal ("Products found:\\nYamada-Nishiki Tokubetsu Junmai-shu Sake, 0.72 l, 19.99 €, Japan, green\\nKirin Junmai Daiginjo Sake, 0.72 l, 47.8 €, Japan, red\\nKura no Machi Tokubetsu Junmai Ginjo Sake, 0.3 l, 5.21 €, Japan, green\\nHakutsuru Sayuri Nigori Sake, 0.3 l, 11.97 €, Japan, green\\nHakutsuru Tanrei Junmai Sake, 0.18 l, 6.58 €, Japan, green\\nMasaki Yamadanishiki Junmai Genshu Sake, 0.3 l, 9.73 €, Japan, green\\nAizu Homare Junmai Daiginjo Banshu Sake, 0.72 l, 49.4 €, Japan, green\\nTakehara Junmai True Mirror Sake, 0.72 l, 26.81 €, Japan, green\\nHakutsuru Superior Junmai Ginjo Sake, 0.72 l, 25.5 €, Japan, green\\nTatenokawa Junmai Daiginjo Sake, 0.3 l, 20.9 €, Japan, green\\n")
+    res should equal ("Products found: Yamada-Nishiki Tokubetsu Junmai-shu Sake, 0.72 l, 19.99 €, Japan, green. Kirin Junmai Daiginjo Sake, 0.72 l, 47.8 €, Japan, red. Kura no Machi Tokubetsu Junmai Ginjo Sake, 0.3 l, 5.21 €, Japan, green. Hakutsuru Sayuri Nigori Sake, 0.3 l, 11.97 €, Japan, green. Hakutsuru Tanrei Junmai Sake, 0.18 l, 6.58 €, Japan, green. Masaki Yamadanishiki Junmai Genshu Sake, 0.3 l, 9.73 €, Japan, green. Aizu Homare Junmai Daiginjo Banshu Sake, 0.72 l, 49.4 €, Japan, green. Takehara Junmai True Mirror Sake, 0.72 l, 26.81 €, Japan, green. Hakutsuru Superior Junmai Ginjo Sake, 0.72 l, 25.5 €, Japan, green. Tatenokawa Junmai Daiginjo Sake, 0.3 l, 20.9 €, Japan, green. ")
   }
-/*
+
   "eCommerce example" should "be executed correctly" in {
     val preferences = RunPreferences(Array("-sourceFile=src/test/scala/org/conceptualprogramming/examples/alko/alko.cp"))
     val executor = new ProgramExecutor
     val source = scala.io.Source.fromFile(preferences.getSourceFile)
     val sourceCode = try source.mkString finally source.close()
     val res = executor.execute(sourceCode, preferences)
-    res should equal ("done")
-    //HTML.followLink(searchForm[0]["submit"]);
-    //HTML.closeWebPage(url);
-
+    res.contains("Yamada-Nishiki Tokubetsu Junmai-shu Sake, 0.72 l, 19.99 €, Japan, green.") should be (true)
+    res.contains("Kirin Junmai Daiginjo Sake, 0.72 l, 47.8 €, Japan, red.") should be (true)
+    res.contains("Kura no Machi Tokubetsu Junmai Ginjo Sake, 0.3 l, 5.21 €, Japan, green.") should be (true)
+    res.contains("Hakutsuru Sayuri Nigori Sake, 0.3 l, 11.97 €, Japan, green.") should be (true)
+    res.contains("Hakutsuru Tanrei Junmai Sake, 0.18 l, 6.58 €, Japan, green.") should be (true)
+    res.contains("Masaki Yamadanishiki Junmai Genshu Sake, 0.3 l, 9.73 €, Japan, green.") should be (true)
+    res.contains("Aizu Homare Junmai Daiginjo Banshu Sake, 0.72 l, 49.4 €, Japan, green.") should be (true)
+    res.contains("Takehara Junmai True Mirror Sake, 0.72 l, 26.81 €, Japan, green.") should be (true)
+    res.contains("Hakutsuru Superior Junmai Ginjo Sake, 0.72 l, 25.5 €, Japan, green.") should be (true)
+    res.contains("Tatenokawa Junmai Daiginjo Sake, 0.3 l, 20.9 €, Japan, green.") should be (true)
   }
-  */
 }
