@@ -81,7 +81,7 @@ products <- Product {};
 output = "Products found: ";
 for(product in products) {
     output = output + product["name"] + ", " +  product["volume"] + " l, " +
-             product["price"] + " €, " + product["country"] + ", " + product["availability"] + ". ";
+             product["price"] + " eur, " + product["country"] + ", " + product["availability"] + ". ";
 };
 
 HTML.closeWebPage(url);
