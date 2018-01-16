@@ -1,0 +1,47 @@
+Здравствуйте, в свободное вреся я работаю над своим проектом и хотел бы поделиться результатами.
+Проект посвящен задаче упрощения работы со слабо структурированными данными в области Robotic Process Automation (RPA). Такими данными могут быть HTML код WEB страниц, тексты, изображения, логи и т.п. Эти данные имеют низкоуровневую структуру, с которой умеют работать компьютерные системы. Например, Web страница разбивается на набор HTML тэгов, предложение на ествественном языке может быть разбито на грамматические структуры, изображения - на набор геометрических примитивов. 
+
+В отличии от компьютера человек привык работать с информацией на более абстрактном уровне. Мы способны распознать и описать высокоуровневые абстрактные объекты, например выделить на экране такие элементы как формы логина и поиска, меню, товары, описать их свойства и отношения между ними. А затем использовать их в описании последовательности действий над ними.
+Существующие языки программирования не предоставляют такой гибкости. ООП и функциональное программирование хорошо подходят для описания последовательности действий но декларативное описание понятий будет очень громоздким. Декларативные языки программирования такие как Prolog позволяют описать набор понятий и отношений между ними в форме гораздо более близкой к ествественному языку, но описание алгоритмов будет очень сложным и тяжелым для восприятия. 
+Поэтому возникла идея создать такой язык программирования, который был бы одинаково удобным для описания как классов объектов так и действий над ними, был бы легок в обучении и прост в приминении. Я разработал дизайн и "proof of concept" реализацию такого гибридного языка программирования, сочетающего декларативную логическую и императивную парадигмы. Структура классов и отношения между ними описывается в SQL-подобном стиле, а действия над ними - в JavaScript стиле. Разработаны принципы, позволяющие естественным образом объединить эти две парадигмы в рамках одного языка. Пример программы:
+CONCEPT income EXTENDS tableCell c WITHOUT id, column WHERE c.column = 2;
+CONCEPT outcome EXTENDS tableCell c WITHOUT id, column WHERE c.column = 3;
+CONCEPT profit p IS
+     table, row, value == i.value - o.value  
+FROM income i, outcome o
+WHERE p.row = i.row = o.row AND p.table = i.table = o.table;
+allProfits = find profit {table: "table1"};
+for(curProfit in allProfits) {
+    println(curProfit.row + ": " + curProfit.value);
+}
+Также разработано дополнение к языку, позволяющее считывать и управлять содержимым Web страниц а также набор встроеных классов, позволяющих найти объекты на странице в зависимости от их цвета, текста, подписи, взаимного расположения, позиции в списке, места в иерархии. В качестве примера показано, как его помощью можно открыть Web страницу онлайн магазина, описать, что есть главное меню, какой из элеметов меню открывает форму поиска, из каких элементов она состоит. Затем ввести поисковый терм и перейти на страницу со списком товаров. Описать из каких элементов состоит товар, найти их все о сформировать отчет.
+Другими возможными сферами применения могут быть работа с текстами на ествественном языке, изображениями, логами, базами данных.
+Хотелось бы показать мои результаты тем нашим сотрудникам, которые являются профессионалами в областях RPA, Data Processing, Test Automation, Software Design, DevOps и т.д. Выяснить, заинтересована ли Accenture в моей работе, есть ли возможности сотрудничества. 
+
+Hello, I'm working on my project on my own time and would like to share the results. 
+The project is devoted to a task of simplification of work with poorly structured data in the field of Robotic Process Automation (RPA). It may be HTML code, texts, images, logs, etc. These data have a low-level structure and computer systems work with these data quite well. For example, Web pages consist of HTML tags, a sentence in the natural language can be parsed into grammatical structures, geometric primitives can be recognized on images.
+The problem is that these low-level data formats require specific technical knowledge from programmer, strongly depend on nature of data and difficult to work with. People are used to work with information on more abstract level. We are able to recognize and describe patterns in raw data, give names to them and use them in tasks descriptions. For example, we can describe what login and search forms, menus, products are, how they look like, where they are located, how they relate to each other, etc. Such level of abstract concepts is more natural for humans, less dependent on changes in input data and allows to combine data from different sources. The goal of the project is to create possibilities for programmers to create and use such abstract concepts in RPA tasks in most natural and easy way.
+Humans usually describe abstract concepts in declarative way, which means that they specify properties of expected result rather than the way how to get it. On the other side the way of solving a task is usually expressed in imperative way as a sequence of actions which must be performed to get the result. Logic programming languages such as Prolog are well suited for declarative descriptions but it's quite challenging to use them for creation of control flow. Object oriented and functional programming languages have opposite flaw, declarative descriptions are quite cumbersome and difficult to read.
+This problem can be solved by creation of hybrid programming language which combines logic and imperative paradigm. It must be suitable for RPA tasks and be easy to learn and use. I created a design and "proof of concept" implementation of such language. Its declarative component allows to define abstract concepts based on the relationship between other concepts or "ground level" data. Its syntax is in SQL style. Syntax and type system of imperative component are close to JavaScript. Principles that allow to unite these two paradigms in a natural way are developed. Example of a program: 
+CONCEPT income EXTENDS tableCell c WITHOUT id, column WHERE c.column = 2;
+CONCEPT outcome EXTENDS tableCell c WITHOUT id, column WHERE c.column = 3;
+CONCEPT profit p IS
+     table, row, value == i.value - o.value  
+FROM income i, outcome o
+WHERE p.row = i.row = o.row AND p.table = i.table = o.table;
+allProfits = find profit {table: "table1"};
+for(curProfit in allProfits) {
+    println(curProfit.row + ": " + curProfit.value);
+}
+The proposed language was tested on tasks of control of Web pages. I developed an add-on to the language which allows to parse a page and manipulate its links, input fields, buttons, checkboxes, lists etc. Also it offers a set of built-in concepts that allow to link page elements to each other depending on their relative location, color, caption, position in the list or hierarchy. I prepared a test example that opens an online store, finds and uses a search form, finds all products on result page and prepares a report on such attributes of products as name, price, availability, country of origin etc.
+Another possible areas of application are:
+- search for texts that match a template described by set of abstract concepts;
+- search for elements of images that match a template described by set of abstract concepts;
+- pattern recognition, classification and tagging in tasks of log analysis;
+- transformation and unification of data from different sources in traditional programming.
+I would like to share the results with collegues from other departments, i.e. RPA, Data Processing, Test Automation, Software Design, DevOps etc. 
+I would also like to find out if Accenture is interested in such project and if there are possibilities for mutual cooperation.
+Could you please help me with this?
+
+
+
