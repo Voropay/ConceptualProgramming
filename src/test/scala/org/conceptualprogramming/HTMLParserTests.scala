@@ -19,13 +19,17 @@ class HTMLParserTests extends FlatSpec with Matchers {
   val driverFilePath = new File("resources/chromedriver.exe")
   System.setProperty("webdriver.chrome.driver", driverFilePath.getAbsolutePath)
 
+  def createUrl(resourcePath: String): String = {
+    "file://" + System.getProperty("user.dir") + resourcePath;
+  }
+
   "color extraction" should "work correctly" in {
     ColorUtils.extractColorName("rgba(255, 0, 0, 1)") should equal("Red")
     ColorUtils.extractBasicColorName("rgba(248, 165, 66, 1)") should equal("Brown")
   }
 
   "div tag" should "be parsed correctly" in {
-    val url = "file:///C:/projects/AI/ConceptualProgramming/src/test/scala/org/conceptualprogramming/examples/html/div.html"
+    val url = createUrl("/src/test/scala/org/conceptualprogramming/examples/html/div.html")
     val driver: WebDriver = new ChromeDriver
     driver.get(url)
     val pageObjects = HTMLParser.parsePage(driver, url)
@@ -41,7 +45,7 @@ class HTMLParserTests extends FlatSpec with Matchers {
     //divObj.attributes("fontStyle").getStringValue.get should equal("normal")
     //divObj.attributes("fontWeight").getStringValue.get should equal("normal")
     divObj.attributes.get("hidden") should equal(None)
-    divObj.attributes("page").getStringValue.get should equal("file:///C:/projects/AI/ConceptualProgramming/src/test/scala/org/conceptualprogramming/examples/html/div.html")
+    divObj.attributes("page").getStringValue.get should equal(createUrl("/src/test/scala/org/conceptualprogramming/examples/html/div.html"))
     divObj.attributes("pos").getIntValue.get should equal(1)
     divObj.attributes("text").getStringValue.get should equal("Hello,")
     divObj.attributes("xPath").getStringValue.get should equal("/html[1]/body[1]/div[1]")
@@ -57,7 +61,7 @@ class HTMLParserTests extends FlatSpec with Matchers {
     //innerDivObj.attributes("fontStyle").getStringValue.get should equal("normal")
     //innerDivObj.attributes("fontWeight").getStringValue.get should equal("bold")
     innerDivObj.attributes.get("hidden") should equal(None)
-    innerDivObj.attributes("page").getStringValue.get should equal("file:///C:/projects/AI/ConceptualProgramming/src/test/scala/org/conceptualprogramming/examples/html/div.html")
+    innerDivObj.attributes("page").getStringValue.get should equal(createUrl("/src/test/scala/org/conceptualprogramming/examples/html/div.html"))
     innerDivObj.attributes("pos").getIntValue.get should equal(1)
     innerDivObj.attributes("text").getStringValue.get should equal("World!")
     innerDivObj.attributes("xPath").getStringValue.get should equal("/html[1]/body[1]/div[1]/span[1]")
@@ -65,7 +69,7 @@ class HTMLParserTests extends FlatSpec with Matchers {
     innerDivObj.defaultAttribute should equal("text")
 
     val titleObj = pageObjects.filter(_.name == "PageTitle").head
-    titleObj.attributes("page").getStringValue.get should equal("file:///C:/projects/AI/ConceptualProgramming/src/test/scala/org/conceptualprogramming/examples/html/div.html")
+    titleObj.attributes("page").getStringValue.get should equal(createUrl("/src/test/scala/org/conceptualprogramming/examples/html/div.html"))
     titleObj.attributes("value").getStringValue.get should equal("ConceptualProgramming - div test")
     titleObj.defaultAttribute should equal("value")
 
@@ -73,7 +77,7 @@ class HTMLParserTests extends FlatSpec with Matchers {
   }
 
   "link tag" should "be parsed correctly" in {
-    val url = "file:///C:/projects/AI/ConceptualProgramming/src/test/scala/org/conceptualprogramming/examples/html/link.html"
+    val url = createUrl("/src/test/scala/org/conceptualprogramming/examples/html/link.html")
     val driver: WebDriver = new ChromeDriver
     driver.get(url)
     val pageObjects = HTMLParser.parsePage(driver, url)
@@ -88,7 +92,7 @@ class HTMLParserTests extends FlatSpec with Matchers {
     //aObj.attributes("fontStyle").getStringValue.get should equal("normal")
     //aObj.attributes("fontWeight").getStringValue.get should equal("normal")
     aObj.attributes.get("hidden") should equal(None)
-    aObj.attributes("page").getStringValue.get should equal("file:///C:/projects/AI/ConceptualProgramming/src/test/scala/org/conceptualprogramming/examples/html/link.html")
+    aObj.attributes("page").getStringValue.get should equal(createUrl("/src/test/scala/org/conceptualprogramming/examples/html/link.html"))
     aObj.attributes("pos").getIntValue.get should equal(1)
     aObj.attributes("text").getStringValue.get should equal("link to another page")
     aObj.attributes("xPath").getStringValue.get should equal("/html[1]/body[1]/a[1]")
@@ -104,7 +108,7 @@ class HTMLParserTests extends FlatSpec with Matchers {
     //imgObj.attributes("fontStyle").getStringValue.get should equal("normal")
     //imgObj.attributes("fontWeight").getStringValue.get should equal("normal")
     imgObj.attributes.get("hidden") should equal(None)
-    imgObj.attributes("page").getStringValue.get should equal("file:///C:/projects/AI/ConceptualProgramming/src/test/scala/org/conceptualprogramming/examples/html/link.html")
+    imgObj.attributes("page").getStringValue.get should equal(createUrl("/src/test/scala/org/conceptualprogramming/examples/html/link.html"))
     imgObj.attributes("pos").getIntValue.get should equal(1)
     imgObj.attributes("xPath").getStringValue.get should equal("/html[1]/body[1]/a[1]/img[1]")
     imgObj.attributes("alt").getStringValue.get should equal("Smiley face")
@@ -115,7 +119,7 @@ class HTMLParserTests extends FlatSpec with Matchers {
     imgObj.defaultAttribute should equal("id")
 
     val titleObj = pageObjects.filter(_.name == "PageTitle").head
-    titleObj.attributes("page").getStringValue.get should equal("file:///C:/projects/AI/ConceptualProgramming/src/test/scala/org/conceptualprogramming/examples/html/link.html")
+    titleObj.attributes("page").getStringValue.get should equal(createUrl("/src/test/scala/org/conceptualprogramming/examples/html/link.html"))
     titleObj.attributes("value").getStringValue.get should equal("ConceptualProgramming - link test")
     titleObj.defaultAttribute should equal("value")
 
@@ -123,7 +127,7 @@ class HTMLParserTests extends FlatSpec with Matchers {
   }
 
   "heading tags" should "be parsed correctly" in {
-    val url = "file:///C:/projects/AI/ConceptualProgramming/src/test/scala/org/conceptualprogramming/examples/html/heading.html"
+    val url = createUrl("/src/test/scala/org/conceptualprogramming/examples/html/heading.html")
     val driver: WebDriver = new ChromeDriver
     driver.get(url)
     val pageObjects = HTMLParser.parsePage(driver, url)
@@ -184,7 +188,7 @@ class HTMLParserTests extends FlatSpec with Matchers {
     footerPObj.attributes("parent").getStringValue.get should equal(footerDivObj.attributes("id").getStringValue.get)
 
     val titleObj = pageObjects.filter(_.name == "PageTitle").head
-    titleObj.attributes("page").getStringValue.get should equal("file:///C:/projects/AI/ConceptualProgramming/src/test/scala/org/conceptualprogramming/examples/html/heading.html")
+    titleObj.attributes("page").getStringValue.get should equal(createUrl("/src/test/scala/org/conceptualprogramming/examples/html/heading.html"))
     titleObj.attributes("value").getStringValue.get should equal("ConceptualProgramming - heading test")
     titleObj.defaultAttribute should equal("value")
 
@@ -192,7 +196,7 @@ class HTMLParserTests extends FlatSpec with Matchers {
   }
 
   "list tags" should "be parsed correctly" in {
-    val url = "file:///C:/projects/AI/ConceptualProgramming/src/test/scala/org/conceptualprogramming/examples/html/list.html"
+    val url = createUrl("/src/test/scala/org/conceptualprogramming/examples/html/list.html")
     val driver: WebDriver = new ChromeDriver
     driver.get(url)
     val pageObjects = HTMLParser.parsePage(driver, url)
@@ -239,7 +243,7 @@ class HTMLParserTests extends FlatSpec with Matchers {
     olItems(2).getStringValue.get should equal(ol3Obj.attributes("id").getStringValue.get)
 
     val titleObj = pageObjects.filter(_.name == "PageTitle").head
-    titleObj.attributes("page").getStringValue.get should equal("file:///C:/projects/AI/ConceptualProgramming/src/test/scala/org/conceptualprogramming/examples/html/list.html")
+    titleObj.attributes("page").getStringValue.get should equal(createUrl("/src/test/scala/org/conceptualprogramming/examples/html/list.html"))
     titleObj.attributes("value").getStringValue.get should equal("ConceptualProgramming - list test")
     titleObj.defaultAttribute should equal("value")
 
@@ -247,7 +251,7 @@ class HTMLParserTests extends FlatSpec with Matchers {
   }
 
   "form tags" should "be parsed correctly" in {
-    val url = "file:///C:/projects/AI/ConceptualProgramming/src/test/scala/org/conceptualprogramming/examples/html/form.html"
+    val url = createUrl("/src/test/scala/org/conceptualprogramming/examples/html/form.html")
     val driver: WebDriver = new ChromeDriver
     driver.get(url)
     val pageObjects = HTMLParser.parsePage(driver, url)
@@ -476,7 +480,7 @@ class HTMLParserTests extends FlatSpec with Matchers {
   }
 
   "table tags" should "be parsed correctly" in {
-    val url = "file:///C:/projects/AI/ConceptualProgramming/src/test/scala/org/conceptualprogramming/examples/html/table.html"
+    val url = createUrl("/src/test/scala/org/conceptualprogramming/examples/html/table.html");
     val driver: WebDriver = new ChromeDriver
     driver.get(url)
     val pageObjects = HTMLParser.parsePage(driver, url)
@@ -891,7 +895,7 @@ class HTMLParserTests extends FlatSpec with Matchers {
 
 
   "text tags" should "be parsed correctly" in {
-    val url = "file:///C:/projects/AI/ConceptualProgramming/src/test/scala/org/conceptualprogramming/examples/html/text.html"
+    val url = createUrl("/src/test/scala/org/conceptualprogramming/examples/html/text.html")
     val driver: WebDriver = new ChromeDriver
     driver.get(url)
     val pageObjects = HTMLParser.parsePage(driver, url)
@@ -899,13 +903,13 @@ class HTMLParserTests extends FlatSpec with Matchers {
 
     val sectionObj = pageObjects.filter(_.attributes.getOrElse("xPath", CPBooleanValue(false)) == CPStringValue("/html[1]/body[1]/section[1]")).head
     sectionObj.name should equal("PageSection")
-    sectionObj.attributes("page").getStringValue.get should equal("file:///C:/projects/AI/ConceptualProgramming/src/test/scala/org/conceptualprogramming/examples/html/text.html")
+    sectionObj.attributes("page").getStringValue.get should equal(createUrl("/src/test/scala/org/conceptualprogramming/examples/html/text.html"))
     sectionObj.attributes("pos").getIntValue.get should equal(1)
     val sectionId = sectionObj.attributes("id").getStringValue.get
 
     val strongObj = pageObjects.filter(_.attributes.getOrElse("xPath", CPBooleanValue(false)) == CPStringValue("/html[1]/body[1]/section[1]/strong[1]")).head
     strongObj.name should equal("PageStrongText")
-    strongObj.attributes("page").getStringValue.get should equal("file:///C:/projects/AI/ConceptualProgramming/src/test/scala/org/conceptualprogramming/examples/html/text.html")
+    strongObj.attributes("page").getStringValue.get should equal(createUrl("/src/test/scala/org/conceptualprogramming/examples/html/text.html"))
     strongObj.attributes("pos").getIntValue.get should equal(1)
     strongObj.attributes("text").getStringValue.get should equal("Strong text example")
     strongObj.attributes("parent").getStringValue.get should equal(sectionId)
@@ -914,7 +918,7 @@ class HTMLParserTests extends FlatSpec with Matchers {
 
     val boldObj = pageObjects.filter(_.attributes.getOrElse("xPath", CPBooleanValue(false)) == CPStringValue("/html[1]/body[1]/section[1]/b[1]")).head
     boldObj.name should equal("PageBoldText")
-    boldObj.attributes("page").getStringValue.get should equal("file:///C:/projects/AI/ConceptualProgramming/src/test/scala/org/conceptualprogramming/examples/html/text.html")
+    boldObj.attributes("page").getStringValue.get should equal(createUrl("/src/test/scala/org/conceptualprogramming/examples/html/text.html"))
     boldObj.attributes("pos").getIntValue.get should equal(1)
     boldObj.attributes("text").getStringValue.get should equal("Bold text example")
     boldObj.attributes("parent").getStringValue.get should equal(sectionId)
@@ -923,7 +927,7 @@ class HTMLParserTests extends FlatSpec with Matchers {
 
     val smallObj = pageObjects.filter(_.attributes.getOrElse("xPath", CPBooleanValue(false)) == CPStringValue("/html[1]/body[1]/section[1]/small[1]")).head
     smallObj.name should equal("PageSmallText")
-    smallObj.attributes("page").getStringValue.get should equal("file:///C:/projects/AI/ConceptualProgramming/src/test/scala/org/conceptualprogramming/examples/html/text.html")
+    smallObj.attributes("page").getStringValue.get should equal(createUrl("/src/test/scala/org/conceptualprogramming/examples/html/text.html"))
     smallObj.attributes("pos").getIntValue.get should equal(1)
     smallObj.attributes("text").getStringValue.get should equal("Small text example")
     smallObj.attributes("parent").getStringValue.get should equal(sectionId)
@@ -932,7 +936,7 @@ class HTMLParserTests extends FlatSpec with Matchers {
 
     val subObj = pageObjects.filter(_.attributes.getOrElse("xPath", CPBooleanValue(false)) == CPStringValue("/html[1]/body[1]/section[1]/sub[1]")).head
     subObj.name should equal("PageSubscriptedText")
-    subObj.attributes("page").getStringValue.get should equal("file:///C:/projects/AI/ConceptualProgramming/src/test/scala/org/conceptualprogramming/examples/html/text.html")
+    subObj.attributes("page").getStringValue.get should equal(createUrl("/src/test/scala/org/conceptualprogramming/examples/html/text.html"))
     subObj.attributes("pos").getIntValue.get should equal(1)
     subObj.attributes("text").getStringValue.get should equal("Subscript text example")
     subObj.attributes("parent").getStringValue.get should equal(sectionId)
@@ -941,7 +945,7 @@ class HTMLParserTests extends FlatSpec with Matchers {
 
     val buttonObj = pageObjects.filter(_.attributes.getOrElse("xPath", CPBooleanValue(false)) == CPStringValue("/html[1]/body[1]/section[1]/button[1]")).head
     buttonObj.name should equal("PageButton")
-    buttonObj.attributes("page").getStringValue.get should equal("file:///C:/projects/AI/ConceptualProgramming/src/test/scala/org/conceptualprogramming/examples/html/text.html")
+    buttonObj.attributes("page").getStringValue.get should equal(createUrl("/src/test/scala/org/conceptualprogramming/examples/html/text.html"))
     buttonObj.attributes("pos").getIntValue.get should equal(1)
     buttonObj.attributes("text").getStringValue.get should equal("Save")
     buttonObj.attributes("parent").getStringValue.get should equal(sectionId)

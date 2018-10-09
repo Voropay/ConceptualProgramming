@@ -2,6 +2,7 @@ package org.concepualprogramming.core.datatypes
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 import org.concepualprogramming.core.CPExecutionContext
 import org.concepualprogramming.core.statements.expressions.functions.BuiltInFunctionDefinition
@@ -36,7 +37,7 @@ class CPStringValue(value: String) extends CPValue with CPPrimitiveType {
 
   //TODO: add as many formats as possible, date parsing must be flexible
   override def getDateValue: Option[LocalDate] = {
-    val dtf = DateTimeFormatter.ofPattern("yyyy-MMM-dd")
+    val dtf = DateTimeFormatter.ofPattern("yyyy-MMM-dd", new Locale("en"))
     try {
     Some(LocalDate.parse(value, dtf))
     } catch {

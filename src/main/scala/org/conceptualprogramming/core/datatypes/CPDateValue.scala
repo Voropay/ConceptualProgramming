@@ -1,7 +1,8 @@
 package org.concepualprogramming.core.datatypes
 
-import java.time.{Month, LocalDate}
+import java.time.{LocalDate, Month}
 import java.time.format.DateTimeFormatter
+import java.util.Locale
 ;
 /**
  * Created by oleksii.voropai on 8/6/2016.
@@ -12,7 +13,7 @@ class CPDateValue(value: LocalDate) extends CPValue with CPPrimitiveType{
 
   override def getFloatingValue: Option[Double] = Some(value.getDayOfMonth.toDouble)
 
-  override def getStringValue: Option[String] = Some(value.format(DateTimeFormatter.ofPattern("yyyy-MMM-dd")))
+  override def getStringValue: Option[String] = Some(value.format(DateTimeFormatter.ofPattern("yyyy-MMM-dd", new Locale("en"))))
 
   override def getIntValue: Option[Int] = Some(value.getDayOfMonth)
 

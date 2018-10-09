@@ -399,7 +399,7 @@ class EcommerceTests extends FlatSpec with Matchers {
     val res = context.getValueResult.get.getStringValue.get
     res should equal ("Products found: Yamada-Nishiki Tokubetsu Junmai-shu Sake, 0.72 l, 19.99 eur, Japan, green. Kirin Junmai Daiginjo Sake, 0.72 l, 47.8 eur, Japan, red. Kura no Machi Tokubetsu Junmai Ginjo Sake, 0.3 l, 5.21 eur, Japan, green. Hakutsuru Sayuri Nigori Sake, 0.3 l, 11.97 eur, Japan, green. Hakutsuru Tanrei Junmai Sake, 0.18 l, 6.58 eur, Japan, green. Masaki Yamadanishiki Junmai Genshu Sake, 0.3 l, 9.73 eur, Japan, green. Aizu Homare Junmai Daiginjo Banshu Sake, 0.72 l, 49.4 eur, Japan, green. Takehara Junmai True Mirror Sake, 0.72 l, 26.81 eur, Japan, green. Hakutsuru Superior Junmai Ginjo Sake, 0.72 l, 25.5 eur, Japan, green. Tatenokawa Junmai Daiginjo Sake, 0.3 l, 20.9 eur, Japan, green. ")
   }
-/*
+
   "eCommerce example" should "be executed correctly" in {
     val preferences = RunPreferences(Array("-sourceFile=src/test/scala/org/conceptualprogramming/examples/alko/alko.cp"))
     val executor = new ProgramExecutor
@@ -417,5 +417,5 @@ class EcommerceTests extends FlatSpec with Matchers {
     res.contains("Hakutsuru Superior Junmai Ginjo Sake, 0.72 l, 25.5 eur, Japan, green.") should be (true)
     res.contains("Tatenokawa Junmai Daiginjo Sake, 0.3 l, 20.9 eur, Japan, green.") should be (true)
   }
-  */
+
 }

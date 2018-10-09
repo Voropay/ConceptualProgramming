@@ -1,4 +1,4 @@
-url = "file:///C:/projects/AI/ConceptualProgramming/src/test/scala/org/conceptualprogramming/examples/alko/Home.html";
+url = "file:///C:/projects/ConceptualProgramming/src/test/scala/org/conceptualprogramming/examples/alko/Home.html";
 object HTML.openWebPage(url);
 
 concept ProductLink :- PageLink (text == "PRODUCTS");

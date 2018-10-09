@@ -16,31 +16,35 @@ import org.scalatest.{FlatSpec, Matchers}
   */
 class HTMLConceptsTests extends FlatSpec with Matchers {
 
+  def createUrl(resourcePath: String): String = {
+    "file://" + System.getProperty("user.dir") + resourcePath;
+  }
+
   val driverFilePath = new File("resources/chromedriver.exe")
   System.setProperty("webdriver.chrome.driver", driverFilePath.getAbsolutePath)
 
   val pe = new ProgramExecutor
   val context = pe.initContext(new RunPreferences(Map()))
 
-  val welcomeUrl = CPConstant(CPStringValue("file:///C:/projects/AI/ConceptualProgramming/src/test/scala/org/conceptualprogramming/examples/html/welcomePage.html"))
+  val welcomeUrl = CPConstant(CPStringValue(createUrl("/src/test/scala/org/conceptualprogramming/examples/html/welcomePage.html")))
   val welcomeReadFunc = new CPFunctionCall("HTML.openWebPage", welcomeUrl :: Nil)
   val welcomeObjects = welcomeReadFunc.calculate(context).get.asInstanceOf[CPList].values.map(_.asInstanceOf[CPObjectValue].objectValue)
   val welcomeCloseFunc = new CPFunctionCall("HTML.closeWebPage", welcomeUrl :: Nil)
   welcomeCloseFunc.calculate(context)
 
-  val formUrl = CPConstant(CPStringValue("file:///C:/projects/AI/ConceptualProgramming/src/test/scala/org/conceptualprogramming/examples/html/form.html"))
+  val formUrl = CPConstant(CPStringValue(createUrl("/src/test/scala/org/conceptualprogramming/examples/html/form.html")))
   val formReadFunc = new CPFunctionCall("HTML.openWebPage", formUrl :: Nil)
   val formObjects = formReadFunc.calculate(context).get.asInstanceOf[CPList].values.map(_.asInstanceOf[CPObjectValue].objectValue)
   val formCloseFunc = new CPFunctionCall("HTML.closeWebPage", formUrl :: Nil)
   formCloseFunc.calculate(context)
 
-  val loginUrl = CPConstant(CPStringValue("file:///C:/projects/AI/ConceptualProgramming/src/test/scala/org/conceptualprogramming/examples/html/loginPage.html"))
+  val loginUrl = CPConstant(CPStringValue(createUrl("/src/test/scala/org/conceptualprogramming/examples/html/loginPage.html")))
   val loginReadFunc = new CPFunctionCall("HTML.openWebPage", loginUrl :: Nil)
   val loginObjects = loginReadFunc.calculate(context).get.asInstanceOf[CPList].values.map(_.asInstanceOf[CPObjectValue].objectValue)
   val loginCloseFunc = new CPFunctionCall("HTML.closeWebPage", loginUrl :: Nil)
   loginCloseFunc.calculate(context)
 
-  val tableUrl = CPConstant(CPStringValue("file:///C:/projects/AI/ConceptualProgramming/src/test/scala/org/conceptualprogramming/examples/html/table.html"))
+  val tableUrl = CPConstant(CPStringValue(createUrl("/src/test/scala/org/conceptualprogramming/examples/html/table.html")))
   val tableReadFunc = new CPFunctionCall("HTML.openWebPage", tableUrl :: Nil)
   val tableObjects = tableReadFunc.calculate(context).get.asInstanceOf[CPList].values.map(_.asInstanceOf[CPObjectValue].objectValue)
   val tableCloseFunc = new CPFunctionCall("HTML.closeWebPage", tableUrl :: Nil)
@@ -145,15 +149,14 @@ class HTMLConceptsTests extends FlatSpec with Matchers {
 
     val topOfThePage = context1.knowledgeBase.getConcepts("atTheTopOfThePage").head
     val topOfThePageObjects = topOfThePage.resolve(Map("page" -> title.attributes("page")), context1)
-    topOfThePageObjects.size should equal (5)
-
+    topOfThePageObjects.size should equal (9)
     val bottomPartOfThePage = context1.knowledgeBase.getConcepts("atTheBottomOfThePage").head
     val bottomOfThePageObjects = bottomPartOfThePage.resolve(Map("page" -> title.attributes("page")), context1)
-    bottomOfThePageObjects.size should equal (9)
+    bottomOfThePageObjects.size should equal (5)
 
     val centerPartOfThePage = context1.knowledgeBase.getConcepts("inTheCenterOfThePage").head
     val centerPartOfThePageObjects = centerPartOfThePage.resolve(Map("page" -> title.attributes("page")), context1)
-    centerPartOfThePageObjects.size should equal (10)
+    centerPartOfThePageObjects.size should equal (14)
 
 
     val form = context.knowledgeBase.getObjects("PageForm").head

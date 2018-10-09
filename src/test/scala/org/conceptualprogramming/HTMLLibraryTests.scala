@@ -19,8 +19,12 @@ class HTMLLibraryTests extends FlatSpec with Matchers {
   val driverFilePath = new File("resources/chromedriver.exe")
   System.setProperty("webdriver.chrome.driver", driverFilePath.getAbsolutePath)
 
+  def createUrl(resourcePath: String): String = {
+    "file://" + System.getProperty("user.dir") + resourcePath;
+  }
+
   "openWebPage and closeWebPage functions" should "work correctly" in {
-    val url = CPConstant(CPStringValue("file:///C:/projects/AI/ConceptualProgramming/src/test/scala/org/conceptualprogramming/examples/html/loginPage.html"))
+    val url = CPConstant(CPStringValue(createUrl("/src/test/scala/org/conceptualprogramming/examples/html/loginPage.html")))
     val readFunc = new CPFunctionCall("HTML.openWebPage", url :: Nil)
     val pe = new ProgramExecutor
     val context = pe.initContext(new RunPreferences(Map()))
@@ -30,7 +34,7 @@ class HTMLLibraryTests extends FlatSpec with Matchers {
     context.knowledgeBase.getObjects("PageInput", Map("name" -> CPStringValue("LoginForm_Password"))).size should equal (1)
     context.knowledgeBase.getObjects("PageInput", Map("name" -> CPStringValue("submit"))).size should equal (1)
 
-    val url1 = CPConstant(CPStringValue("file:///C:/projects/AI/ConceptualProgramming/src/test/scala/org/conceptualprogramming/examples/html/welcomePage.html"))
+    val url1 = CPConstant(CPStringValue(createUrl("/src/test/scala/org/conceptualprogramming/examples/html/welcomePage.html")))
     val readFunc1 = new CPFunctionCall("HTML.openWebPage", url1 :: Nil)
     val objects1 = readFunc1.calculate(context).get.asInstanceOf[CPList].values.map(_.asInstanceOf[CPObjectValue].objectValue)
     context.knowledgeBase.add(objects1)
@@ -48,7 +52,7 @@ class HTMLLibraryTests extends FlatSpec with Matchers {
   }
 
   "click and refreshWebPage functions" should "work correctly" in {
-    val url = CPConstant(CPStringValue("file:///C:/projects/AI/ConceptualProgramming/src/test/scala/org/conceptualprogramming/examples/html/loginPage.html"))
+    val url = CPConstant(CPStringValue(createUrl("/src/test/scala/org/conceptualprogramming/examples/html/loginPage.html")))
     val pageName = CPConstant(CPStringValue("loginPage"))
     val readFunc = new CPFunctionCall("HTML.openWebPage", url :: pageName :: Nil)
     val pe = new ProgramExecutor
@@ -66,7 +70,7 @@ class HTMLLibraryTests extends FlatSpec with Matchers {
     context.knowledgeBase.add(newObjects)
     val greetingMessage = context.knowledgeBase.getObjects("PageHeading", Map("id" -> CPStringValue("greetingMessage")))
     greetingMessage.size should equal (1)
-    greetingMessage.head.attributes.get("url").get.getStringValue.get should equal ("file:///C:/projects/AI/ConceptualProgramming/src/test/scala/org/conceptualprogramming/examples/html/welcomePage.html")
+    greetingMessage.head.attributes.get("url").get.getStringValue.get.contains("/src/test/scala/org/conceptualprogramming/examples/html/welcomePage.html") should be (true)
 
     val closeFunc = new CPFunctionCall("HTML.closeWebPage", pageName :: Nil)
     closeFunc.calculate(context).get.getBooleanValue.get should be (true)
@@ -75,7 +79,7 @@ class HTMLLibraryTests extends FlatSpec with Matchers {
 
 
   "followLink function" should "work correctly" in {
-    val url = CPConstant(CPStringValue("file:///C:/projects/AI/ConceptualProgramming/src/test/scala/org/conceptualprogramming/examples/html/loginPage.html"))
+    val url = CPConstant(CPStringValue(createUrl("/src/test/scala/org/conceptualprogramming/examples/html/loginPage.html")))
     val pageName = CPConstant(CPStringValue("loginPage"))
     val readFunc = new CPFunctionCall("HTML.openWebPage", url :: pageName :: Nil)
     val pe = new ProgramExecutor
@@ -90,7 +94,7 @@ class HTMLLibraryTests extends FlatSpec with Matchers {
     context.knowledgeBase.add(newObjects)
     val greetingMessage = context.knowledgeBase.getObjects("PageHeading", Map("id" -> CPStringValue("greetingMessage")))
     greetingMessage.size should equal (1)
-    greetingMessage.head.attributes.get("url").get.getStringValue.get should equal ("file:///C:/projects/AI/ConceptualProgramming/src/test/scala/org/conceptualprogramming/examples/html/welcomePage.html")
+    greetingMessage.head.attributes.get("url").get.getStringValue.get.contains("/src/test/scala/org/conceptualprogramming/examples/html/welcomePage.html") should be (true)
 
     val closeFunc = new CPFunctionCall("HTML.closeWebPage", pageName :: Nil)
     closeFunc.calculate(context).get.getBooleanValue.get should be (true)
@@ -98,7 +102,7 @@ class HTMLLibraryTests extends FlatSpec with Matchers {
   }
 
   "openLinkNewTab function" should "work correctly" in {
-    val url = CPConstant(CPStringValue("file:///C:/projects/AI/ConceptualProgramming/src/test/scala/org/conceptualprogramming/examples/html/loginPage.html"))
+    val url = CPConstant(CPStringValue(createUrl("/src/test/scala/org/conceptualprogramming/examples/html/loginPage.html")))
     val pageName = CPConstant(CPStringValue("loginPage"))
     val readFunc = new CPFunctionCall("HTML.openWebPage", url :: pageName :: Nil)
     val pe = new ProgramExecutor
@@ -114,7 +118,7 @@ class HTMLLibraryTests extends FlatSpec with Matchers {
     context.knowledgeBase.add(newObjects)
     val greetingMessage = context.knowledgeBase.getObjects("PageHeading", Map("id" -> CPStringValue("greetingMessage")))
     greetingMessage.size should equal (1)
-    greetingMessage.head.attributes.get("url").get.getStringValue.get should equal ("file:///C:/projects/AI/ConceptualProgramming/src/test/scala/org/conceptualprogramming/examples/html/welcomePage.html")
+    greetingMessage.head.attributes.get("url").get.getStringValue.get.contains("/src/test/scala/org/conceptualprogramming/examples/html/welcomePage.html") should be (true)
 
     val closeFunc1 = new CPFunctionCall("HTML.closeWebPage", pageName :: Nil)
     closeFunc1.calculate(context).get.getBooleanValue.get should be (true)
@@ -126,7 +130,7 @@ class HTMLLibraryTests extends FlatSpec with Matchers {
   }
 
   "enterText function" should "work correctly" in {
-    val url = CPConstant(CPStringValue("file:///C:/projects/AI/ConceptualProgramming/src/test/scala/org/conceptualprogramming/examples/html/loginPage.html"))
+    val url = CPConstant(CPStringValue(createUrl("/src/test/scala/org/conceptualprogramming/examples/html/loginPage.html")))
     val readFunc = new CPFunctionCall("HTML.openWebPage", url :: Nil)
     val pe = new ProgramExecutor
     val context = pe.initContext(new RunPreferences(Map()))
@@ -153,7 +157,7 @@ class HTMLLibraryTests extends FlatSpec with Matchers {
   }
 
   "selectOption function" should "work correctly" in {
-    val url = CPConstant(CPStringValue("file:///C:/projects/AI/ConceptualProgramming/src/test/scala/org/conceptualprogramming/examples/html/form.html"))
+    val url = CPConstant(CPStringValue(createUrl("/src/test/scala/org/conceptualprogramming/examples/html/form.html")))
     val readFunc = new CPFunctionCall("HTML.openWebPage", url :: Nil)
     val pe = new ProgramExecutor
     val context = pe.initContext(new RunPreferences(Map()))

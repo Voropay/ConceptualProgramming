@@ -4,3 +4,4 @@ project/*
 !project/plugins.sbt
 .idea/
 *.iml
+output/
